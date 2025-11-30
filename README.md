@@ -6,9 +6,8 @@ Eine iOS / Andriod App, die Essens-Vorschläge für die Familie liefern kann. Z.
 - ... (ich schreibe später noch mehr wenn ich Zeit und Lust habe)
 ## Aktueller Fortschritt
 ### App
-- Titelseite mit Suchleiste und Vorschlägen (provisorisch)
-- Anklickbare Vorschläge, die einen auf eine Rezept-Seite führen
-- Rezept Seite unvollständig
+- Eine Navigations-Leiste unten mit Material 3 Design
+- Fünf Seiten: Entdecken, Meine Rezepte, Planer, Verlauf und Einstellungen
 ### Backend
 - PostgresDB auf Port 5432
 - PostgreSQL Modele
