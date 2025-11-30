@@ -1,0 +1,24 @@
+services:
+  db:
+    image: postgres:16
+    container_name: cookbook_db
+    restart: always
+    environment:
+      POSTGRES_USER: cookbook
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: cookbook
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  backend:
+    build: ./backend
+    container_name: fastapi
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
