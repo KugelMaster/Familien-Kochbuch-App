@@ -1,5 +1,6 @@
 class Recipe {
   final String title;
+  final List<String>? tags;
   final String? image;
   final String? description;
   final double? timePrep;
@@ -17,6 +18,7 @@ class Recipe {
 
   Recipe(
     this.title,
+    this.tags,
     this.image,
     this.description,
     this.timePrep,
