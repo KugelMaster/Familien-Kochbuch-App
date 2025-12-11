@@ -1,6 +1,5 @@
-from sqlalchemy import Column, Integer, Float, String, Text, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, Float, String, Text, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
-from datetime import datetime, timezone
 from database import Base
 
 class Recipe(Base):
@@ -19,10 +18,10 @@ class Recipe(Base):
     nutritions = relationship("Nutrition", cascade="all, delete-orphan")
     usernotes = relationship("UserNote", cascade="all, delete-orphan")
     ratings = relationship("Rating", cascade="all, delete-orphan")
-    tags = relationship("Tag", secondary="recipe_tags", backref="recipes", cascade="all, delete")
+    tags = relationship("Tag", secondary="recipe_tags", backref="recipes")
 
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now())
 
 class Ingredient(Base):
     __tablename__ = "ingredients"
@@ -50,8 +49,8 @@ class UserNote(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     text = Column(Text, nullable=False)
 
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now())
 
 class Rating(Base):
     __tablename__ = "ratings"
@@ -62,8 +61,8 @@ class Rating(Base):
     stars = Column(Float, nullable=False) # type: ignore
     comment = Column(Text, nullable=True)
 
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now())
 
 
 class Tag(Base):
@@ -75,8 +74,8 @@ class Tag(Base):
 class RecipeTag(Base):
     __tablename__ = "recipe_tags"
 
-    recipe_id = Column(Integer, ForeignKey("recipes.id"), primary_key=True, index=True)
-    tag_id = Column(Integer, ForeignKey("tags.id"), primary_key=True, index=True)
+    recipe_id = Column(Integer, ForeignKey("recipes.id", ondelete="CASCADE"), primary_key=True, index=True)
+    tag_id = Column(Integer, ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True, index=True)
 
 
 class User(Base):

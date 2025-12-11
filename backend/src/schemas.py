@@ -49,8 +49,8 @@ class UserNoteOut(BaseModel):
     user_id: int
     text: str
 
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime]
+    updated_at: Optional[datetime]
 
 class RatingOut(BaseModel):
     id: int
@@ -58,8 +58,8 @@ class RatingOut(BaseModel):
     stars: float # Zwischen 0 und 5 mit 0,5 Schritten
     comment: Optional[str] = None
 
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime]
+    updated_at: Optional[datetime]
 
 class RecipeOut(BaseModel):
     id: int
@@ -77,8 +77,8 @@ class RecipeOut(BaseModel):
     user_notes: Optional[list[UserNoteOut]] = None
     ratings: Optional[list[RatingOut]] = None
 
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime]
+    updated_at: Optional[datetime]
 
     class Config:
         from_attributes = True

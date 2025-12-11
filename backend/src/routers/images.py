@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, UploadFile
-from database import SessionLocal
+from database import get_db
 from sqlalchemy.orm import Session
 
 from crud import images
@@ -9,13 +9,6 @@ router = APIRouter(
     prefix="/images",
     tags=["Images"]
 )
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post("/{recipe_id}", response_model=dict)

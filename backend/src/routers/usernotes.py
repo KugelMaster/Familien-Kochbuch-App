@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from database import SessionLocal
+from database import get_db
 from sqlalchemy.orm import Session
 
 from schemas import UserNoteCreate, UserNoteOut
@@ -10,13 +10,6 @@ router = APIRouter(
     prefix="/usernotes",
     tags=["UserNotes"]
 )
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post("", response_model=UserNoteOut)

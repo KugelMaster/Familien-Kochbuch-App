@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from database import SessionLocal
+from database import get_db
 from sqlalchemy.orm import Session
 
 from schemas import RatingCreate, RatingOut
@@ -10,13 +10,6 @@ router = APIRouter(
     prefix="/ratings",
     tags=["Ratings"]
 )
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post("", response_model=RatingOut)

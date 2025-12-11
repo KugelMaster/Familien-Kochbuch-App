@@ -16,7 +16,11 @@ Eine iOS / Andriod App, die Essens-Vorschläge für die Familie liefern kann. Z.
 - PostgreSQL Modele
 - Pydantic Schemen
 - API Routen:
-    - [Recipe erstellen und abrufen](http://localhost:8000/recipes)
+    - [Recipes](http://localhost:8000/recipes)
+    - [UserNotes](http://localhost:8000/usernotes)
+    - [Ratings](http://localhost:8000/ratings)
+    - [Images](http://localhost:8000/images)
+    - [Tags](http://localhost:8000/tags)
 
 <br>
 <br>
