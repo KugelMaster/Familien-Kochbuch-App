@@ -1,11 +1,14 @@
-from fastapi import APIRouter, Depends, UploadFile
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException
 from database import SessionLocal
-from schemas import RecipeCreate, RecipeOut, TagOut, UserNoteCreate, UserNoteOut, RatingCreate, RatingOut, RecipeUpdate
-from crud import recipes, images
+from sqlalchemy.orm import Session
+
+from schemas import RecipeCreate, RecipeOut, RecipeUpdate
+from models import Recipe, Ingredient, Nutrition, Tag, RecipeTag
+
 
 router = APIRouter(
-    prefix="/recipes"
+    prefix="/recipes",
+    tags=["Recipes"]
 )
 
 def get_db():
@@ -16,72 +19,104 @@ def get_db():
         db.close()
 
 
-####################################[Recipe]####################################
-@router.post("", response_model=RecipeOut, tags=["Recipe"])
+@router.post("", response_model=RecipeOut)
 def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
-    return recipes.create_recipe(db, recipe)
+    db_recipe = Recipe(
+        title=recipe.title,
+        image=recipe.image,
+        description=recipe.description,
+        time_prep=recipe.time_prep,
+        time_total=recipe.time_total,
+        portions=recipe.portions,
+        recipe_url=recipe.recipe_url
+    )
 
-@router.get("", response_model=list[RecipeOut], tags=["Recipe"])
+    db.add(db_recipe)
+    db.commit()
+    db.refresh(db_recipe)
+
+    for ingredient in recipe.ingredients:
+        db_ingredient = Ingredient(
+            recipe_id=db_recipe.id,
+            name=ingredient.name,
+            amount=ingredient.amount,
+            unit=ingredient.unit
+        )
+        db.add(db_ingredient)
+
+    ### Optional stuff ###
+    if recipe.tags is not None:
+        for name in recipe.tags:
+            db_tag = Tag(name=name)
+            db.add(db_tag)
+            db.commit()
+            db.refresh(db_tag)
+
+            db.add(RecipeTag(
+                recipe_id=db_recipe.id,
+                tag_id=db_tag.id
+            ))
+
+    if recipe.nutritions is not None:
+        for nutrition in recipe.nutritions:
+            db_nutrition = Nutrition(
+                recipe_id=db_recipe.id,
+                name=nutrition.name,
+                amount=nutrition.amount,
+                unit=nutrition.unit
+            )
+            db.add(db_nutrition)
+
+    db.commit()
+    return db_recipe
+
+@router.get("", response_model=list[RecipeOut])
 def list_recipes(db: Session = Depends(get_db)):
-    return recipes.get_recipes(db)
+    return db.query(Recipe).all()
 
-@router.get("/{recipe_id}", response_model=RecipeOut, tags=["Recipe"])
+@router.get("/{recipe_id}", response_model=RecipeOut)
 def get_recipe(recipe_id: int, db: Session = Depends(get_db)):
-    return recipes.get_recipe(db, recipe_id)
+    return db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
-@router.patch("/{recipe_id}", response_model=RecipeOut, tags=["Recipe"])
+@router.patch("/{recipe_id}", response_model=RecipeOut)
 def update_recipe(recipe_id: int, patch: RecipeUpdate, db: Session = Depends(get_db)):
-    return recipes.update_recipe(db, recipe_id, patch)
+    recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
-@router.delete("/{recipe_id}", response_model=dict, tags=["Recipe"])
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+    patch_data = patch.model_dump(exclude_unset=True)
+
+    # Special handling for tags:
+    if "tags" in patch_data:
+        tag_ids = patch_data.pop("tags")
+
+        new_tags = db.query(Tag).filter(Tag.id.in_(tag_ids)).all()
+
+        if len(new_tags) != len(tag_ids):
+            raise HTTPException(status_code=400, detail="One or more tags not found")
+        
+        recipe.tags = new_tags
+
+    # Update normal fields
+    for key, value in patch_data.items():
+        setattr(recipe, key, value)
+
+    print(recipe.tags)
+
+    db.commit()
+    db.refresh(recipe)
+
+    return recipe
+
+@router.delete("/{recipe_id}", response_model=dict)
 def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
-    return recipes.delete_recipe(db, recipe_id)
+    recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
 
-###################################[UserNote]###################################
-@router.post("/usernote", response_model=UserNoteOut, tags=["UserNote"])
-def create_usernote(usernote: UserNoteCreate, db: Session = Depends(get_db)):
-    return recipes.create_usernote(db, usernote)
+    db.delete(recipe)
+    db.commit()
 
-@router.get("/{recipe_id}/usernotes", response_model=list[UserNoteOut], tags=["UserNote"])
-def list_usernotes(recipe_id: int, db: Session = Depends(get_db)):
-    return recipes.get_usernotes(db, recipe_id)
-
-
-####################################[Rating]####################################
-@router.post("/rating", response_model=RatingOut, tags=["Rating"])
-def create_rating(rating: RatingCreate, db: Session = Depends(get_db)):
-    return recipes.create_rating(db, rating)
-
-@router.get("/{recipe_id}/ratings", response_model=list[RatingOut], tags=["Rating"])
-def list_ratings(recipe_id: int, db: Session = Depends(get_db)):
-    return recipes.get_ratings(db, recipe_id)
-
-
-####################################[Image]#####################################
-@router.post("/{recipe_id}/image", response_model=dict, tags=["Image"])
-def upload_recipe_image(recipe_id: int, file: UploadFile, db: Session = Depends(get_db)):
-    return images.save_recipe_image(recipe_id, file, db)
-
-@router.get("/{recipe_id}/image", tags=["Image"])
-def get_recipe_image(recipe_id: int, db: Session = Depends(get_db)):
-    return images.load_recipe_image(recipe_id, db)
-
-#####################################[Tags]#####################################
-@router.post("/tag", response_model=TagOut, tags=["Tag"])
-def create_tag(tag_name: str, db: Session = Depends(get_db)):
-    return recipes.create_tag(db, tag_name)
-
-@router.get("/tags", response_model=list[TagOut], tags=["Tag"])
-def list_tags(db: Session = Depends(get_db)):
-    return recipes.get_tags(db)
-
-@router.patch("/tags/{tag_id}", response_model=TagOut, tags=["Tag"])
-def rename_tag(tag_id: int, new_name: str, db: Session = Depends(get_db)):
-    return recipes.rename_tag(db, tag_id, new_name)
-
-@router.delete("/tags/{tag_id}", response_model=dict, tags=["Tag"])
-def delete_tag(tag_id: int, db: Session = Depends(get_db)):
-    return recipes.delete_tag(db, tag_id)
-
-# TODO: Function for sending all recipe ids associated with a tag
+    return {"message": "deleted"}

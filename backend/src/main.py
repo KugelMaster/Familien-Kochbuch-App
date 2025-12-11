@@ -1,26 +1,30 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-from routers import recipes
+from routers import recipes, usernotes, ratings, images, tags
 from database import Base, engine
 
 
 tags_metadata = [
     {
-        "name": "Recipe",
+        "name": "Recipes",
         "description": "Operations with recipes.",
     },
     {
-        "name": "UserNote",
+        "name": "UserNotes",
         "description": "Operations with usernotes.",
     },
     {
-        "name": "Rating",
+        "name": "Ratings",
         "description": "Operations with ratings.",
     },
     {
-        "name": "Image",
+        "name": "Images",
         "description": "Operations with images.",
+    },
+    {
+        "name": "Tags",
+        "description": "Operations with tags.",
     }
 ]
 
@@ -34,6 +38,10 @@ app = FastAPI(
 Base.metadata.create_all(bind=engine)
 
 app.include_router(recipes.router)
+app.include_router(usernotes.router)
+app.include_router(ratings.router)
+app.include_router(images.router)
+app.include_router(tags.router)
 
 
 @app.get("/", response_class=HTMLResponse)
