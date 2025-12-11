@@ -1,8 +1,8 @@
 # TODOs:
-- Tag Erstellung
+- Alle Rezepte mit bestimmten Tag returnen
 - Bilder upload planen (URL-Erstellung / ID?)
 - Objekt editierbar machen
-- Objekt löschbar machen
+- Objekt löschbar machen (+ Backup 30 Tage für Notfälle!)
 
 - Documentation übersichtlicher machen (OpenAPI)
 - Tags erstellen, mit Rezept verbinden und Rezept löschen Testen (Tag-Verknüpfung sollte gelöscht werden, aber nicht Tag selber)

@@ -1,8 +1,10 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from models import Recipe, Ingredient, Nutrition, UserNote, Rating, Tag, RecipeTag
-from schemas import RecipeCreate, UserNoteCreate, RatingCreate
+from schemas import RecipeCreate, UserNoteCreate, RatingCreate, RecipeUpdate
 
+####################################[Recipe]####################################
 def create_recipe(db: Session, recipe: RecipeCreate) -> Recipe:
     db_recipe = Recipe(
         title=recipe.title,
@@ -53,6 +55,55 @@ def create_recipe(db: Session, recipe: RecipeCreate) -> Recipe:
     db.commit()
     return db_recipe
 
+def get_recipes(db: Session) -> list[Recipe]:
+    return db.query(Recipe).all()
+
+def get_recipe(db: Session, recipe_id: int) -> Recipe | None:
+    return db.query(Recipe).filter(Recipe.id == recipe_id).first()
+
+def update_recipe(db: Session, recipe_id: int, patch: RecipeUpdate) -> Recipe | None:
+    recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+    patch_data = patch.model_dump(exclude_unset=True)
+
+    # Special handling for tags:
+    if "tags" in patch_data:
+        tag_ids = patch_data.pop("tags")
+
+        new_tags = db.query(Tag).filter(Tag.id.in_(tag_ids)).all()
+
+        if len(new_tags) != len(tag_ids):
+            raise HTTPException(status_code=400, detail="One or more tags not found")
+        
+        recipe.tags = new_tags
+
+    # Update normal fields
+    for key, value in patch_data.items():
+        setattr(recipe, key, value)
+
+    print(recipe.tags)
+
+    db.commit()
+    db.refresh(recipe)
+
+    return recipe
+
+def delete_recipe(db: Session, recipe_id: int) -> dict[str, str]:
+    recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+    db.delete(recipe)
+    db.commit()
+
+    return {"message": "deleted"}
+
+
+###################################[UserNote]###################################
 def create_usernote(db: Session, usernote: UserNoteCreate) -> UserNote:
     db_usernote = UserNote(
         recipe_id=usernote.recipe_id,
@@ -66,6 +117,11 @@ def create_usernote(db: Session, usernote: UserNoteCreate) -> UserNote:
 
     return db_usernote
 
+def get_usernotes(db: Session, recipe_id: int) -> list[UserNote]:
+    return db.query(UserNote).filter(UserNote.recipe_id == recipe_id).all()
+
+
+####################################[Rating]####################################
 def create_rating(db: Session, rating: RatingCreate) -> Rating:
     db_rating = Rating(
         recipe_id=rating.recipe_id,
@@ -80,14 +136,42 @@ def create_rating(db: Session, rating: RatingCreate) -> Rating:
 
     return db_rating
 
-def get_recipes(db: Session) -> list[Recipe]:
-    return db.query(Recipe).all()
-
-def get_recipe(db: Session, recipe_id: int) -> Recipe | None:
-    return db.query(Recipe).filter(Recipe.id == recipe_id).first()
-
-def get_usernotes(db: Session, recipe_id: int) -> list[UserNote]:
-    return db.query(UserNote).filter(UserNote.recipe_id == recipe_id).all()
-
 def get_ratings(db: Session, recipe_id: int) -> list[Rating]:
     return db.query(Rating).filter(Rating.recipe_id == recipe_id).all()
+
+
+#####################################[Tags]#####################################
+def create_tag(db: Session, name: str) -> Tag:
+    db_tag = Tag(name=name)
+
+    db.add(db_tag)
+    db.commit()
+    db.refresh(db_tag)
+
+    return db_tag
+
+def get_tags(db: Session) -> list[Tag]:
+    return db.query(Tag).all()
+
+def rename_tag(db: Session, tag_id: int, new_name: str) -> Tag | None:
+    tag = db.query(Tag).filter(Tag.id == tag_id).first()
+
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+
+    setattr(tag, "name", new_name)
+    db.commit()
+    db.refresh(tag)
+
+    return tag
+
+def delete_tag(db: Session, tag_id: int) -> dict[str, str]:
+    tag = db.query(Tag).filter(Tag.id == tag_id).first()
+
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+
+    db.delete(tag)
+    db.commit()
+
+    return {"message": "deleted"}

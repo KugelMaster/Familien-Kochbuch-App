@@ -3,6 +3,9 @@ from typing import Optional
 from datetime import datetime
 
 
+class TagCreate(BaseModel):
+    name: str
+
 class IngredientCreate(BaseModel):
     name: str
     amount: Optional[str] = None
@@ -26,7 +29,7 @@ class RatingCreate(BaseModel):
 
 class RecipeCreate(BaseModel):
     title: str
-    tags: Optional[list[str]] = None
+    tags: Optional[list[int]] = None
     image: Optional[str] = None
     description: Optional[str] = None
     time_prep: Optional[float] = None
@@ -37,6 +40,9 @@ class RecipeCreate(BaseModel):
     ingredients: list[IngredientCreate]
     nutritions: Optional[list[NutritionCreate]] = None # Vllt. später automatisch aus Zutaten berechnen?
 
+class TagOut(BaseModel):
+    id: int
+    name: str
 
 class UserNoteOut(BaseModel):
     id: int
@@ -58,7 +64,7 @@ class RatingOut(BaseModel):
 class RecipeOut(BaseModel):
     id: int
     title: str
-    tags: Optional[list[str]] = None
+    tags: Optional[list[TagOut]] = None
     image: Optional[str] = None
     description: Optional[str] = None
     time_prep: Optional[float] = None
@@ -77,6 +83,22 @@ class RecipeOut(BaseModel):
     class Config:
         from_attributes = True
 
+
+class RecipeUpdate(BaseModel):
+    title: Optional[str] = None
+    tags: Optional[list[int]] = None
+    image: Optional[str] = None
+    description: Optional[str] = None
+    time_prep: Optional[float] = None
+    time_total: Optional[float] = None
+    portions: Optional[float] = None
+    recipe_url: Optional[str] = None
+
+    ingredients: Optional[list[IngredientCreate]] = None
+    nutritions: Optional[list[NutritionCreate]] = None
+
+    class Config:
+        from_attributes = True
 """
 class RecipeImages(BaseModel):
     id: UUID
