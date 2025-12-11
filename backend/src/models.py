@@ -8,6 +8,7 @@ class Recipe(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
+    image = Column(String, nullable=True) # Main Image URL from Backend API FIXME: Vllt. mit RecipeImage ID verknüpfen?
     description = Column(Text, nullable=True)
     time_prep = Column(Float, nullable=True) # type: ignore
     time_total = Column(Float, nullable=True) # type: ignore
@@ -18,6 +19,7 @@ class Recipe(Base):
     nutritions = relationship("Nutrition", cascade="all, delete-orphan")
     usernotes = relationship("UserNote", cascade="all, delete-orphan")
     ratings = relationship("Rating", cascade="all, delete-orphan")
+    tags = relationship("Tag", secondary="recipe_tags", backref="recipes", cascade="all, delete")
 
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
@@ -63,8 +65,29 @@ class Rating(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
+
+class Tag(Base):
+    __tablename__ = "tags"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, nullable=False)
+
+class RecipeTag(Base):
+    __tablename__ = "recipe_tags"
+
+    recipe_id = Column(Integer, ForeignKey("recipes.id"), primary_key=True, index=True)
+    tag_id = Column(Integer, ForeignKey("tags.id"), primary_key=True, index=True)
+
+
 class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
     # TODO
+
+class RecipeImage(Base):
+    __tablename__ = "recipe_images"
+
+    recipe_id = Column(Integer, ForeignKey("recipes.id"), primary_key=True, index=True)
+    filename = Column(String, nullable=False)
+    file_path = Column(String, nullable=False)

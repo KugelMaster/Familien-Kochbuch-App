@@ -6,8 +6,8 @@ from database import Base, engine
 
 
 app = FastAPI(
-    title="Cooking App API",
-    description="Backend API for the Cooking App",
+    title="Family Cookbook API",
+    description="Backend API for the Family Cookbook App",
     version="0.1.0"
 )
 

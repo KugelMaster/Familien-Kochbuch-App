@@ -1,11 +1,12 @@
 from sqlalchemy.orm import Session
 
-from models import Recipe, Ingredient, Nutrition, UserNote, Rating
+from models import Recipe, Ingredient, Nutrition, UserNote, Rating, Tag, RecipeTag
 from schemas import RecipeCreate, UserNoteCreate, RatingCreate
 
 def create_recipe(db: Session, recipe: RecipeCreate) -> Recipe:
     db_recipe = Recipe(
         title=recipe.title,
+        image=recipe.image,
         description=recipe.description,
         time_prep=recipe.time_prep,
         time_total=recipe.time_total,
@@ -25,6 +26,19 @@ def create_recipe(db: Session, recipe: RecipeCreate) -> Recipe:
             unit=ingredient.unit
         )
         db.add(db_ingredient)
+
+    ### Optional stuff ###
+    if recipe.tags is not None:
+        for name in recipe.tags:
+            db_tag = Tag(name=name)
+            db.add(db_tag)
+            db.commit()
+            db.refresh(db_tag)
+
+            db.add(RecipeTag(
+                recipe_id=db_recipe.id,
+                tag_id=db_tag.id
+            ))
 
     if recipe.nutritions is not None:
         for nutrition in recipe.nutritions:
@@ -68,6 +82,9 @@ def create_rating(db: Session, rating: RatingCreate) -> Rating:
 
 def get_recipes(db: Session) -> list[Recipe]:
     return db.query(Recipe).all()
+
+def get_recipe(db: Session, recipe_id: int) -> Recipe | None:
+    return db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
 def get_usernotes(db: Session, recipe_id: int) -> list[UserNote]:
     return db.query(UserNote).filter(UserNote.recipe_id == recipe_id).all()

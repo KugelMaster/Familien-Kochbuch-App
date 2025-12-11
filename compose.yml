@@ -17,8 +17,11 @@ services:
     restart: always
     ports:
       - "8000:8000"
+    volumes:
+      - apidata:/var/family-cookbook-api/images/recipes
     depends_on:
       - db
 
 volumes:
   pgdata:
+  apidata:

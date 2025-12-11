@@ -26,6 +26,8 @@ class RatingCreate(BaseModel):
 
 class RecipeCreate(BaseModel):
     title: str
+    tags: Optional[list[str]] = None
+    image: Optional[str] = None
     description: Optional[str] = None
     time_prep: Optional[float] = None
     time_total: Optional[float] = None
@@ -36,20 +38,38 @@ class RecipeCreate(BaseModel):
     nutritions: Optional[list[NutritionCreate]] = None # Vllt. später automatisch aus Zutaten berechnen?
 
 
-class UserNoteOut(UserNoteCreate):
+class UserNoteOut(BaseModel):
     id: int
+    user_id: int
+    text: str
+
     created_at: datetime
     updated_at: datetime
 
-class RatingOut(RatingCreate):
+class RatingOut(BaseModel):
     id: int
+    user_id: int
+    stars: float # Zwischen 0 und 5 mit 0,5 Schritten
+    comment: Optional[str] = None
+
     created_at: datetime
     updated_at: datetime
 
-class RecipeOut(RecipeCreate):
-    """Ratings sind mit dem Rezept durch eine eigene gespeicherte ID zum Rezept verbunden, daher werden sie nicht in der RecipeOut Klasse angegeben."""
+class RecipeOut(BaseModel):
     id: int
-    user_notes: list[UserNoteCreate] = []
+    title: str
+    tags: Optional[list[str]] = None
+    image: Optional[str] = None
+    description: Optional[str] = None
+    time_prep: Optional[float] = None
+    time_total: Optional[float] = None
+    portions: float = 1.0
+    recipe_url: Optional[str] = None
+
+    ingredients: list[IngredientCreate]
+    nutritions: Optional[list[NutritionCreate]] = None # Vllt. später automatisch aus Zutaten berechnen?
+    user_notes: Optional[list[UserNoteOut]] = None
+    ratings: Optional[list[RatingOut]] = None
 
     created_at: datetime
     updated_at: datetime
