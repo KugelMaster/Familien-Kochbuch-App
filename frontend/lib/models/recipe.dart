@@ -16,7 +16,7 @@ class Recipe {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  Recipe(
+  const Recipe(
     this.title,
     this.tags,
     this.image,

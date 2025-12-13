@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'main_page.dart';
+import 'main_shell.dart';
 
 void main() {
   runApp(const CookingApp());
@@ -42,7 +42,7 @@ class CookingApp extends StatelessWidget {
           }),
         ),
       ),
-      home: const MainPage(),
+      home: const MainShell(),
     );
   }
 }

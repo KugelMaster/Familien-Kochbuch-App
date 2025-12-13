@@ -1,87 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/recipe.dart';
 
-class RecipePage extends StatefulWidget {
-  const RecipePage({super.key});
+class RecipeOverviewPage extends StatefulWidget {
+  final Recipe recipe;
+
+  const RecipeOverviewPage({super.key, required this.recipe});
 
   @override
-  State<RecipePage> createState() => _RecipePageState();
+  State<RecipeOverviewPage> createState() => _RecipeOverviewPageState();
 }
 
-class _RecipePageState extends State<RecipePage> {
-  Recipe? selectedRecipe;
-
-  final List<Recipe> recipes = [
-    Recipe(
-      "Eierpfannenkuchen",
-      ["Schnell", "Mittagessen"],
-      "https://www.harecker.de/blog/wp-content/uploads/2018/04/Pfannenkuchen.jpg",
-      "Eier und Mehl Kuchen",
-      15,
-      20,
-      12,
-      "https://www.harecker.de/blog/grundrezept-fuer-pfannenkuchen/",
-      [
-        Ingredient("Mehl", "125", "g"),
-        Ingredient("Prise Salz", "1", null),
-        Ingredient("Eier", "2", null),
-        Ingredient("Milch", "300", "ml"),
-      ],
-      [Nutrition("Zucker", "100", "g")],
-      [
-        UserNote(
-          1,
-          "Nächstes mal doppelte Menge ;-)",
-          DateTime.now(),
-          DateTime.now(),
-        ),
-        UserNote(2, "Ohne Wasser", DateTime.now(), DateTime.now()),
-      ],
-      [Rating(1, 4.5, "Sehr lecker 😋", DateTime.now(), DateTime.now())],
-      DateTime.now(),
-      DateTime.now(),
-    ),
-  ];
-
+class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
   @override
   Widget build(BuildContext context) {
-    if (selectedRecipe == null) {
-      return buildRecipeList();
-    } else {
-      return buildRecipeDetail(selectedRecipe!);
-    }
-  }
+    Recipe recipe = widget.recipe;
 
-  Widget buildRecipeList() {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Meine Rezepte")),
-      body: ListView.builder(
-        itemCount: recipes.length,
-        itemBuilder: (context, index) {
-          final recipe = recipes[index];
-
-          return ListTile(
-            title: Text(recipe.title),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              setState(() {
-                selectedRecipe = recipe;
-              });
-            },
-          );
-        },
-      ),
-    );
-  }
-
-  Widget buildRecipeDetail(Recipe recipe) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            setState(() => selectedRecipe = null);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
         title: Text(recipe.title),
       ),
@@ -91,13 +29,15 @@ class _RecipePageState extends State<RecipePage> {
           children: [
             if (recipe.tags != null) buildTags(recipe.tags!),
 
-            if (recipe.ratings != null) buildRatingSummary(recipe.ratings!),
-
             if (recipe.image != null) buildImage(recipe.image!),
 
             const SizedBox(height: 16),
 
             ...buildTitleAndDescription(recipe.title, recipe.description),
+
+            const SizedBox(height: 6),
+
+            if (recipe.ratings != null) buildRatingSummary(recipe.ratings!),
 
             const SizedBox(height: 12),
 
@@ -117,12 +57,19 @@ class _RecipePageState extends State<RecipePage> {
 
             const SizedBox(height: 40),
 
-            if (recipe.usernotes != null)
-              buildUserNotes(recipe.usernotes!),
+            if (recipe.usernotes != null) buildUserNotes(recipe.usernotes!),
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: openEditView,
+        child: const Icon(Icons.edit),
+      ),
     );
+  }
+
+  void openEditView() {
+    print("FAB was clicked!");
   }
 
   Widget buildTags(List<String> tags) {
@@ -133,11 +80,7 @@ class _RecipePageState extends State<RecipePage> {
         children: tags.map((tag) {
           return Chip(
             label: Text(tag),
-            labelStyle: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-            ),
-            side: BorderSide(color: Colors.black, width: 2),
+            backgroundColor: Colors.amber,
           );
         }).toList(),
       ),
@@ -149,32 +92,35 @@ class _RecipePageState extends State<RecipePage> {
         ? 0.0
         : ratings.map((r) => r.stars).reduce((a, b) => a + b) / ratings.length;
 
-    return InkWell(
-      onTap: null,
-      child: Row(
-        children: [
-          Row(
-            children: List.generate(5, (i) {
-              final filled = avgStars >= i + 1;
-              final half = !filled && avgStars > i && avgStars < i + 1;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: InkWell(
+        onTap: null,
+        child: Row(
+          children: [
+            Row(
+              children: List.generate(5, (i) {
+                final filled = avgStars >= i + 1;
+                final half = !filled && avgStars > i && avgStars < i + 1;
 
-              return Icon(
-                filled
-                    ? Icons.star
-                    : half
-                    ? Icons.star_half
-                    : Icons.star_border,
-                size: 22,
-                color: Colors.orange,
-              );
-            }),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            "(${ratings.length})",
-            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-          ),
-        ],
+                return Icon(
+                  filled
+                      ? Icons.star
+                      : half
+                      ? Icons.star_half
+                      : Icons.star_border,
+                  size: 22,
+                  color: Colors.orange,
+                );
+              }),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              "(${ratings.length})",
+              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -289,7 +235,7 @@ class _RecipePageState extends State<RecipePage> {
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: const Text(
-          "Inhaltsstoffe",
+          "Nährwerte",
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
       ),
