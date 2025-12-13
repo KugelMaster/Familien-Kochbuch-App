@@ -3,10 +3,10 @@ class Recipe {
   final List<String>? tags;
   final String? image;
   final String? description;
-  final double? timePrep;
-  final double? timeTotal;
+  final int? timePrep;
+  final int? timeTotal;
   final double? portions;
-  final String? recipeUrl;
+  final String? recipeUri;
 
   final List<Ingredient> ingredients;
   final List<Nutrition>? nutritions;
@@ -24,7 +24,7 @@ class Recipe {
     this.timePrep,
     this.timeTotal,
     this.portions,
-    this.recipeUrl,
+    this.recipeUri,
     this.ingredients,
     this.nutritions,
     this.usernotes,

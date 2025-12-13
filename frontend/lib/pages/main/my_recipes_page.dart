@@ -17,8 +17,8 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
       //"https://www.harecker.de/blog/wp-content/uploads/2018/04/Pfannenkuchen.jpg",
       null,
       "Eier und Mehl Kuchen",
-      15,
-      20,
+      70,
+      90,
       12,
       "https://www.harecker.de/blog/grundrezept-fuer-pfannenkuchen/",
       [

@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/components/animated_app_bar.dart';
 import 'package:frontend/models/recipe.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RecipeOverviewPage extends StatefulWidget {
   final Recipe recipe;
@@ -37,39 +39,30 @@ class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             buildImage(recipe.image),
-
             const SizedBox(height: 8),
 
             if (recipe.tags != null) buildTags(recipe.tags!),
-
             const SizedBox(height: 8),
 
             ...buildTitleAndDescription(recipe.title, recipe.description),
-
             const SizedBox(height: 6),
 
             if (recipe.ratings != null) buildRatingSummary(recipe.ratings!),
-
             const SizedBox(height: 12),
 
-            buildInfoChips(recipe),
+            buildInfoChips(recipe, Theme.of(context).colorScheme.onSurfaceVariant),
+            const SizedBox(height: 24),
 
+            if (recipe.recipeUri != null) buildUrlButton(recipe.recipeUri!),
             const SizedBox(height: 24),
 
             ...buildIngredients(recipe.ingredients),
-
-            const SizedBox(height: 24),
-
-            if (recipe.recipeUrl != null) buildUrlButton(recipe.recipeUrl!),
-
             const SizedBox(height: 24),
 
             ...buildNutritions(recipe.nutritions),
-
             const SizedBox(height: 40),
 
             if (recipe.usernotes != null) buildUserNotes(recipe.usernotes!),
-
             const SizedBox(height: 320),
           ],
         ),
@@ -97,58 +90,10 @@ class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
   }
 
   void openEditView() {
+    // TODO: Create and Open Edit View
     print("FAB was clicked!");
   }
 
-  Widget buildTags(List<String> tags) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Wrap(
-        spacing: 8,
-        children: tags.map((tag) {
-          return Chip(label: Text(tag), backgroundColor: Colors.amber);
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget buildRatingSummary(List<Rating> ratings) {
-    final avgStars = ratings.isEmpty
-        ? 0.0
-        : ratings.map((r) => r.stars).reduce((a, b) => a + b) / ratings.length;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: InkWell(
-        onTap: null,
-        child: Row(
-          children: [
-            Row(
-              children: List.generate(5, (i) {
-                final filled = avgStars >= i + 1;
-                final half = !filled && avgStars > i && avgStars < i + 1;
-
-                return Icon(
-                  filled
-                      ? Icons.star
-                      : half
-                      ? Icons.star_half
-                      : Icons.star_border,
-                  size: 22,
-                  color: Colors.orange,
-                );
-              }),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              "(${ratings.length})",
-              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget buildImage(String? imageUrl) {
     final height = MediaQuery.of(context).size.height * 0.6;
@@ -220,6 +165,18 @@ class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
     );
   }
 
+  Widget buildTags(List<String> tags) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Wrap(
+        spacing: 8,
+        children: tags.map((tag) {
+          return Chip(label: Text(tag), backgroundColor: Colors.amber);
+        }).toList(),
+      ),
+    );
+  }
+
   List<Widget> buildTitleAndDescription(String title, String? description) {
     return [
       Padding(
@@ -241,28 +198,84 @@ class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
     ];
   }
 
-  Widget buildInfoChips(Recipe recipe) {
+  Widget buildRatingSummary(List<Rating> ratings) {
+    final avgStars = ratings.isEmpty
+        ? 0.0
+        : ratings.map((r) => r.stars).reduce((a, b) => a + b) / ratings.length;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Wrap(
-        spacing: 8,
+      child: InkWell(
+        onTap: null,
+        child: Row(
+          children: [
+            Row(
+              children: List.generate(5, (i) {
+                final filled = avgStars >= i + 1;
+                final half = !filled && avgStars > i && avgStars < i + 1;
+
+                return Icon(
+                  filled
+                      ? Icons.star
+                      : half
+                      ? Icons.star_half
+                      : Icons.star_border,
+                  size: 22,
+                  color: Colors.orange,
+                );
+              }),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              "(${ratings.length})",
+              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildInfoChips(Recipe recipe, Color iconColor) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
         children: [
-          if (recipe.timeTotal != null)
-            Chip(
-              label: Text("Gesamt: ${recipe.timeTotal!.toInt()} min"),
-              avatar: const Icon(Icons.timer),
-            ),
-          if (recipe.timePrep != null)
-            Chip(
-              label: Text("Vorbereitung: ${recipe.timePrep!.toInt()} min"),
-              avatar: const Icon(Icons.kitchen),
-            ),
-          if (recipe.portions != null)
-            Chip(
-              label: Text("${recipe.portions!.toInt()} Portionen"),
-              avatar: const Icon(Icons.restaurant),
-            ),
+          Icon(Icons.timer, color: iconColor),
+          const SizedBox(width: 6),
+          Text(_formatTime(recipe.timePrep)),
+
+          const SizedBox(width: 12),
+          Container(width: 1, height: 16, color: Colors.grey.shade500),
+          const SizedBox(width: 12),
+
+          Icon(Icons.schedule, color: iconColor),
+          const SizedBox(width: 6),
+          Text(_formatTime(recipe.timeTotal)),
+
+          const SizedBox(width: 12),
+          Container(width: 1, height: 16, color: Colors.grey.shade500),
+          const SizedBox(width: 12),
+
+          Icon(Icons.fastfood, color: iconColor),
+          const SizedBox(width: 6),
+          Text(_formatPortion(recipe.portions)),
         ],
+      ),
+    );
+  }
+
+  Widget buildUrlButton(String uri) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: OutlinedButton.icon(
+        icon: const Icon(Icons.open_in_new),
+        label: const Text("Originalrezept öffnen"),
+        onPressed: () async {
+          if (!await launchUrl(Uri.parse(uri), mode: LaunchMode.externalApplication)) {
+            throw Exception("Could not launch $uri");
+          }
+        },
       ),
     );
   }
@@ -295,19 +308,6 @@ class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
         ),
       ),
     ];
-  }
-
-  Widget buildUrlButton(String url) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: OutlinedButton.icon(
-        icon: const Icon(Icons.open_in_new),
-        label: const Text("Originalrezept öffnen"),
-        onPressed: () {
-          // TODO: URL öffnen
-        },
-      ),
-    );
   }
 
   List<Widget> buildNutritions(List<Nutrition>? nutritions) {
@@ -402,87 +402,24 @@ class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
     final updated = n.updatedAt != n.createdAt ? " (bearbeitet)" : "";
     return "Erstellt am $created$updated";
   }
-}
 
-class AnimatedAppBar extends StatefulWidget implements PreferredSizeWidget {
-  final ScrollController scrollController;
-  final String title;
-  final double triggerOffset;
-
-  const AnimatedAppBar({
-    super.key,
-    required this.scrollController,
-    required this.title,
-    required this.triggerOffset,
-  });
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-
-  @override
-  State<StatefulWidget> createState() => _AnimatedAppBarState();
-}
-
-class _AnimatedAppBarState extends State<AnimatedAppBar> {
-  bool scrolled = false;
-
-  @override
-  void initState() {
-    super.initState();
-    widget.scrollController.addListener(_onScroll);
-  }
-
-  void _onScroll() {
-    final shouldBeScrolled =
-        widget.scrollController.offset > widget.triggerOffset;
-
-    if (shouldBeScrolled != scrolled) {
-      setState(() => scrolled = shouldBeScrolled);
+  String _formatTime(int? time) {
+    if (time == null) {
+      return "N/A";
     }
+
+    final int hours = time ~/ 60;
+    final int minutes = time % 60;
+
+    return "${hours == 0 ? "" : "$hours Std. "}$minutes Min";
   }
 
-  @override
-  void dispose() {
-    widget.scrollController.removeListener(_onScroll);
-    super.dispose();
-  }
+  String _formatPortion(double? portions) {
+    if (portions == null) {
+      return "N/A Stück";
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      decoration: BoxDecoration(
-        color: scrolled ? Colors.white : Colors.transparent,
-        border: scrolled
-            ? const Border(
-                bottom: BorderSide(color: Colors.black12, width: 0.8),
-              )
-            : null,
-      ),
-      child: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: scrolled ? Colors.black : Colors.white,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: AnimatedOpacity(
-          opacity: scrolled ? 1 : 0,
-          duration: const Duration(milliseconds: 200),
-          child: Text(
-            widget.title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.black),
-          ),
-        ),
-      ),
-    );
+    String rounded = portions.toStringAsFixed(1);
+    return "${rounded.endsWith(".0") ? rounded.substring(0, rounded.length - 2) : rounded} Stück";
   }
 }
