@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/models/recipe.dart';
+import 'package:image_picker/image_picker.dart';
 
 class RecipeOverviewPage extends StatefulWidget {
   final Recipe recipe;
@@ -11,27 +14,35 @@ class RecipeOverviewPage extends StatefulWidget {
 }
 
 class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
+  final ScrollController _scrollController = ScrollController();
+
+  final ImagePicker _picker = ImagePicker();
+  XFile? pickedImage;
+
   @override
   Widget build(BuildContext context) {
+    final double triggerOffset = MediaQuery.of(context).size.height * 0.6;
     Recipe recipe = widget.recipe;
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(recipe.title),
+      extendBodyBehindAppBar: true,
+      appBar: AnimatedAppBar(
+        scrollController: _scrollController,
+        title: recipe.title,
+        triggerOffset: triggerOffset,
       ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            buildImage(recipe.image),
+
+            const SizedBox(height: 8),
+
             if (recipe.tags != null) buildTags(recipe.tags!),
 
-            if (recipe.image != null) buildImage(recipe.image!),
-
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
 
             ...buildTitleAndDescription(recipe.title, recipe.description),
 
@@ -58,6 +69,8 @@ class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
             const SizedBox(height: 40),
 
             if (recipe.usernotes != null) buildUserNotes(recipe.usernotes!),
+
+            const SizedBox(height: 320),
           ],
         ),
       ),
@@ -66,6 +79,21 @@ class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
         child: const Icon(Icons.edit),
       ),
     );
+  }
+
+  Future<void> takePhoto() async {
+    final image = await _picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 85,
+    );
+
+    if (image != null) {
+      setState(() {
+        pickedImage = image;
+      });
+
+      // TODO: Image an Backend senden
+    }
   }
 
   void openEditView() {
@@ -78,10 +106,7 @@ class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
       child: Wrap(
         spacing: 8,
         children: tags.map((tag) {
-          return Chip(
-            label: Text(tag),
-            backgroundColor: Colors.amber,
-          );
+          return Chip(label: Text(tag), backgroundColor: Colors.amber);
         }).toList(),
       ),
     );
@@ -125,17 +150,72 @@ class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
     );
   }
 
-  Widget buildImage(String imageUrl) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.only(
-        bottomLeft: Radius.circular(16),
-        bottomRight: Radius.circular(16),
-      ),
-      child: Image.network(
-        imageUrl,
-        width: double.infinity,
-        height: 220,
-        fit: BoxFit.cover,
+  Widget buildImage(String? imageUrl) {
+    final height = MediaQuery.of(context).size.height * 0.6;
+    final Widget imageOrFiller;
+
+    // PRIORITY:
+    // 1. Pick image taken from user
+    if (pickedImage != null) {
+      imageOrFiller = Image.file(File(pickedImage!.path), fit: BoxFit.cover);
+    }
+    // 2. Display image from the url
+    else if (imageUrl != null) {
+      imageOrFiller = Image.network(imageUrl, fit: BoxFit.cover);
+    }
+    // 3. Display a filler
+    else {
+      imageOrFiller = InkWell(
+        onTap: takePhoto,
+        child: Container(
+          color: Colors.grey.shade200,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(Icons.add_a_photo, size: 48, color: Colors.grey),
+              SizedBox(height: 12),
+              Text(
+                "Foto hinzufügen",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: height,
+      width: double.infinity,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(16),
+              bottomRight: Radius.circular(16),
+            ),
+            child: imageOrFiller,
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            height: 160,
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [Colors.transparent, Colors.black54],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -285,9 +365,7 @@ class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    child: Icon(
-                      Icons.person,
-                    ), // TODO: Hier Profilbild anzeigen
+                    child: Icon(Icons.person), // TODO: Hier Profilbild anzeigen
                   ),
                   const SizedBox(width: 12),
 
@@ -295,10 +373,7 @@ class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          note.text,
-                          style: const TextStyle(fontSize: 16),
-                        ),
+                        Text(note.text, style: const TextStyle(fontSize: 16)),
 
                         const SizedBox(height: 6),
 
@@ -326,5 +401,88 @@ class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
         "${n.createdAt.day}.${n.createdAt.month}.${n.createdAt.year}";
     final updated = n.updatedAt != n.createdAt ? " (bearbeitet)" : "";
     return "Erstellt am $created$updated";
+  }
+}
+
+class AnimatedAppBar extends StatefulWidget implements PreferredSizeWidget {
+  final ScrollController scrollController;
+  final String title;
+  final double triggerOffset;
+
+  const AnimatedAppBar({
+    super.key,
+    required this.scrollController,
+    required this.title,
+    required this.triggerOffset,
+  });
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  State<StatefulWidget> createState() => _AnimatedAppBarState();
+}
+
+class _AnimatedAppBarState extends State<AnimatedAppBar> {
+  bool scrolled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final shouldBeScrolled =
+        widget.scrollController.offset > widget.triggerOffset;
+
+    if (shouldBeScrolled != scrolled) {
+      setState(() => scrolled = shouldBeScrolled);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController.removeListener(_onScroll);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      decoration: BoxDecoration(
+        color: scrolled ? Colors.white : Colors.transparent,
+        border: scrolled
+            ? const Border(
+                bottom: BorderSide(color: Colors.black12, width: 0.8),
+              )
+            : null,
+      ),
+      child: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: scrolled ? Colors.black : Colors.white,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: AnimatedOpacity(
+          opacity: scrolled ? 1 : 0,
+          duration: const Duration(milliseconds: 200),
+          child: Text(
+            widget.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: Colors.black),
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -14,7 +14,8 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
     Recipe(
       "Eierpfannenkuchen",
       ["Schnell", "Mittagessen", "Frühstück"],
-      "https://www.harecker.de/blog/wp-content/uploads/2018/04/Pfannenkuchen.jpg",
+      //"https://www.harecker.de/blog/wp-content/uploads/2018/04/Pfannenkuchen.jpg",
+      null,
       "Eier und Mehl Kuchen",
       15,
       20,
