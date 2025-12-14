@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/network/endpoints.dart';
 import 'package:frontend/features/presentation/pages/recipe_edit_page.dart';
 import 'package:frontend/features/presentation/widgets/animated_app_bar.dart';
 import 'package:frontend/features/data/models/recipe.dart';
 import 'package:frontend/features/presentation/widgets/recipe_overview_widgets.dart';
+import 'package:frontend/features/providers/recipe_providers.dart';
 import 'package:image_picker/image_picker.dart';
 
-class RecipeOverviewPage extends StatefulWidget {
+class RecipeOverviewPage extends ConsumerStatefulWidget {
   final Recipe recipe;
 
   const RecipeOverviewPage({super.key, required this.recipe});
-
+  
   @override
-  State<RecipeOverviewPage> createState() => _RecipeOverviewPageState();
+  ConsumerState<RecipeOverviewPage> createState() => _RecipeOverviewPageState();
 }
 
-class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
+class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
   final ScrollController _scrollController = ScrollController();
 
   final ImagePicker _picker = ImagePicker();
@@ -98,7 +101,10 @@ class _RecipeOverviewPageState extends State<RecipeOverviewPage> {
         pickedImage = image;
       });
 
-      // TODO: Image an Backend senden
+      final service = ref.read(recipeServiceProvider);
+      final filename = Endpoints.imageHost(await service.sendImage(image));
+
+      print(filename);
     }
   }
 

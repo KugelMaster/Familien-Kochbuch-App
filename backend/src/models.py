@@ -84,9 +84,9 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     # TODO
 
-class RecipeImage(Base):
-    __tablename__ = "recipe_images"
+class Image(Base):
+    __tablename__ = "images"
 
-    recipe_id = Column(Integer, ForeignKey("recipes.id"), primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     filename = Column(String, nullable=False)
     file_path = Column(String, nullable=False)
