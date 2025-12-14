@@ -3,9 +3,9 @@
 - Bilder upload planen (URL-Erstellung / ID?)
 - Objekt editierbar machen
 - Objekt löschbar machen (+ Backup 30 Tage für Notfälle!)
+- Ingredients und Nutritions einzelnd editierbar machen
 
 - Documentation übersichtlicher machen (OpenAPI)
-- Tags erstellen, mit Rezept verbinden und Rezept löschen Testen (Tag-Verknüpfung sollte gelöscht werden, aber nicht Tag selber)
 
 
 # Andere Hinweise

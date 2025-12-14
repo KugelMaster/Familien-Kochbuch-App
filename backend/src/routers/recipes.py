@@ -62,7 +62,7 @@ def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
 
 @router.get("", response_model=list[RecipeOut])
 def list_recipes(db: Session = Depends(get_db)):
-    return db.query(Recipe).all()
+    return db.query(Recipe).order_by(Recipe.id).all()
 
 @router.get("/{recipe_id}", response_model=RecipeOut)
 def get_recipe(recipe_id: int, db: Session = Depends(get_db)):
@@ -77,7 +77,7 @@ def update_recipe(recipe_id: int, patch: RecipeUpdate, db: Session = Depends(get
 
     patch_data = patch.model_dump(exclude_unset=True)
 
-    # Special handling for tags:
+    # Special handling for relationships:
     if "tags" in patch_data:
         tag_ids = patch_data.pop("tags")
 
@@ -88,11 +88,41 @@ def update_recipe(recipe_id: int, patch: RecipeUpdate, db: Session = Depends(get
         
         recipe.tags = new_tags
 
+    if "ingredients" in patch_data:
+        ingredient_dicts = patch_data.pop("ingredients")
+
+        # Delete existing ingredients
+        db.query(Ingredient).filter(Ingredient.recipe_id == recipe.id).delete()
+
+        # Add new ingredients
+        for ingredient_data in ingredient_dicts:
+            db_ingredient = Ingredient(
+                recipe_id=recipe.id,
+                name=ingredient_data.get("name", ""),
+                amount=ingredient_data.get("amount", None),
+                unit=ingredient_data.get("unit", None)
+            )
+            db.add(db_ingredient)
+
+    if "nutritions" in patch_data:
+        nutrition_dicts = patch_data.pop("nutritions")
+
+        # Delete existing nutritions
+        db.query(Nutrition).filter(Nutrition.recipe_id == recipe.id).delete()
+
+        # Add new nutritions
+        for nutrition_data in nutrition_dicts:
+            db_nutrition = Nutrition(
+                recipe_id=recipe.id,
+                name=nutrition_data.get("name", ""),
+                amount=nutrition_data.get("amount", None),
+                unit=nutrition_data.get("unit", None)
+            )
+            db.add(db_nutrition)
+
     # Update normal fields
     for key, value in patch_data.items():
         setattr(recipe, key, value)
-
-    print(recipe.tags)
 
     db.commit()
     db.refresh(recipe)

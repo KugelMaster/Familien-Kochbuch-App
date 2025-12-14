@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'main_shell.dart';
 
 void main() async {
-  runApp(const CookingApp());
+  runApp(
+    const ProviderScope(
+      child: CookingApp(),
+    )
+  );
 }
 
 class CookingApp extends StatelessWidget {
