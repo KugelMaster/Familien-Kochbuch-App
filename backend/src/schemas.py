@@ -32,10 +32,10 @@ class RecipeCreate(BaseModel):
     tags: Optional[list[int]] = None
     image: Optional[str] = None
     description: Optional[str] = None
-    time_prep: Optional[float] = None
-    time_total: Optional[float] = None
+    time_prep: Optional[int] = None
+    time_total: Optional[int] = None
     portions: float = 1.0
-    recipe_url: Optional[str] = None
+    recipe_uri: Optional[str] = None
 
     ingredients: list[IngredientCreate]
     nutritions: Optional[list[NutritionCreate]] = None # Vllt. später automatisch aus Zutaten berechnen?
@@ -67,10 +67,10 @@ class RecipeOut(BaseModel):
     tags: Optional[list[TagOut]] = None
     image: Optional[str] = None
     description: Optional[str] = None
-    time_prep: Optional[float] = None
-    time_total: Optional[float] = None
+    time_prep: Optional[int] = None
+    time_total: Optional[int] = None
     portions: float = 1.0
-    recipe_url: Optional[str] = None
+    recipe_uri: Optional[str] = None
 
     ingredients: list[IngredientCreate]
     nutritions: Optional[list[NutritionCreate]] = None # Vllt. später automatisch aus Zutaten berechnen?
@@ -89,10 +89,10 @@ class RecipeUpdate(BaseModel):
     tags: Optional[list[int]] = None
     image: Optional[str] = None
     description: Optional[str] = None
-    time_prep: Optional[float] = None
-    time_total: Optional[float] = None
+    time_prep: Optional[int] = None
+    time_total: Optional[int] = None
     portions: Optional[float] = None
-    recipe_url: Optional[str] = None
+    recipe_uri: Optional[str] = None
 
     ingredients: Optional[list[IngredientCreate]] = None
     nutritions: Optional[list[NutritionCreate]] = None

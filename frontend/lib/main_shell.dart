@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/main/discover_page.dart';
-import 'package:frontend/pages/main/history_page.dart';
-import 'package:frontend/pages/main/planer_page.dart';
-import 'package:frontend/pages/main/my_recipes_page.dart';
-import 'package:frontend/pages/main/settings_page.dart';
+import 'package:frontend/features/presentation/pages/discover_page.dart';
+import 'package:frontend/features/presentation/pages/history_page.dart';
+import 'package:frontend/features/presentation/pages/planer_page.dart';
+import 'package:frontend/features/presentation/pages/my_recipes_page.dart';
+import 'package:frontend/features/presentation/pages/settings_page.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});

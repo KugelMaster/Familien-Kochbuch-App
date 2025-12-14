@@ -15,7 +15,7 @@ router = APIRouter(
 @router.post("", response_model=RecipeOut)
 def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
     # Check if all tags exist
-    db_tags = None
+    db_tags = []
     if (tags := recipe.tags) is not None:
         db_tags = db.query(Tag).filter(Tag.id.in_(tags)).all()
 
@@ -30,7 +30,7 @@ def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
         time_prep=recipe.time_prep,
         time_total=recipe.time_total,
         portions=recipe.portions,
-        recipe_url=recipe.recipe_url,
+        recipe_uri=recipe.recipe_uri,
         tags=db_tags
     )
 

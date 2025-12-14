@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:frontend/components/animated_app_bar.dart';
-import 'package:frontend/models/recipe.dart';
+import 'package:frontend/shared/components/animated_app_bar.dart';
+import 'package:frontend/features/data/models/recipe.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 

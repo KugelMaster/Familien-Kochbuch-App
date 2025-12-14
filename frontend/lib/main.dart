@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'main_shell.dart';
 
-void main() {
+void main() async {
   runApp(const CookingApp());
 }
 

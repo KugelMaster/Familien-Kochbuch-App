@@ -9,10 +9,10 @@ class Recipe(Base):
     title = Column(String, nullable=False)
     image = Column(String, nullable=True) # Main Image URL from Backend API FIXME: Vllt. mit RecipeImage ID verknüpfen?
     description = Column(Text, nullable=True)
-    time_prep = Column(Float, nullable=True) # type: ignore
-    time_total = Column(Float, nullable=True) # type: ignore
+    time_prep = Column(Integer, nullable=True) # type: ignore
+    time_total = Column(Integer, nullable=True) # type: ignore
     portions = Column(Float, default=1.0) # type: ignore
-    recipe_url = Column(String, nullable=True)
+    recipe_uri = Column(String, nullable=True)
 
     ingredients = relationship("Ingredient", cascade="all, delete-orphan")
     nutritions = relationship("Nutrition", cascade="all, delete-orphan")
