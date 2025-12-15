@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from database import get_db
 from sqlalchemy.orm import Session
 
-from schemas import RecipeCreate, RecipeOut, RecipeUpdate
-from models import Recipe, Ingredient, Nutrition, Tag
+from schemas import RecipeCreate, RecipeResponse, RecipeUpdate
+from models import Image, Recipe, Ingredient, Nutrition, Tag
 
 
 router = APIRouter(
@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 
-@router.post("", response_model=RecipeOut)
+@router.post("", response_model=RecipeResponse)
 def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
     # Check if all tags exist
     db_tags = []
@@ -21,11 +21,17 @@ def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
 
         if len(db_tags) != len(tags):
             raise HTTPException(status_code=400, detail="One or more tags not found")
+        
+    if recipe.image_id is not None:
+        img = db.query(Image).filter(Image.id == recipe.image_id).first()
+
+        if not img:
+            raise HTTPException(status_code=400, detail="Image not found")
 
     # If all conditions are met, create the recipe
     db_recipe = Recipe(
         title=recipe.title,
-        image=recipe.image,
+        image_id=recipe.image_id,
         description=recipe.description,
         time_prep=recipe.time_prep,
         time_total=recipe.time_total,
@@ -38,14 +44,15 @@ def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_recipe)
 
-    for ingredient in recipe.ingredients:
-        db_ingredient = Ingredient(
-            recipe_id=db_recipe.id,
-            name=ingredient.name,
-            amount=ingredient.amount,
-            unit=ingredient.unit
-        )
-        db.add(db_ingredient)
+    if recipe.ingredients is not None:
+        for ingredient in recipe.ingredients:
+            db_ingredient = Ingredient(
+                recipe_id=db_recipe.id,
+                name=ingredient.name,
+                amount=ingredient.amount,
+                unit=ingredient.unit
+            )
+            db.add(db_ingredient)
 
     if recipe.nutritions is not None:
         for nutrition in recipe.nutritions:
@@ -60,15 +67,20 @@ def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
     db.commit()
     return db_recipe
 
-@router.get("", response_model=list[RecipeOut])
+@router.get("", response_model=list[RecipeResponse])
 def list_recipes(db: Session = Depends(get_db)):
     return db.query(Recipe).order_by(Recipe.id).all()
 
-@router.get("/{recipe_id}", response_model=RecipeOut)
+@router.get("/{recipe_id}", response_model=RecipeResponse)
 def get_recipe(recipe_id: int, db: Session = Depends(get_db)):
-    return db.query(Recipe).filter(Recipe.id == recipe_id).first()
+    recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
-@router.patch("/{recipe_id}", response_model=RecipeOut)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+    return recipe
+
+@router.patch("/{recipe_id}", response_model=RecipeResponse)
 def update_recipe(recipe_id: int, patch: RecipeUpdate, db: Session = Depends(get_db)):
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
@@ -78,15 +90,16 @@ def update_recipe(recipe_id: int, patch: RecipeUpdate, db: Session = Depends(get
     patch_data = patch.model_dump(exclude_unset=True)
 
     # Special handling for relationships:
-    if "tags" in patch_data:
-        tag_ids = patch_data.pop("tags")
+    if "image_id" in patch_data:
+        image_id = patch_data.pop("image_id")
 
-        new_tags = db.query(Tag).filter(Tag.id.in_(tag_ids)).all()
+        if image_id is not None:
+            img = db.query(Image).filter(Image.id == image_id).first()
 
-        if len(new_tags) != len(tag_ids):
-            raise HTTPException(status_code=400, detail="One or more tags not found")
+            if not img:
+                raise HTTPException(status_code=400, detail="Image not found")
         
-        recipe.tags = new_tags
+        recipe.image_id = image_id
 
     if "ingredients" in patch_data:
         ingredient_dicts = patch_data.pop("ingredients")
@@ -119,6 +132,16 @@ def update_recipe(recipe_id: int, patch: RecipeUpdate, db: Session = Depends(get
                 unit=nutrition_data.get("unit", None)
             )
             db.add(db_nutrition)
+
+    if "tags" in patch_data:
+        tag_ids = patch_data.pop("tags")
+
+        new_tags = db.query(Tag).filter(Tag.id.in_(tag_ids)).all()
+
+        if len(new_tags) != len(tag_ids):
+            raise HTTPException(status_code=400, detail="One or more tags not found")
+        
+        recipe.tags = new_tags
 
     # Update normal fields
     for key, value in patch_data.items():

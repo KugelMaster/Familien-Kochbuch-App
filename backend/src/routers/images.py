@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, UploadFile, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, HTTPException
 from fastapi.responses import FileResponse
 from database import get_db
 from sqlalchemy.orm import Session
@@ -7,6 +7,7 @@ import uuid
 
 from models import Image
 from config import RECIPE_IMAGE_DIR
+from schemas import ImageUploadResponse
 
 
 router = APIRouter(
@@ -15,8 +16,8 @@ router = APIRouter(
 )
 
 
-@router.post("", response_model=str)
-def upload_image(file: UploadFile, request: Request, db: Session = Depends(get_db)):
+@router.post("", response_model=ImageUploadResponse)
+def upload_image(file: UploadFile, db: Session = Depends(get_db)):
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Only image files allowed")
 
@@ -33,14 +34,45 @@ def upload_image(file: UploadFile, request: Request, db: Session = Depends(get_d
     )
     db.add(img)
     db.commit()
+    db.refresh(img)
 
-    return filename
+    return img
 
-@router.get("/{filename}")
-def get_recipe_image(filename: str, db: Session = Depends(get_db)):
+@router.get("/filename/{filename}")
+def get_image_by_filename(filename: str, db: Session = Depends(get_db)):
     img = db.query(Image).filter(Image.filename == filename).first()
 
     if not img:
         raise HTTPException(status_code=404, detail="Image not found")
     
     return FileResponse(str(img.file_path))
+
+@router.get("/{image_id}")
+def get_image_by_id(image_id: int, db: Session = Depends(get_db)):
+    img = db.query(Image).filter(Image.id == image_id).first()
+
+    if not img:
+        raise HTTPException(status_code=404, detail="Image not found")
+    
+    return FileResponse(str(img.file_path))
+
+@router.delete("/{image_id}")
+def delete_image(image_id: int, db: Session = Depends(get_db)):
+    img = db.query(Image).filter(Image.id == image_id).first()
+
+    if not img:
+        raise HTTPException(status_code=404, detail="Image not found")
+    
+    # Delete the file from the filesystem
+    try:
+        file_path = RECIPE_IMAGE_DIR / img.filename
+        file_path.unlink()
+    except Exception as e:
+        print(f"Error deleting image file: {e}")
+        raise HTTPException(status_code=500, detail="Error deleting image file")
+
+    # Delete the database record
+    db.delete(img)
+    db.commit()
+
+    return {"detail": "Image deleted successfully"}

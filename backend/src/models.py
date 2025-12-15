@@ -7,16 +7,16 @@ class Recipe(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
-    image = Column(String, nullable=True) # Main Image URL from Backend API FIXME: Vllt. mit RecipeImage ID verknüpfen?
+    image_id = Column(Integer, ForeignKey("images.id", ondelete="SET NULL"), nullable=True)
     description = Column(Text, nullable=True)
     time_prep = Column(Integer, nullable=True) # type: ignore
     time_total = Column(Integer, nullable=True) # type: ignore
-    portions = Column(Float, default=1.0) # type: ignore
+    portions = Column(Float, nullable=True) # type: ignore
     recipe_uri = Column(String, nullable=True)
 
     ingredients = relationship("Ingredient", cascade="all, delete-orphan")
     nutritions = relationship("Nutrition", cascade="all, delete-orphan")
-    usernotes = relationship("UserNote", cascade="all, delete-orphan")
+    user_notes = relationship("UserNote", cascade="all, delete-orphan")
     ratings = relationship("Rating", cascade="all, delete-orphan")
     tags = relationship("Tag", secondary="recipe_tags", backref="recipes")
 
@@ -83,6 +83,15 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     # TODO
+"""
+class User(BaseModel):
+    id: UUID
+    name: str
+    #email: str
+    avatar_url: str
+    created_at: str
+    updated_at: str
+"""
 
 class Image(Base):
     __tablename__ = "images"
@@ -90,3 +99,6 @@ class Image(Base):
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String, nullable=False)
     file_path = Column(String, nullable=False)
+    uploaded_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+
+    created_at = Column(DateTime, server_default=func.now())
