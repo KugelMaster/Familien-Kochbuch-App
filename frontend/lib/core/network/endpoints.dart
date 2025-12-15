@@ -1,7 +1,6 @@
-import 'package:frontend/config/app_config.dart';
-
 class Endpoints {
   static String recipes = "/recipes";
+  static String recipesSimple = "$recipes/simple";
   static String recipe(int recipeId) => "$recipes/$recipeId";
 
   static String usernotes = "/usernotes";
@@ -14,6 +13,5 @@ class Endpoints {
   static String tag(int tagId) => "$tags/$tagId";
 
   static String images = "/images";
-  static String image(String filename) => "$images/$filename";
-  static String imageHost(String filename) => "${AppConfig.baseUrl}$images/$filename";
+  static String image(int imageId) => "$images/$imageId";
 }

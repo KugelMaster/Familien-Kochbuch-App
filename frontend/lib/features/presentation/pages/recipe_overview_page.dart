@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/core/network/endpoints.dart';
 import 'package:frontend/features/presentation/pages/recipe_edit_page.dart';
 import 'package:frontend/features/presentation/widgets/animated_app_bar.dart';
 import 'package:frontend/features/data/models/recipe.dart';
@@ -9,10 +8,15 @@ import 'package:frontend/features/providers/recipe_providers.dart';
 import 'package:image_picker/image_picker.dart';
 
 class RecipeOverviewPage extends ConsumerStatefulWidget {
+  final int recipeId;
   final Recipe recipe;
 
-  const RecipeOverviewPage({super.key, required this.recipe});
-  
+  const RecipeOverviewPage({
+    super.key,
+    required this.recipeId,
+    required this.recipe,
+  });
+
   @override
   ConsumerState<RecipeOverviewPage> createState() => _RecipeOverviewPageState();
 }
@@ -43,8 +47,7 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
             RecipeOverviewWidgets.buildImage(
               getPhoto: takePhoto,
               screenHeight: MediaQuery.of(context).size.height,
-              imageUrl: recipe.image,
-              pickedImage: pickedImage,
+              getImage: getImage,
             ),
             const SizedBox(height: 8),
 
@@ -71,7 +74,8 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
               RecipeOverviewWidgets.buildUriButton(recipe.recipeUri!),
             const SizedBox(height: 24),
 
-            ...RecipeOverviewWidgets.buildIngredients(recipe.ingredients),
+            if (recipe.ingredients != null)
+              ...RecipeOverviewWidgets.buildIngredients(recipe.ingredients!),
             const SizedBox(height: 24),
 
             ...RecipeOverviewWidgets.buildNutritions(recipe.nutritions),
@@ -90,6 +94,20 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     );
   }
 
+  Future<XFile?> getImage() async {
+    if (pickedImage != null) {
+      return pickedImage!;
+    }
+
+    if (widget.recipe.imageId == null) {
+      print("ImageId is null!");
+      return null;
+    }
+
+    final service = ref.read(recipeServiceProvider);
+    return await service.getImage(widget.recipe.imageId!);
+  }
+
   Future<void> takePhoto() async {
     final image = await _picker.pickImage(
       source: ImageSource.camera,
@@ -102,9 +120,13 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
       });
 
       final service = ref.read(recipeServiceProvider);
-      final filename = Endpoints.imageHost(await service.sendImage(image));
+      widget.recipe.imageId = await service.sendImage(image);
+      Recipe newRecipe = await service.updateRecipe(
+        widget.recipeId,
+        RecipeUpdate(imageId: widget.recipe.imageId),
+      );
 
-      print(filename);
+      print(newRecipe);
     }
   }
 
@@ -116,7 +138,12 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
 
     if (updatedRecipe != null) {
       // TODO: Update UI + Send to Backend
-      Navigator.push(context, MaterialPageRoute(builder: (_) => RecipeOverviewPage(recipe: updatedRecipe)));
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => RecipeOverviewPage(recipeId: widget.recipeId, recipe: updatedRecipe),
+        ),
+      );
     }
   }
 }

@@ -61,6 +61,13 @@ class RatingOut(BaseModel):
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
 
+class RecipeOutSimple(BaseModel):
+    id: int
+    title: str
+
+    class Config:
+        from_attributes = True
+
 class RecipeResponse(BaseModel):
     id: int
     title: str

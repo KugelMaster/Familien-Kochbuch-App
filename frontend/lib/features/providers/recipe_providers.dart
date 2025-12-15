@@ -9,7 +9,7 @@ final recipeServiceProvider = Provider<RecipeService>((ref) {
 });
 
 
-final recipesProvider = FutureProvider<List<Recipe>>((ref) async {
+final recipesProvider = FutureProvider<List<RecipeSimple>>((ref) async {
   final service = ref.watch(recipeServiceProvider);
-  return service.getAll();
+  return service.getAllSimple();
 });

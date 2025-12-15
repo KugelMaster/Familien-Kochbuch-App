@@ -4,38 +4,38 @@ import 'package:frontend/features/data/models/rating.dart';
 import 'package:frontend/features/data/models/usernote.dart';
 
 class Recipe {
-  final String title;
-  final List<String>? tags;
-  final String? image;
-  final String? description;
-  final int? timePrep;
-  final int? timeTotal;
-  final double? portions;
-  final String? recipeUri;
+  String title;
+  List<String>? tags;
+  int? imageId;
+  String? description;
+  int? timePrep;
+  int? timeTotal;
+  double? portions;
+  String? recipeUri;
 
-  final List<Ingredient> ingredients;
-  final List<Nutrition>? nutritions;
-  final List<UserNote>? usernotes;
-  final List<Rating>? ratings;
+  List<Ingredient>? ingredients;
+  List<Nutrition>? nutritions;
+  List<UserNote>? usernotes;
+  List<Rating>? ratings;
 
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  DateTime? createdAt;
+  DateTime? updatedAt;
 
-  const Recipe({
+  Recipe({
     required this.title,
     this.tags,
-    this.image,
+    this.imageId,
     this.description,
     this.timePrep,
     this.timeTotal,
     this.portions,
     this.recipeUri,
-    required this.ingredients,
+    this.ingredients,
     this.nutritions,
     this.usernotes,
     this.ratings,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
@@ -48,7 +48,7 @@ class Recipe {
     return Recipe(
       title: json["title"] as String,
       tags: List<String>.from(json["tags"] ?? []),
-      image: json["image"] as String?,
+      imageId: json["image_id"] as int?,
       description: json["description"] as String?,
 
       timePrep: json["time_prep"] as int?,
@@ -64,5 +64,56 @@ class Recipe {
       createdAt: DateTime.tryParse(json["created_at"] ?? "") ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json["updated_at"] ?? "") ?? DateTime.now(),
     );
+  }
+}
+
+class RecipeSimple {
+  int id;
+  String title;
+
+  RecipeSimple({
+    required this.id,
+    required this.title,
+  });
+
+  factory RecipeSimple.fromJson(Map<String, dynamic> json) {
+    return RecipeSimple(
+      id: json["id"] as int,
+      title: json["title"] as String,
+    );
+  }
+}
+
+class RecipeUpdate {
+  String? title;
+  int? imageId;
+  String? description;
+  int? timePrep;
+  int? timeTotal;
+  double? portions;
+  String? recipeUri;
+
+  RecipeUpdate({
+    this.title,
+    this.imageId,
+    this.description,
+    this.timePrep,
+    this.timeTotal,
+    this.portions,
+    this.recipeUri,
+  });
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+
+    if (title != null) data["title"] = title;
+    if (imageId != null) data["image_id"] = imageId;
+    if (description != null) data["description"] = description;
+    if (timePrep != null) data["time_prep"] = timePrep;
+    if (timeTotal != null) data["time_total"] = timeTotal;
+    if (portions != null) data["portions"] = portions;
+    if (recipeUri != null) data["recipe_uri"] = recipeUri;
+
+    return data;
   }
 }

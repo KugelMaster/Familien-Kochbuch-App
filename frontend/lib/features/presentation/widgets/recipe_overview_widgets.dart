@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'dart:typed_data';
 import 'package:frontend/features/data/models/ingredient.dart';
 import 'package:frontend/features/data/models/nutrition.dart';
 import 'package:frontend/features/data/models/rating.dart';
@@ -13,45 +12,66 @@ class RecipeOverviewWidgets {
   static Widget buildImage({
     required Future<void> Function() getPhoto,
     required double screenHeight,
-    String? imageUrl,
-    XFile? pickedImage,
+    required Future<XFile?> Function() getImage,
   }) {
-    final height = screenHeight * 0.6;
-    final Widget imageOrFiller;
-
-    // PRIORITY:
-    // 1. Pick image taken from user
-    if (pickedImage != null) {
-      imageOrFiller = Image.file(File(pickedImage.path), fit: BoxFit.cover);
-    }
-    // 2. Display image from the url
-    else if (imageUrl != null) {
-      imageOrFiller = Image.network(imageUrl, fit: BoxFit.cover);
-    }
-    // 3. Display a filler
-    else {
-      imageOrFiller = InkWell(
-        onTap: getPhoto,
-        child: Container(
-          color: Colors.grey.shade200,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(Icons.add_a_photo, size: 48, color: Colors.grey),
-              SizedBox(height: 12),
-              Text(
-                "Foto hinzufügen",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey,
-                ),
+    final Widget filler = InkWell(
+      onTap: getPhoto,
+      child: Container(
+        color: Colors.grey.shade200,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.add_a_photo, size: 48, color: Colors.grey),
+            SizedBox(height: 12),
+            Text(
+              "Foto hinzufügen",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
-    }
+      ),
+    );
+
+    final height = screenHeight * 0.6;
+    final Widget imageOrFiller = FutureBuilder<XFile?>(
+      future: getImage(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              "Fehler beim Laden des Bildes: ${snapshot.error}",
+            ),
+          );
+        } else if (snapshot.hasData && snapshot.data != null) {
+          return FutureBuilder<Uint8List>(
+            future: snapshot.data!.readAsBytes(),
+            builder: (context, snapshotBytes) {
+              if (snapshotBytes.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshotBytes.hasError) {
+                return Center(
+                  child: Text(
+                    "Fehler beim Laden des Bildes: ${snapshotBytes.error}",
+                  ),
+                );
+              } else if (snapshotBytes.hasData) {
+                return Image.memory(snapshotBytes.data!, fit: BoxFit.cover);
+              } else {
+                return filler;
+              }
+            },
+          );
+        } else {
+          return filler;
+        }
+      },
+    );
 
     return SizedBox(
       height: height,
@@ -191,7 +211,10 @@ class RecipeOverviewWidgets {
         icon: const Icon(Icons.open_in_new),
         label: const Text("Originalrezept öffnen"),
         onPressed: () async {
-          if (!await launchUrl(Uri.parse(uri), mode: LaunchMode.externalApplication)) {
+          if (!await launchUrl(
+            Uri.parse(uri),
+            mode: LaunchMode.externalApplication,
+          )) {
             throw Exception("Could not launch $uri");
           }
         },
@@ -314,7 +337,6 @@ class RecipeOverviewWidgets {
       ),
     );
   }
-
 
   static String _formatNoteDate(UserNote n) {
     final created =
