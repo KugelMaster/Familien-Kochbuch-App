@@ -1,6 +1,6 @@
 class Nutrition {
   final String name;
-  final String? amount;
+  final double? amount;
   final String? unit;
 
   const Nutrition({required this.name, this.amount, this.unit});
@@ -8,7 +8,7 @@ class Nutrition {
   factory Nutrition.fromJson(Map<String, dynamic> json) {
     return Nutrition(
       name: json["name"],
-      amount: json["amount"],
+      amount: double.parse(json["amount"]),
       unit: json["unit"],
     );
   }

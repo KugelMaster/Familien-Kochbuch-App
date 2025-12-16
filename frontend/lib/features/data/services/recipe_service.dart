@@ -1,9 +1,11 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
-import 'package:flutter/services.dart';
 import 'package:frontend/features/data/models/recipe.dart';
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/endpoints.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 class RecipeService {
   final ApiClient _client;
@@ -85,29 +87,17 @@ class RecipeService {
       throw Exception("Failed to load image");
     }
 
-    return XFile.fromData(
-      Uint8List.fromList(bytes),
-      mimeType: response.headers.value(Headers.contentTypeHeader) ?? "image/jpeg",
-    );
+    final dir = await getTemporaryDirectory();
+    final file = File("${dir.path}/image.jpg");
 
-    /*
-    // Some APIs need XFile with a file path, this is an alternative way to get it:
+    await file.writeAsBytes(bytes);
 
-    import 'dart:io';
-    import 'dart:typed_data';
-    import 'package:path_provider/path_provider.dart';
-    import 'package:cross_file/cross_file.dart';
+    return XFile(file.path);
 
-    Future<XFile> loadImageAsXFileViaFile(String url) async {
-      final bytes = await loadImageBytes(url);
-
-      final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/image.jpg');
-
-      await file.writeAsBytes(bytes);
-
-      return XFile(file.path);
-    }
-    */
+    // Shorter version, but doesn't work if the file is requested via path :-(
+    //return XFile.fromData(
+    //  Uint8List.fromList(bytes),
+    //  mimeType: response.headers.value(Headers.contentTypeHeader) ?? "image/jpeg",
+    //);
   }
 }

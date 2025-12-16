@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/features/data/models/recipe.dart';
+import 'package:frontend/features/presentation/pages/recipe_edit_page.dart';
 import 'package:frontend/features/presentation/pages/recipe_overview_page.dart';
 import 'package:frontend/features/providers/recipe_providers.dart';
 
@@ -9,7 +11,7 @@ class MyRecipesPage extends ConsumerWidget {
   Future<void> _openRecipeOverview(
     BuildContext context,
     WidgetRef ref,
-    int id
+    int id,
   ) async {
     final service = ref.read(recipeServiceProvider);
 
@@ -39,10 +41,7 @@ class MyRecipesPage extends ConsumerWidget {
 
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => RecipeOverviewPage(
-            recipeId: id,
-            recipe: fetched,
-          ),
+          builder: (_) => RecipeOverviewPage(recipeId: id, recipe: fetched),
         ),
       );
     } catch (error) {
@@ -71,9 +70,9 @@ class MyRecipesPage extends ConsumerWidget {
       );
 
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Fehler beim Laden: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Fehler beim Laden: $error')));
     }
   }
 
@@ -99,6 +98,26 @@ class MyRecipesPage extends ConsumerWidget {
           },
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => openAddNewRecipeView(context),
+        child: const Icon(Icons.add),
+      ),
     );
+  }
+
+  void openAddNewRecipeView(BuildContext context) async {
+    final newRecipe = await Navigator.push<Recipe>(
+      context,
+      MaterialPageRoute(builder: (_) => RecipeEditPage()),
+    );
+
+    if (context.mounted && newRecipe != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => RecipeOverviewPage(recipeId: -1, recipe: newRecipe),
+        ),
+      );
+    }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/utils/number_formatter.dart';
 import 'dart:typed_data';
 import 'package:frontend/features/data/models/ingredient.dart';
 import 'package:frontend/features/data/models/nutrition.dart';
@@ -198,7 +199,7 @@ class RecipeOverviewWidgets {
 
           Icon(Icons.fastfood, color: iconColor),
           const SizedBox(width: 6),
-          Text(_formatPortion(recipe.portions)),
+          Text("${Utils.formatNumber(recipe.portions)} Stück"),
         ],
       ),
     );
@@ -242,7 +243,7 @@ class RecipeOverviewWidgets {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Text(
-                "• ${ing.amount} ${ing.unit} ${ing.name}",
+                "• ${Utils.formatNumber(ing.amount)} ${ing.unit} ${ing.name}",
                 style: const TextStyle(fontSize: 16),
               ),
             );
@@ -273,7 +274,7 @@ class RecipeOverviewWidgets {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Text(
-                  "• ${nut.amount} ${nut.unit} ${nut.name}",
+                  "• ${Utils.formatNumber(nut.amount)} ${nut.unit} ${nut.name}",
                   style: const TextStyle(fontSize: 16),
                 ),
               );
@@ -354,14 +355,5 @@ class RecipeOverviewWidgets {
     final int minutes = time % 60;
 
     return "${hours == 0 ? "" : "$hours Std. "}$minutes Min";
-  }
-
-  static String _formatPortion(double? portions) {
-    if (portions == null) {
-      return "N/A Stück";
-    }
-
-    String rounded = portions.toStringAsFixed(1);
-    return "${rounded.endsWith(".0") ? rounded.substring(0, rounded.length - 2) : rounded} Stück";
   }
 }
