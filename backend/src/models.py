@@ -29,7 +29,7 @@ class Ingredient(Base):
     id = Column(Integer, primary_key=True, index=True)
     recipe_id = Column(Integer, ForeignKey("recipes.id"))
     name = Column(String, nullable=False)
-    amount = Column(String, nullable=True)
+    amount = Column(Float, nullable=True) # type: ignore
     unit = Column(String, nullable=True)
 
 class Nutrition(Base):
@@ -38,7 +38,7 @@ class Nutrition(Base):
     id = Column(Integer, primary_key=True, index=True)
     recipe_id = Column(Integer, ForeignKey("recipes.id"))
     name = Column(String, nullable=False)
-    amount = Column(String, nullable=True)
+    amount = Column(Float, nullable=True) # type: ignore
     unit = Column(String, nullable=True)
 
 class UserNote(Base):

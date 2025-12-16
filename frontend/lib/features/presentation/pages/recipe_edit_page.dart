@@ -373,7 +373,13 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.camera);
+    final XFile? picked;
+    try {
+      picked = await picker.pickImage(source: ImageSource.camera);
+    } catch (e) {
+      print(e);
+      return;
+    }
 
     if (picked != null) {
       setState(() => image = picked);
@@ -415,6 +421,8 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
 
       ingredients: ingredientModels,
       nutritions: nutritionModels,
+
+      image: image,
     );
 
     Navigator.pop(context, recipe);

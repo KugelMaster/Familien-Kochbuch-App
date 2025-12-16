@@ -15,4 +15,11 @@ class UserNote {
       updatedAt: DateTime.tryParse(json["updated_at"]) ?? DateTime.now(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "user_id": userId,
+      "text": text,
+    };
+  }
 }

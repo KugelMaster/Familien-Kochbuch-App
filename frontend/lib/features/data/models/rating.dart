@@ -23,4 +23,15 @@ class Rating {
       updatedAt: DateTime.tryParse(json["updated_at"]) ?? DateTime.now(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {
+      "user_id": userId,
+      "stars": stars
+    };
+
+    if (comment != null) data["comment"] = comment;
+
+    return data;
+  }
 }

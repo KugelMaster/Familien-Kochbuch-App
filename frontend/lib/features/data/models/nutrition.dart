@@ -8,8 +8,19 @@ class Nutrition {
   factory Nutrition.fromJson(Map<String, dynamic> json) {
     return Nutrition(
       name: json["name"],
-      amount: double.parse(json["amount"]),
+      amount: json["amount"],
       unit: json["unit"],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {
+      "name": name,
+    };
+
+    if (amount != null) data["amount"] = amount;
+    if (unit != null) data["unit"] = unit;
+
+    return data;
   }
 }

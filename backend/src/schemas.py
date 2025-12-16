@@ -8,12 +8,12 @@ class TagCreate(BaseModel):
 
 class IngredientCreate(BaseModel):
     name: str
-    amount: Optional[str] = None
+    amount: Optional[float] = None
     unit: Optional[str] = None
 
 class NutritionCreate(BaseModel):
     name: str
-    amount: Optional[str] = None
+    amount: Optional[float] = None
     unit: Optional[str] = None
 
 class UserNoteCreate(BaseModel):

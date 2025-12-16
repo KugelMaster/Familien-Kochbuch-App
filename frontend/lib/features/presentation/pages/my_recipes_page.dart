@@ -99,25 +99,37 @@ class MyRecipesPage extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => openAddNewRecipeView(context),
+        onPressed: () => openEditView(context, ref),
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void openAddNewRecipeView(BuildContext context) async {
-    final newRecipe = await Navigator.push<Recipe>(
+  void openEditView(BuildContext context, WidgetRef ref) async {
+    // Get the new recipe filled with data entered by the user
+    final newRecipe = await Navigator.push<Recipe?>(
       context,
       MaterialPageRoute(builder: (_) => RecipeEditPage()),
     );
 
-    if (context.mounted && newRecipe != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => RecipeOverviewPage(recipeId: -1, recipe: newRecipe),
-        ),
-      );
+    // If the user cancelled, the function stops
+    if (newRecipe == null) return;
+
+    // Otherwise, the recipe is going to be send to the backend api.
+    final service = ref.read(recipeServiceProvider);
+    if (newRecipe.image != null) {
+      newRecipe.imageId = await service.sendImage(newRecipe.image!);
     }
+    
+    final (id, recipe) = await service.createRecipe(newRecipe);
+
+    if (!context.mounted) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RecipeOverviewPage(recipeId: id, recipe: recipe),
+      ),
+    );
   }
 }
