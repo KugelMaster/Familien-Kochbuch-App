@@ -265,11 +265,18 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
         const SizedBox(width: 8),
         Expanded(
           flex: 2,
-          child: TextField(
+          child: TextFormField(
             controller: ing.amount,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             textInputAction: TextInputAction.next,
             decoration: const InputDecoration(labelText: "Menge"),
+            validator: (value) {
+              if (value == null) return null;
+
+              final number = double.tryParse(value);
+
+              return number == null ? "Zahl!" : null;
+            },
           ),
         ),
         const SizedBox(width: 8),
@@ -338,11 +345,18 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
         const SizedBox(width: 8),
         Expanded(
           flex: 2,
-          child: TextField(
+          child: TextFormField(
             controller: nut.amount,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             textInputAction: TextInputAction.next,
             decoration: const InputDecoration(labelText: "Menge"),
+            validator: (value) {
+              if (value == null) return null;
+
+              final number = double.tryParse(value);
+
+              return number == null ? "Zahl!" : null;
+            },
           ),
         ),
         const SizedBox(width: 8),

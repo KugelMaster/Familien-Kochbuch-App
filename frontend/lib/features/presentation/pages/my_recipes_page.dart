@@ -37,7 +37,9 @@ class MyRecipesPage extends ConsumerWidget {
       final fetched = await service.getById(id);
 
       if (!context.mounted) return;
-      Navigator.of(context).pop(); // close loading dialog
+      Navigator.of(context).pop(); // close loading dialog7
+
+
 
       await Navigator.of(context).push(
         MaterialPageRoute(
@@ -78,10 +80,13 @@ class MyRecipesPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final recipesAsync = ref.watch(recipesProvider);
+    AsyncValue<List<RecipeSimple>> recipesAsync = ref.watch(recipesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Meine Rezepte")),
+      appBar: AppBar(
+        title: const Text("Meine Rezepte"),
+        actions: [IconButton(onPressed: () => ref.invalidate(recipesProvider), icon: Icon(Icons.replay))],
+      ),
       body: recipesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) => Center(child: Text("Fehler: $error")),
@@ -99,13 +104,13 @@ class MyRecipesPage extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => openEditView(context, ref),
+        onPressed: () => openEditView(context, ref, () => ref.invalidate(recipesProvider)),
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void openEditView(BuildContext context, WidgetRef ref) async {
+  void openEditView(BuildContext context, WidgetRef ref, void Function() reloadView) async {
     // Get the new recipe filled with data entered by the user
     final newRecipe = await Navigator.push<Recipe?>(
       context,
@@ -120,8 +125,11 @@ class MyRecipesPage extends ConsumerWidget {
     if (newRecipe.image != null) {
       newRecipe.imageId = await service.sendImage(newRecipe.image!);
     }
-    
+
     final (id, recipe) = await service.createRecipe(newRecipe);
+
+    // Afterwards, reload the view
+    reloadView();
 
     if (!context.mounted) return;
 
