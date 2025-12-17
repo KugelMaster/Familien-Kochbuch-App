@@ -1,3 +1,8 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'nutrition.g.dart';
+
+@JsonSerializable()
 class Nutrition {
   final String name;
   final double? amount;
@@ -5,22 +10,7 @@ class Nutrition {
 
   const Nutrition({required this.name, this.amount, this.unit});
 
-  factory Nutrition.fromJson(Map<String, dynamic> json) {
-    return Nutrition(
-      name: json["name"],
-      amount: json["amount"],
-      unit: json["unit"],
-    );
-  }
+  factory Nutrition.fromJson(Map<String, dynamic> json) => _$NutritionFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = {
-      "name": name,
-    };
-
-    if (amount != null) data["amount"] = amount;
-    if (unit != null) data["unit"] = unit;
-
-    return data;
-  }
+  Map<String, dynamic> toJson() => _$NutritionToJson(this);
 }

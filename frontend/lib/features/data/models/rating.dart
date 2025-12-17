@@ -1,9 +1,16 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'rating.g.dart';
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class Rating {
   final int userId;
   final double stars;
   final String? comment;
 
+  @JsonKey(includeToJson: false)
   final DateTime createdAt;
+  @JsonKey(includeToJson: false)
   final DateTime updatedAt;
 
   const Rating({
@@ -14,24 +21,7 @@ class Rating {
     required this.updatedAt,
   });
 
-  factory Rating.fromJson(Map<String, dynamic> json) {
-    return Rating(
-      userId: json["user_id"],
-      stars: json["stars"],
-      comment: json["comment"],
-      createdAt: DateTime.tryParse(json["created_at"]) ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(json["updated_at"]) ?? DateTime.now(),
-    );
-  }
+  factory Rating.fromJson(Map<String, dynamic> json) => _$RatingFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = {
-      "user_id": userId,
-      "stars": stars
-    };
-
-    if (comment != null) data["comment"] = comment;
-
-    return data;
-  }
+  Map<String, dynamic> toJson() => _$RatingToJson(this);
 }

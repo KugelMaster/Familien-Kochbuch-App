@@ -28,6 +28,9 @@ def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
 
         if not img:
             raise HTTPException(status_code=400, detail="Image not found")
+        
+    if recipe.recipe_uri is not None and recipe.recipe_uri.strip() == "":
+        recipe.recipe_uri = None
 
     # If all conditions are met, create the recipe
     db_recipe = Recipe(

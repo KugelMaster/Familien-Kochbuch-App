@@ -16,4 +16,6 @@
 
 # Was noch zu tun ist:
 - RecipeOverviewPage Update Methode implementieren
-- Für JSON Verarbeitung anschauen: https://docs.flutter.dev/data-and-backend/serialization/json
+
+# Hilfreiche Befehle:
+- JSON Modell Konvertierer (automatisch Code generieren):`dart run build_runner watch --delete-conflicting-outputs`

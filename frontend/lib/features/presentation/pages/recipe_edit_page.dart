@@ -425,13 +425,15 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
         )
         .toList();
 
+    final recipeUri = linkCtrl.text != "" ? linkCtrl.text : null;
+
     final recipe = Recipe(
       title: titleCtrl.text,
       description: descCtrl.text,
       timePrep: int.tryParse(timePrepCtrl.text),
       timeTotal: int.tryParse(timeTotalCtrl.text),
       portions: double.tryParse(portionsCtrl.text.replaceAll(",", ".")),
-      recipeUri: linkCtrl.text,
+      recipeUri: recipeUri,
 
       ingredients: ingredientModels,
       nutritions: nutritionModels,

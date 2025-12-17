@@ -3,7 +3,11 @@ import 'package:frontend/features/data/models/nutrition.dart';
 import 'package:frontend/features/data/models/rating.dart';
 import 'package:frontend/features/data/models/usernote.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+part 'recipe.g.dart';
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class Recipe {
   String title;
   List<String>? tags;
@@ -19,10 +23,13 @@ class Recipe {
   List<UserNote>? usernotes;
   List<Rating>? ratings;
 
+  @JsonKey(includeToJson: false)
   DateTime? createdAt;
+  @JsonKey(includeToJson: false)
   DateTime? updatedAt;
 
   /// Könnte Probleme mit copyWith() verursachen!
+  @JsonKey(includeFromJson: false, includeToJson: false)
   XFile? image;
 
   Recipe({
@@ -43,7 +50,11 @@ class Recipe {
     this.image,
   });
 
-  factory Recipe.fromJson(Map<String, dynamic> json) {
+  factory Recipe.fromJson(Map<String, dynamic> json) => _$RecipeFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RecipeToJson(this);
+
+  /*factory Recipe.fromJson(Map<String, dynamic> json) {
     List<T> toList<T>(dynamic data, T Function(Map<String, dynamic> itemJson) fromJson) {
       if (data is! List) return [];
 
@@ -89,9 +100,10 @@ class Recipe {
     if (ratings != null) data["ratings"] = ratings!.map((rat) => rat.toJson()).toList();
 
     return data;
-  }
+  }*/
 }
 
+@JsonSerializable()
 class RecipeSimple {
   int id;
   String title;
@@ -101,14 +113,12 @@ class RecipeSimple {
     required this.title,
   });
 
-  factory RecipeSimple.fromJson(Map<String, dynamic> json) {
-    return RecipeSimple(
-      id: json["id"] as int,
-      title: json["title"] as String,
-    );
-  }
+  factory RecipeSimple.fromJson(Map<String, dynamic> json) => _$RecipeSimpleFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RecipeSimpleToJson(this);
 }
 
+@JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
 class RecipeUpdate {
   String? title;
   int? imageId;
@@ -128,17 +138,7 @@ class RecipeUpdate {
     this.recipeUri,
   });
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = {};
+  factory RecipeUpdate.fromJson(Map<String, dynamic> json) => _$RecipeUpdateFromJson(json);
 
-    if (title != null) data["title"] = title;
-    if (imageId != null) data["image_id"] = imageId;
-    if (description != null) data["description"] = description;
-    if (timePrep != null) data["time_prep"] = timePrep;
-    if (timeTotal != null) data["time_total"] = timeTotal;
-    if (portions != null) data["portions"] = portions;
-    if (recipeUri != null) data["recipe_uri"] = recipeUri;
-
-    return data;
-  }
+  Map<String, dynamic> toJson() => _$RecipeUpdateToJson(this);
 }
