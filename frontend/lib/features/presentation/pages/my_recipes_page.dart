@@ -13,42 +13,15 @@ class MyRecipesPage extends ConsumerWidget {
     WidgetRef ref,
     int id,
   ) async {
-    final service = ref.read(recipeServiceProvider);
-
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Dialog(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 16),
-              Text('Lade...'),
-            ],
-          ),
-        ),
-      ),
-    );
-
     try {
-      final fetched = await service.getById(id);
-
-      if (!context.mounted) return;
-      Navigator.of(context).pop(); // close loading dialog7
-
-
-
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => RecipeOverviewPage(recipeId: id, recipe: fetched),
+          builder: (_) => RecipeOverviewPage(recipeId: id),
         ),
       );
     } catch (error) {
       if (!context.mounted) return;
-      Navigator.of(context).pop(); // close loading dialog
+      //Navigator.of(context).pop(); // close loading dialog
 
       await showDialog<void>(
         context: context,
@@ -75,6 +48,47 @@ class MyRecipesPage extends ConsumerWidget {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Fehler beim Laden: $error')));
+    }
+  }
+
+  void openEditView(BuildContext context, WidgetRef ref, void Function() reloadView) async {
+    // Get the new recipe filled with data entered by the user
+    final newRecipe = await Navigator.push<Recipe?>(
+      context,
+      MaterialPageRoute(builder: (_) => RecipeEditPage()),
+    );
+
+    // If the user cancelled, the function stops
+    if (newRecipe == null) return;
+
+    // Otherwise, the recipe is going to be send to the backend api.
+    try {
+      final service = ref.read(recipeServiceProvider);
+      if (newRecipe.image != null) {
+        newRecipe.imageId = await service.sendImage(newRecipe.image!);
+      }
+
+      final (id, recipe) = await service.createRecipe(newRecipe);
+      // TODO: Cache the recipe with the id so that the overview page doesn't have to ask the API again
+      // Cache here: recipeProvider(id)
+
+      // Afterwards, reload the view
+      reloadView();
+
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Rezept gespeichert")));
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => RecipeOverviewPage(recipeId: id),
+        ),
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Fehler beim Speichern")));
+      }
+      rethrow;
     }
   }
 
@@ -106,37 +120,6 @@ class MyRecipesPage extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => openEditView(context, ref, () => ref.invalidate(recipesProvider)),
         child: const Icon(Icons.add),
-      ),
-    );
-  }
-
-  void openEditView(BuildContext context, WidgetRef ref, void Function() reloadView) async {
-    // Get the new recipe filled with data entered by the user
-    final newRecipe = await Navigator.push<Recipe?>(
-      context,
-      MaterialPageRoute(builder: (_) => RecipeEditPage()),
-    );
-
-    // If the user cancelled, the function stops
-    if (newRecipe == null) return;
-
-    // Otherwise, the recipe is going to be send to the backend api.
-    final service = ref.read(recipeServiceProvider);
-    if (newRecipe.image != null) {
-      newRecipe.imageId = await service.sendImage(newRecipe.image!);
-    }
-
-    final (id, recipe) = await service.createRecipe(newRecipe);
-
-    // Afterwards, reload the view
-    reloadView();
-
-    if (!context.mounted) return;
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => RecipeOverviewPage(recipeId: id, recipe: recipe),
       ),
     );
   }

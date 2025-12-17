@@ -58,7 +58,7 @@ RecipeSimple _$RecipeSimpleFromJson(Map<String, dynamic> json) => RecipeSimple(
 Map<String, dynamic> _$RecipeSimpleToJson(RecipeSimple instance) =>
     <String, dynamic>{'id': instance.id, 'title': instance.title};
 
-RecipeUpdate _$RecipeUpdateFromJson(Map<String, dynamic> json) => RecipeUpdate(
+RecipePatch _$RecipePatchFromJson(Map<String, dynamic> json) => RecipePatch(
   title: json['title'] as String?,
   imageId: (json['image_id'] as num?)?.toInt(),
   description: json['description'] as String?,
@@ -66,9 +66,15 @@ RecipeUpdate _$RecipeUpdateFromJson(Map<String, dynamic> json) => RecipeUpdate(
   timeTotal: (json['time_total'] as num?)?.toInt(),
   portions: (json['portions'] as num?)?.toDouble(),
   recipeUri: json['recipe_uri'] as String?,
+  ingredients: (json['ingredients'] as List<dynamic>?)
+      ?.map((e) => Ingredient.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  nutritions: (json['nutritions'] as List<dynamic>?)
+      ?.map((e) => Nutrition.fromJson(e as Map<String, dynamic>))
+      .toList(),
 );
 
-Map<String, dynamic> _$RecipeUpdateToJson(RecipeUpdate instance) =>
+Map<String, dynamic> _$RecipePatchToJson(RecipePatch instance) =>
     <String, dynamic>{
       'title': ?instance.title,
       'image_id': ?instance.imageId,
@@ -77,4 +83,6 @@ Map<String, dynamic> _$RecipeUpdateToJson(RecipeUpdate instance) =>
       'time_total': ?instance.timeTotal,
       'portions': ?instance.portions,
       'recipe_uri': ?instance.recipeUri,
+      'ingredients': ?instance.ingredients,
+      'nutritions': ?instance.nutritions,
     };

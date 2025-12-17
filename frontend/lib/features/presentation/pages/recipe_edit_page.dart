@@ -22,6 +22,7 @@ class RecipeEditPage extends ConsumerStatefulWidget {
 class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
   final _formKey = GlobalKey<FormState>();
 
+  final picker = ImagePicker();
   XFile? image;
 
   final titleCtrl = TextEditingController();
@@ -59,14 +60,16 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
       unit: nut.unit,
     )));
 
-    if (recipe.imageId != null) {
-      loadImage(recipe.imageId!);
-    }
+    loadImage(recipe);
   }
 
-  Future<void> loadImage(int imageId) async {
+  Future<void> loadImage(Recipe recipe) async {
+    if (recipe.image != null) setState(() => this.image = recipe.image);
+
+    if (recipe.imageId == null) return;
+
     final service = ref.read(recipeServiceProvider);
-    final image = await service.getImage(imageId);
+    final image = await service.getImage(recipe.imageId!);
     setState(() => this.image = image);
   }
 
@@ -386,17 +389,17 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
   );
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final XFile? picked;
     try {
-      picked = await picker.pickImage(source: ImageSource.camera);
+      final picked = await picker.pickImage(source: ImageSource.camera);
+      if (picked != null) {
+        setState(() {
+          image = picked;
+          widget.recipe?.imageId = null; // TODO: Check if setting the state is actually needed
+        });
+      }
     } catch (e) {
       print(e);
       return;
-    }
-
-    if (picked != null) {
-      setState(() => image = picked);
     }
   }
 
@@ -429,6 +432,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
 
     final recipe = Recipe(
       title: titleCtrl.text,
+      imageId: widget.recipe?.imageId,
       description: descCtrl.text,
       timePrep: int.tryParse(timePrepCtrl.text),
       timeTotal: int.tryParse(timeTotalCtrl.text),

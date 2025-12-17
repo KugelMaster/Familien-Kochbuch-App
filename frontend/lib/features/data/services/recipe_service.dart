@@ -56,10 +56,10 @@ class RecipeService {
     return (response.data!["id"] as int, Recipe.fromJson(response.data!));
   }
 
-  Future<Recipe> updateRecipe(int recipeId, RecipeUpdate updatedRecipe) async {
+  Future<Recipe> updateRecipe(int recipeId, RecipePatch patch) async {
     final response = await _client.dio.patch<Map<String, dynamic>>(
       Endpoints.recipe(recipeId),
-      data: updatedRecipe.toJson(),
+      data: patch.toJson(),
       options: Options(contentType: Headers.jsonContentType),
     );
 

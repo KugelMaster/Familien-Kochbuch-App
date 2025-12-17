@@ -33,5 +33,7 @@ Damit die erstellen Container nach dem Testen auch wieder entfernt werden, muss 
 ## PostgreSQL
 Wenn man in den Container der PostgreSQL-Datenbank zu dem Reiter "Exec" wechselt, dann kann man dort Befehle eingeben. Das ist nützlich, falls man z.B. Werte manuell in der Datenbank ändern muss. \
 Durch den Befehl `psql -U cookbook` kann man eine Session starten und normale SQL Befehle ausführen.
+## ref.watch()
+`ref.watch(<provider>)` sollte man nur in einer `build()` Methode verwenden!
 ## Flutter
 Durch den Befehl `flutter build apk --dart-define=BASE_URL=http://192.168.xx.xx:8000` kann man die App für Android bauen lassen. Die URL zum Schluss ist die IP und Port zum Server (also hier: Mein Heim-PC).

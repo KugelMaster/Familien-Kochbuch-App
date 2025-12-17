@@ -15,7 +15,7 @@
 - created_at / updated_at: Grau hinterlegt außen, nicht editierbar
 
 # Was noch zu tun ist:
-- RecipeOverviewPage Update Methode implementieren
+- Einzelne TODOs bearbeiten
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren):`dart run build_runner watch --delete-conflicting-outputs`

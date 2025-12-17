@@ -13,4 +13,14 @@ class Ingredient {
   factory Ingredient.fromJson(Map<String, dynamic> json) => _$IngredientFromJson(json);
 
   Map<String, dynamic> toJson() => _$IngredientToJson(this);
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! Ingredient) return false;
+
+    return name == other.name && amount == other.amount && unit == other.unit;
+  }
+
+  @override
+  int get hashCode => Object.hash(name, amount, unit);
 }

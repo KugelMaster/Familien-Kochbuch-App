@@ -11,7 +11,10 @@ part 'recipe.g.dart';
 class Recipe {
   String title;
   List<String>? tags;
+
+  /// If [Recipe.imageId] is null, but [Recipe.image] is not null, then the image is new and should be sent to the backend immediately to retrieve a new imageId.
   int? imageId;
+
   String? description;
   int? timePrep;
   int? timeTotal;
@@ -119,7 +122,7 @@ class RecipeSimple {
 }
 
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
-class RecipeUpdate {
+class RecipePatch {
   String? title;
   int? imageId;
   String? description;
@@ -128,7 +131,10 @@ class RecipeUpdate {
   double? portions;
   String? recipeUri;
 
-  RecipeUpdate({
+  List<Ingredient>? ingredients;
+  List<Nutrition>? nutritions;
+
+  RecipePatch({
     this.title,
     this.imageId,
     this.description,
@@ -136,9 +142,13 @@ class RecipeUpdate {
     this.timeTotal,
     this.portions,
     this.recipeUri,
+    this.ingredients,
+    this.nutritions,
   });
 
-  factory RecipeUpdate.fromJson(Map<String, dynamic> json) => _$RecipeUpdateFromJson(json);
+  factory RecipePatch.fromJson(Map<String, dynamic> json) => _$RecipePatchFromJson(json);
 
-  Map<String, dynamic> toJson() => _$RecipeUpdateToJson(this);
+  Map<String, dynamic> toJson() => _$RecipePatchToJson(this);
+
+  bool get isEmpty => [title, imageId, description, timePrep, timeTotal, portions, recipeUri, ingredients, nutritions].every((attr) => attr == null);
 }
