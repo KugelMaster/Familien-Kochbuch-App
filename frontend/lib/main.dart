@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'main_shell.dart';
 
 void main() async {
+  await initializeDateFormatting("de-DE");
+
   runApp(
     const ProviderScope(
       child: CookingApp(),

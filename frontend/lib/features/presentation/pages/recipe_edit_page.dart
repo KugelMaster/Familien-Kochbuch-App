@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/core/utils/number_formatter.dart';
+import 'package:frontend/core/utils/format.dart';
 import 'package:frontend/features/data/models/ingredient.dart';
 import 'package:frontend/features/data/models/nutrition.dart';
 import 'package:frontend/features/data/models/recipe.dart';
@@ -11,9 +11,10 @@ import 'package:frontend/features/providers/recipe_providers.dart';
 import 'package:image_picker/image_picker.dart';
 
 class RecipeEditPage extends ConsumerStatefulWidget {
+  final int? recipeId;
   final Recipe? recipe;
 
-  const RecipeEditPage({super.key, this.recipe});
+  const RecipeEditPage({super.key, this.recipeId, this.recipe});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _RecipeEditPage();
@@ -24,6 +25,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
 
   final picker = ImagePicker();
   XFile? image;
+  int? imageId;
 
   final titleCtrl = TextEditingController();
   final descCtrl = TextEditingController();
@@ -35,6 +37,8 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
   final List<IngredientOrNutritionDraft> ingredients = [];
   final List<IngredientOrNutritionDraft> nutritions = [];
 
+  final metadataLabelStyle = TextStyle(color: Colors.grey.shade600, fontSize: 12);
+
   @override
   void initState() {
     super.initState();
@@ -44,26 +48,42 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
 
     titleCtrl.text = recipe.title;
     descCtrl.text = recipe.description ?? "";
-    timePrepCtrl.text = Utils.formatNumber(recipe.timePrep?.toDouble(), defaultReturn: "");
-    timeTotalCtrl.text = Utils.formatNumber(recipe.timeTotal?.toDouble(), defaultReturn: "");
-    portionsCtrl.text = Utils.formatNumber(recipe.portions, defaultReturn: "");
+    timePrepCtrl.text = Format.number(
+      recipe.timePrep?.toDouble(),
+      defaultReturn: "",
+    );
+    timeTotalCtrl.text = Format.number(
+      recipe.timeTotal?.toDouble(),
+      defaultReturn: "",
+    );
+    portionsCtrl.text = Format.number(recipe.portions, defaultReturn: "");
     linkCtrl.text = recipe.recipeUri ?? "";
 
-    recipe.ingredients?.forEach((ing) => ingredients.add(IngredientOrNutritionDraft(
-      name: ing.name,
-      amount: ing.amount,
-      unit: ing.unit,
-    )));
-    recipe.nutritions?.forEach((nut) => nutritions.add(IngredientOrNutritionDraft(
-      name: nut.name,
-      amount: nut.amount,
-      unit: nut.unit,
-    )));
+    recipe.ingredients?.forEach(
+      (ing) => ingredients.add(
+        IngredientOrNutritionDraft(
+          name: ing.name,
+          amount: ing.amount,
+          unit: ing.unit,
+        ),
+      ),
+    );
+    recipe.nutritions?.forEach(
+      (nut) => nutritions.add(
+        IngredientOrNutritionDraft(
+          name: nut.name,
+          amount: nut.amount,
+          unit: nut.unit,
+        ),
+      ),
+    );
 
     loadImage(recipe);
   }
 
   Future<void> loadImage(Recipe recipe) async {
+    setState(() => imageId = recipe.imageId);
+
     if (recipe.image != null) setState(() => this.image = recipe.image);
 
     if (recipe.imageId == null) return;
@@ -114,6 +134,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
             const SizedBox(height: 24),
             _nutritionsSection(),
             const SizedBox(height: 240),
+            _metadataSection(),
           ],
         ),
       ),
@@ -124,17 +145,24 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
     onTap: _pickImage,
     child: Hero(
       tag: "recipe-image",
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: AspectRatio(
-          aspectRatio: 16 / 9,
-          child: image == null
-              ? Container(
-                  color: Colors.grey.shade300,
-                  child: const Icon(Icons.camera_alt, size: 40),
-                )
-              : Image.file(File(image!.path), fit: BoxFit.cover),
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: image == null
+                  ? Container(
+                      color: Colors.grey.shade300,
+                      child: const Icon(Icons.camera_alt, size: 40),
+                    )
+                  : Image.file(File(image!.path), fit: BoxFit.cover),
+            ),
+          ),
+          if (imageId != null)
+            Text("ID: $imageId"),
+        ],
       ),
     ),
   );
@@ -388,14 +416,34 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
     ),
   );
 
+  Widget _metadataSection() => Padding(
+    padding: EdgeInsets.all(8),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Rezept ID: ${widget.recipeId}", style: metadataLabelStyle),
+        if (widget.recipe?.createdAt != null)
+          Text(
+            "Erstellt: ${Format.date(widget.recipe!.createdAt)}",
+            style: metadataLabelStyle,
+          ),
+        if (widget.recipe?.updatedAt != null)
+          Text(
+            "Bearbeitet: ${Format.date(widget.recipe!.updatedAt)}",
+            style: metadataLabelStyle,
+          ),
+      ],
+    ),
+  );
+
   Future<void> _pickImage() async {
     try {
       final picked = await picker.pickImage(source: ImageSource.camera);
       if (picked != null) {
         setState(() {
           image = picked;
-          widget.recipe?.imageId = null; // TODO: Check if setting the state is actually needed
         });
+        imageId = null;
       }
     } catch (e) {
       print(e);
@@ -432,7 +480,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
 
     final recipe = Recipe(
       title: titleCtrl.text,
-      imageId: widget.recipe?.imageId,
+      imageId: imageId,
       description: descCtrl.text,
       timePrep: int.tryParse(timePrepCtrl.text),
       timeTotal: int.tryParse(timeTotalCtrl.text),
@@ -459,7 +507,7 @@ class IngredientOrNutritionDraft {
       this.name.text = name;
     }
     if (amount != null) {
-      this.amount.text = Utils.formatNumber(amount);
+      this.amount.text = Format.number(amount);
     }
   }
 }

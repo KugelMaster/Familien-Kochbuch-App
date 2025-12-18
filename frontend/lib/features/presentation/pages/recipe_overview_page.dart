@@ -146,7 +146,7 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     // Open the Edit UI for the User and wait for a result
     final updatedRecipe = await Navigator.push<Recipe>(
       context,
-      MaterialPageRoute(builder: (_) => RecipeEditPage(recipe: oldRecipe)),
+      MaterialPageRoute(builder: (_) => RecipeEditPage(recipeId: widget.recipeId, recipe: oldRecipe)),
     );
 
     // If the user cancelled, then end the function

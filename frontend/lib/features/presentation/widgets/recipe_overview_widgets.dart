@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/utils/number_formatter.dart';
+import 'package:frontend/core/utils/format.dart';
 import 'dart:typed_data';
 import 'package:frontend/features/data/models/ingredient.dart';
 import 'package:frontend/features/data/models/nutrition.dart';
@@ -199,7 +199,7 @@ class RecipeOverviewWidgets {
 
           Icon(Icons.fastfood, color: iconColor),
           const SizedBox(width: 6),
-          Text("${Utils.formatNumber(recipe.portions)} Stück"),
+          Text("${Format.number(recipe.portions)} Stück"),
         ],
       ),
     );
@@ -243,7 +243,7 @@ class RecipeOverviewWidgets {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Text(
-                "• ${Utils.formatNumber(ing.amount)} ${ing.unit} ${ing.name}",
+                "• ${Format.number(ing.amount)} ${ing.unit} ${ing.name}",
                 style: const TextStyle(fontSize: 16),
               ),
             );
@@ -274,7 +274,7 @@ class RecipeOverviewWidgets {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Text(
-                  "• ${Utils.formatNumber(nut.amount)} ${nut.unit} ${nut.name}",
+                  "• ${Format.number(nut.amount)} ${nut.unit} ${nut.name}",
                   style: const TextStyle(fontSize: 16),
                 ),
               );
