@@ -25,10 +25,11 @@
 - Einzelne TODOs bearbeiten
 - Dokumentation schreiben
 - Neues Attribut: Wann wurde das Rezept das letzte mal gekocht?
+- Offline-Modus (gecached Rezepte verwenden)
 
 # Aufgaben abgeschlossen:
-- Löschen-Knopf hinzufügen + Benutzer zurücksenden
-- Code Cleanup
+- Programmablauf verbessert
+- CACHE (Rezept bei erstellen, bearbeiten und lesen cachen; bei löschen aus Cache entfernen)
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

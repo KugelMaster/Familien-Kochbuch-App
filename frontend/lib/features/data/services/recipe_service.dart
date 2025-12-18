@@ -42,14 +42,10 @@ class RecipeService {
   }
 
   /// Creates a new recipe on the backend server.
-  /// 
+  ///
   /// Automatically uploads the new image, if [recipe.image] is not null.
   /// Returns the new recipe with the new image included.
   Future<(int, Recipe)> createRecipe(Recipe recipe) async {
-    if (recipe.image != null) {
-      recipe.imageId = await sendImage(recipe.image!);
-    }
-
     final response = await _client.dio.post<Map<String, dynamic>>(
       Endpoints.recipes,
       data: recipe.toJson(),
@@ -61,21 +57,14 @@ class RecipeService {
       throw Exception("Failed to create recipe");
     }
 
-    return (
-      response.data!["id"] as int,
-      Recipe.fromJson(response.data!)..image = recipe.image,
-    );
+    return (response.data!["id"] as int, Recipe.fromJson(response.data!));
   }
 
   /// Updates a recipe on the backend server.
-  /// 
+  ///
   /// Automatically updates the image too, if [patch.image] is not null.
   /// Returns the updated recipe with the new image.
   Future<Recipe> updateRecipe(int recipeId, RecipePatch patch) async {
-    if (patch.image != null) {
-      patch.imageId = await sendImage(patch.image!);
-    }
-
     final response = await _client.dio.patch<Map<String, dynamic>>(
       Endpoints.recipe(recipeId),
       data: patch.toJson(),
@@ -87,7 +76,7 @@ class RecipeService {
       throw Exception("Failed to update recipe");
     }
 
-    return Recipe.fromJson(response.data!)..image = patch.image;
+    return Recipe.fromJson(response.data!);
   }
 
   Future<void> deleteRecipe(int recipeId) async {

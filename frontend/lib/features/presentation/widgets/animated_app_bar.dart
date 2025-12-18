@@ -86,8 +86,7 @@ class _AnimatedAppBarState extends ConsumerState<AnimatedAppBar> {
 
     if (!(confirmed ?? false)) return;
 
-    final service = ref.read(recipeServiceProvider);
-    await service.deleteRecipe(widget.recipeId);
+    await ref.read(recipeProvider(widget.recipeId).notifier).deleteRecipe();
 
     // Return to the original caller who opened the RecipeOverviewPage
     // "true" means, that the recipe changed (in this case deleted)

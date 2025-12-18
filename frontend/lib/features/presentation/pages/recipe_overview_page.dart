@@ -9,19 +9,16 @@ import 'package:frontend/features/providers/recipe_providers.dart';
 import 'package:image_picker/image_picker.dart';
 
 /// Shows a detailed user interface of a recipe.
-/// 
+///
 /// Needs a [recipeId] to fetch the recipe from the recipe provider.
-/// 
+///
 /// Returns a [bool] on close (via Navigator.pop):
 /// * [true] - The recipe got deleted.
 /// * [false] or [null] - The page closed normally.
 class RecipeOverviewPage extends ConsumerStatefulWidget {
   final int recipeId;
 
-  const RecipeOverviewPage({
-    super.key,
-    required this.recipeId,
-  });
+  const RecipeOverviewPage({super.key, required this.recipeId});
 
   @override
   ConsumerState<RecipeOverviewPage> createState() => _RecipeOverviewPageState();
@@ -101,9 +98,12 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
           onPressed: openEditView,
           child: const Icon(Icons.edit),
         ),
-      )
+      ),
     );
   }
+
+  void updateRecipe(RecipePatch patch) =>
+      ref.read(recipeProvider(widget.recipeId).notifier).updateRecipe(patch);
 
   Future<XFile?> getImage() async {
     if (recipeAsync.value == null) return null;
@@ -130,26 +130,24 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     );
 
     if (image != null) {
-      final service = ref.read(recipeServiceProvider);
-
-      Recipe updatedRecipe = await service.updateRecipe(
-        widget.recipeId,
-        RecipePatch(image: image),
-      );
-
-      ref.read(recipeProvider(widget.recipeId).notifier).updateLocal(updatedRecipe);
+      updateRecipe(RecipePatch(image: image));
     }
   }
 
   void openEditView() async {
     if (recipeAsync.value == null) {
-      throw Exception("How is this possible? You should not open a recipe overview page with no recipe to show and then try to edit it!");
+      throw Exception(
+        "How is this possible? You should not open a recipe overview page with no recipe to show and then try to edit it!",
+      );
     }
 
     Recipe oldRecipe = recipeAsync.value!;
     final updatedRecipe = await Navigator.push<Recipe>(
       context,
-      MaterialPageRoute(builder: (_) => RecipeEditPage(recipeId: widget.recipeId, recipe: oldRecipe)),
+      MaterialPageRoute(
+        builder: (_) =>
+            RecipeEditPage(recipeId: widget.recipeId, recipe: oldRecipe),
+      ),
     );
 
     if (updatedRecipe == null) return;
@@ -157,12 +155,11 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     RecipePatch patch = RecipeDiff.from(oldRecipe, updatedRecipe);
     if (patch.isEmpty) return;
 
-    final service = ref.read(recipeServiceProvider);
-    final newRecipe = await service.updateRecipe(widget.recipeId, patch);
-
-    ref.read(recipeProvider(widget.recipeId).notifier).updateLocal(newRecipe);
+    updateRecipe(patch);
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Rezept aktualisiert")));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Rezept aktualisiert")));
   }
 }

@@ -13,7 +13,9 @@ class MyRecipesPage extends ConsumerStatefulWidget {
 }
 
 class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
-  Future<void> _openRecipeOverview(int id, void Function() reloadView) async {
+  void updateUI() => ref.invalidate(recipesProvider);
+
+  Future<void> _openRecipeOverview(int id) async {
     try {
       final deleted =
           await Navigator.push<bool>(
@@ -23,7 +25,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
           false;
 
       if (deleted) {
-        reloadView();
+        updateUI();
 
         if (!mounted) return;
         ScaffoldMessenger.of(
@@ -46,7 +48,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
             TextButton(
               onPressed: () {
                 Navigator.pop(ctx);
-                _openRecipeOverview(id, reloadView);
+                _openRecipeOverview(id);
               },
               child: const Text("Wiederholen"),
             ),
@@ -61,7 +63,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
     }
   }
 
-  void openEditView(void Function() reloadView) async {
+  void openEditView() async {
     try {
       final newRecipe = await Navigator.push<Recipe>(
         context,
@@ -71,19 +73,16 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
       if (newRecipe == null) return;
 
       // Otherwise, the recipe is going to be send to the backend api.
-      final service = ref.read(recipeServiceProvider);
-      final (id, recipe) = await service.createRecipe(newRecipe);
-      // TODO: Cache the recipe with the id so that the overview page doesn't have to ask the API again
-      // Cache here: recipeProvider(id)
+      final id = await ref.read(recipeCreateProvider(newRecipe).future);
 
-      reloadView();
+      updateUI();
 
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Rezept gespeichert")));
 
-      _openRecipeOverview(id, reloadView);
+      _openRecipeOverview(id);
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -98,12 +97,10 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   Widget build(BuildContext context) {
     AsyncValue<List<RecipeSimple>> recipesAsync = ref.watch(recipesProvider);
 
-    void reload() => ref.invalidate(recipesProvider);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Meine Rezepte"),
-        actions: [IconButton(onPressed: reload, icon: Icon(Icons.replay))],
+        actions: [IconButton(onPressed: updateUI, icon: Icon(Icons.replay))],
       ),
       body: recipesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -116,13 +113,13 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
             return ListTile(
               title: Text(recipe.title),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => _openRecipeOverview(recipe.id, reload),
+              onTap: () => _openRecipeOverview(recipe.id),
             );
           },
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => openEditView(reload),
+        onPressed: () => openEditView(),
         child: const Icon(Icons.add),
       ),
     );
