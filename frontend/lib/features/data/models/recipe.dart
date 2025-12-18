@@ -134,6 +134,9 @@ class RecipePatch {
   List<Ingredient>? ingredients;
   List<Nutrition>? nutritions;
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  XFile? image;
+
   RecipePatch({
     this.title,
     this.imageId,
@@ -144,11 +147,12 @@ class RecipePatch {
     this.recipeUri,
     this.ingredients,
     this.nutritions,
+    this.image,
   });
 
   factory RecipePatch.fromJson(Map<String, dynamic> json) => _$RecipePatchFromJson(json);
 
   Map<String, dynamic> toJson() => _$RecipePatchToJson(this);
 
-  bool get isEmpty => [title, imageId, description, timePrep, timeTotal, portions, recipeUri, ingredients, nutritions].every((attr) => attr == null);
+  bool get isEmpty => [title, imageId, description, timePrep, timeTotal, portions, recipeUri, ingredients, nutritions, image].every((attr) => attr == null);
 }

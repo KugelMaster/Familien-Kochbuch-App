@@ -5,101 +5,105 @@ import 'package:frontend/features/presentation/pages/recipe_edit_page.dart';
 import 'package:frontend/features/presentation/pages/recipe_overview_page.dart';
 import 'package:frontend/features/providers/recipe_providers.dart';
 
-class MyRecipesPage extends ConsumerWidget {
+class MyRecipesPage extends ConsumerStatefulWidget {
   const MyRecipesPage({super.key});
 
-  Future<void> _openRecipeOverview(
-    BuildContext context,
-    WidgetRef ref,
-    int id,
-  ) async {
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => _MyRecipesPageState();
+}
+
+class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
+  Future<void> _openRecipeOverview(int id, void Function() reloadView) async {
     try {
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => RecipeOverviewPage(recipeId: id),
-        ),
-      );
+      final deleted =
+          await Navigator.push<bool>(
+            context,
+            MaterialPageRoute(builder: (_) => RecipeOverviewPage(recipeId: id)),
+          ) ??
+          false;
+
+      if (deleted) {
+        reloadView();
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Rezept gelöscht")));
+      }
     } catch (error) {
-      if (!context.mounted) return;
-      //Navigator.of(context).pop(); // close loading dialog
+      if (!mounted) return;
 
       await showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Fehler'),
+          title: const Text("Fehler"),
           content: Text(error.toString()),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Schließen'),
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text("Schließen"),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(ctx).pop();
-                _openRecipeOverview(context, ref, id);
+                Navigator.pop(ctx);
+                _openRecipeOverview(id, reloadView);
               },
-              child: const Text('Wiederholen'),
+              child: const Text("Wiederholen"),
             ),
           ],
         ),
       );
 
-      if (!context.mounted) return;
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Fehler beim Laden: $error')));
+      ).showSnackBar(SnackBar(content: Text("Fehler beim Laden: $error")));
     }
   }
 
-  void openEditView(BuildContext context, WidgetRef ref, void Function() reloadView) async {
-    // Get the new recipe filled with data entered by the user
-    final newRecipe = await Navigator.push<Recipe?>(
-      context,
-      MaterialPageRoute(builder: (_) => RecipeEditPage()),
-    );
-
-    // If the user cancelled, the function stops
-    if (newRecipe == null) return;
-
-    // Otherwise, the recipe is going to be send to the backend api.
+  void openEditView(void Function() reloadView) async {
     try {
-      final service = ref.read(recipeServiceProvider);
-      if (newRecipe.image != null) {
-        newRecipe.imageId = await service.sendImage(newRecipe.image!);
-      }
+      final newRecipe = await Navigator.push<Recipe>(
+        context,
+        MaterialPageRoute(builder: (_) => RecipeEditPage()),
+      );
 
+      if (newRecipe == null) return;
+
+      // Otherwise, the recipe is going to be send to the backend api.
+      final service = ref.read(recipeServiceProvider);
       final (id, recipe) = await service.createRecipe(newRecipe);
       // TODO: Cache the recipe with the id so that the overview page doesn't have to ask the API again
       // Cache here: recipeProvider(id)
 
-      // Afterwards, reload the view
       reloadView();
 
-      if (!context.mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Rezept gespeichert")));
-      Navigator.push(
+      if (!mounted) return;
+      ScaffoldMessenger.of(
         context,
-        MaterialPageRoute(
-          builder: (_) => RecipeOverviewPage(recipeId: id),
-        ),
-      );
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Fehler beim Speichern")));
+      ).showSnackBar(const SnackBar(content: Text("Rezept gespeichert")));
+
+      _openRecipeOverview(id, reloadView);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Fehler beim Speichern")));
       }
       rethrow;
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     AsyncValue<List<RecipeSimple>> recipesAsync = ref.watch(recipesProvider);
+
+    void reload() => ref.invalidate(recipesProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Meine Rezepte"),
-        actions: [IconButton(onPressed: () => ref.invalidate(recipesProvider), icon: Icon(Icons.replay))],
+        actions: [IconButton(onPressed: reload, icon: Icon(Icons.replay))],
       ),
       body: recipesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -112,13 +116,13 @@ class MyRecipesPage extends ConsumerWidget {
             return ListTile(
               title: Text(recipe.title),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => _openRecipeOverview(context, ref, recipe.id),
+              onTap: () => _openRecipeOverview(recipe.id, reload),
             );
           },
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => openEditView(context, ref, () => ref.invalidate(recipesProvider)),
+        onPressed: () => openEditView(reload),
         child: const Icon(Icons.add),
       ),
     );

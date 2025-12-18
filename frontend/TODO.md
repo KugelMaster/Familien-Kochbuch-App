@@ -1,5 +1,4 @@
 # Aufgaben von RecipeOverviewPage
-- Löschen-Knopf hinzufügen
 - Tags (add, edit, delete)
 - user_notes: Außen
 - ratings: Außen
@@ -16,8 +15,9 @@
     - FAB zu tief
     - Gradient zu groß
     - Transition AppBar schlecht
-1. Testen, ob man Links für Koch Apps wie bspw. Cookido einfügen kann
 1. API-Calls reduzieren
+1. HTTP-Fehler handeln
+1. Testen, ob man Links für Koch Apps wie bspw. Cookido einfügen kann
 
 # Weitere Aufgaben (noch keine Priorität):
 - Task Leiste unten sieht schlecht aus
@@ -27,8 +27,8 @@
 - Neues Attribut: Wann wurde das Rezept das letzte mal gekocht?
 
 # Aufgaben abgeschlossen:
-- Metadaten in RecipeEditPage anzeigen (recipeId, imageId, createdAt, updatedAt)
-- Bugfix für Bilderneuerung und danach Abbrechen
+- Löschen-Knopf hinzufügen + Benutzer zurücksenden
+- Code Cleanup
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

@@ -8,6 +8,13 @@ import 'package:frontend/features/presentation/widgets/recipe_overview_widgets.d
 import 'package:frontend/features/providers/recipe_providers.dart';
 import 'package:image_picker/image_picker.dart';
 
+/// Shows a detailed user interface of a recipe.
+/// 
+/// Needs a [recipeId] to fetch the recipe from the recipe provider.
+/// 
+/// Returns a [bool] on close (via Navigator.pop):
+/// * [true] - The recipe got deleted.
+/// * [false] or [null] - The page closed normally.
 class RecipeOverviewPage extends ConsumerStatefulWidget {
   final int recipeId;
 
@@ -38,6 +45,7 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
         extendBodyBehindAppBar: true,
         appBar: AnimatedAppBar(
           scrollController: _scrollController,
+          recipeId: widget.recipeId,
           title: recipe.title,
           triggerOffset: triggerOffset,
         ),
@@ -123,14 +131,11 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
 
     if (image != null) {
       final service = ref.read(recipeServiceProvider);
-      final imageId = await service.sendImage(image);
 
       Recipe updatedRecipe = await service.updateRecipe(
         widget.recipeId,
-        RecipePatch(imageId: imageId),
+        RecipePatch(image: image),
       );
-
-      updatedRecipe.image = image;
 
       ref.read(recipeProvider(widget.recipeId).notifier).updateLocal(updatedRecipe);
     }
@@ -142,32 +147,19 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     }
 
     Recipe oldRecipe = recipeAsync.value!;
-
-    // Open the Edit UI for the User and wait for a result
     final updatedRecipe = await Navigator.push<Recipe>(
       context,
       MaterialPageRoute(builder: (_) => RecipeEditPage(recipeId: widget.recipeId, recipe: oldRecipe)),
     );
 
-    // If the user cancelled, then end the function
     if (updatedRecipe == null) return;
 
-    // First, retrieve all differences in comparison to the old recipe:
     RecipePatch patch = RecipeDiff.from(oldRecipe, updatedRecipe);
-
-    // If a new image was created, upload it to the backend and store the new imageId.
-    final service = ref.read(recipeServiceProvider);
-    if (updatedRecipe.imageId == null && updatedRecipe.image != null) {
-      patch.imageId = await service.sendImage(updatedRecipe.image!);
-    }
-
-    // If nothing changed, exit
     if (patch.isEmpty) return;
 
-    // Lastly, send the whole patch (with optional new imageId) to the backend and get the new Recipe-Object
+    final service = ref.read(recipeServiceProvider);
     final newRecipe = await service.updateRecipe(widget.recipeId, patch);
 
-    // ... and update the UI
     ref.read(recipeProvider(widget.recipeId).notifier).updateLocal(newRecipe);
 
     if (!mounted) return;

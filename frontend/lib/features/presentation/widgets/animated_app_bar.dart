@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/features/providers/recipe_providers.dart';
 
-class AnimatedAppBar extends StatefulWidget implements PreferredSizeWidget {
+class AnimatedAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget {
   final ScrollController scrollController;
+  final int recipeId;
   final String title;
   final double triggerOffset;
 
   const AnimatedAppBar({
     super.key,
     required this.scrollController,
+    required this.recipeId,
     required this.title,
     required this.triggerOffset,
   });
@@ -16,10 +20,10 @@ class AnimatedAppBar extends StatefulWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
-  State<StatefulWidget> createState() => _AnimatedAppBarState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _AnimatedAppBarState();
 }
 
-class _AnimatedAppBarState extends State<AnimatedAppBar> {
+class _AnimatedAppBarState extends ConsumerState<AnimatedAppBar> {
   bool scrolled = false;
 
   @override
@@ -35,6 +39,60 @@ class _AnimatedAppBarState extends State<AnimatedAppBar> {
     if (shouldBeScrolled != scrolled) {
       setState(() => scrolled = shouldBeScrolled);
     }
+  }
+
+  void _onDeletePressed() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        icon: const Icon(Icons.delete_outline, color: Colors.red, size: 40), //TODO: Vllt doch ohne Icon?
+        title: const Text(
+          "Rezept löschen",
+          textAlign: TextAlign.center,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Willst du das Rezept "${widget.title}" wirklich unwiderruflich löschen?',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ),
+        actionsAlignment: MainAxisAlignment.spaceEvenly,
+        actionsPadding: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            child: const Text("Abbrechen"),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red.shade800,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text("Ja, löschen"),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ],
+      )
+    );
+
+    if (!(confirmed ?? false)) return;
+
+    final service = ref.read(recipeServiceProvider);
+    await service.deleteRecipe(widget.recipeId);
+
+    // Return to the original caller who opened the RecipeOverviewPage
+    // "true" means, that the recipe changed (in this case deleted)
+    if (!mounted) return;
+    Navigator.pop(context, true);
   }
 
   @override
@@ -57,16 +115,12 @@ class _AnimatedAppBarState extends State<AnimatedAppBar> {
             : null,
       ),
       child: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
             color: scrolled ? Colors.black : Colors.white,
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(context, false),
         ),
         title: AnimatedOpacity(
           opacity: scrolled ? 1 : 0,
@@ -78,6 +132,19 @@ class _AnimatedAppBarState extends State<AnimatedAppBar> {
             style: const TextStyle(color: Colors.black),
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: _onDeletePressed,
+            icon: Icon(
+              Icons.delete,
+              color: scrolled ? Colors.black : Colors.white,
+            ),
+          ),
+        ],
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        backgroundColor: Colors.transparent,
       ),
     );
   }

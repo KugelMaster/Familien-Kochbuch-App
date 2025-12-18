@@ -18,5 +18,6 @@ class RecipeDiff {
     nutritions: !listEquals(oldR.nutritions, newR.nutritions)
         ? newR.nutritions
         : null,
+    image: newR.imageId == null && newR.image != null ? newR.image : null,
   );
 }
