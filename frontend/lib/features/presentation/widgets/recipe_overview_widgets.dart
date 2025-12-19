@@ -5,6 +5,7 @@ import 'package:frontend/features/data/models/ingredient.dart';
 import 'package:frontend/features/data/models/nutrition.dart';
 import 'package:frontend/features/data/models/rating.dart';
 import 'package:frontend/features/data/models/recipe.dart';
+import 'package:frontend/features/data/models/tag.dart';
 import 'package:frontend/features/data/models/usernote.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -106,13 +107,13 @@ class RecipeOverviewWidgets {
     );
   }
 
-  static Widget buildTags(List<String> tags) {
+  static Widget buildTags(List<Tag> tags) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Wrap(
         spacing: 8,
         children: tags.map((tag) {
-          return Chip(label: Text(tag), backgroundColor: Colors.amber);
+          return Chip(label: Text(tag.name), backgroundColor: Colors.amber);
         }).toList(),
       ),
     );

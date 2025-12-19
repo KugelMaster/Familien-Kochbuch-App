@@ -13,12 +13,13 @@ import 'package:image_picker/image_picker.dart';
 /// Needs a [recipeId] to fetch the recipe from the recipe provider.
 ///
 /// Returns a [bool] on close (via Navigator.pop):
-/// * [true] - The recipe got deleted.
-/// * [false] or [null] - The page closed normally.
+/// * [true] - Indicates a change of the internal recipe data (e.g. deleted, title edited, ...).
+/// * [false] or [null] - The page closed normally without any updates.
 class RecipeOverviewPage extends ConsumerStatefulWidget {
   final int recipeId;
+  final String? title;
 
-  const RecipeOverviewPage({super.key, required this.recipeId});
+  const RecipeOverviewPage({super.key, required this.recipeId, this.title});
 
   @override
   ConsumerState<RecipeOverviewPage> createState() => _RecipeOverviewPageState();
@@ -28,6 +29,11 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
   final ScrollController _scrollController = ScrollController();
 
   late AsyncValue<Recipe> recipeAsync;
+  bool recipeWasUpdated = false;
+
+  void onClose(bool requestUpdate) {
+    Navigator.pop(context, requestUpdate || recipeWasUpdated);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,18 +41,19 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
 
     final double triggerOffset = MediaQuery.of(context).size.height * 0.6;
 
-    return recipeAsync.when(
-      loading: () => const CircularProgressIndicator(),
-      error: (e, _) => Text("Fehler: $e"),
-      data: (recipe) => Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: AnimatedAppBar(
-          scrollController: _scrollController,
-          recipeId: widget.recipeId,
-          title: recipe.title,
-          triggerOffset: triggerOffset,
-        ),
-        body: SingleChildScrollView(
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AnimatedAppBar(
+        scrollController: _scrollController,
+        recipeId: widget.recipeId,
+        title: recipeAsync.value?.title ?? widget.title ?? "<Name unbekannt>",
+        triggerOffset: triggerOffset,
+        onClose: onClose,
+      ),
+      body: recipeAsync.when(
+        loading: () => const CircularProgressIndicator(),
+        error: (e, _) => Text("Fehler: $e"),
+        data: (recipe) => SingleChildScrollView(
           controller: _scrollController,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,16 +101,18 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
             ],
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: openEditView,
-          child: const Icon(Icons.edit),
-        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: openEditView,
+        child: const Icon(Icons.edit),
       ),
     );
   }
 
-  void updateRecipe(RecipePatch patch) =>
-      ref.read(recipeProvider(widget.recipeId).notifier).updateRecipe(patch);
+  void updateRecipe(RecipePatch patch) {
+    ref.read(recipeProvider(widget.recipeId).notifier).updateRecipe(patch);
+    recipeWasUpdated = true;
+  }
 
   Future<XFile?> getImage() async {
     if (recipeAsync.value == null) return null;

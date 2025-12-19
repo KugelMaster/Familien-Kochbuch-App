@@ -28,8 +28,9 @@
 - Offline-Modus (gecached Rezepte verwenden)
 
 # Aufgaben abgeschlossen:
-- Programmablauf verbessert
-- CACHE (Rezept bei erstellen, bearbeiten und lesen cachen; bei löschen aus Cache entfernen)
+- RecipeOverviewPage AppBar wird nun sofort geladen
+- Bugfix: RecipeOverviewPage gibt nun Update-Signale über `Navigator.pop` zurück, wenn das Rezept bearbeitet oder gelöscht wurde
+- Einführung von der Datenklasse Tag mit id und name
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

@@ -8,12 +8,15 @@ class AnimatedAppBar extends ConsumerStatefulWidget implements PreferredSizeWidg
   final String title;
   final double triggerOffset;
 
+  final void Function(bool) onClose;
+
   const AnimatedAppBar({
     super.key,
     required this.scrollController,
     required this.recipeId,
     required this.title,
     required this.triggerOffset,
+    required this.onClose,
   });
 
   @override
@@ -88,10 +91,7 @@ class _AnimatedAppBarState extends ConsumerState<AnimatedAppBar> {
 
     await ref.read(recipeProvider(widget.recipeId).notifier).deleteRecipe();
 
-    // Return to the original caller who opened the RecipeOverviewPage
-    // "true" means, that the recipe changed (in this case deleted)
-    if (!mounted) return;
-    Navigator.pop(context, true);
+    widget.onClose(true);
   }
 
   @override
@@ -119,7 +119,7 @@ class _AnimatedAppBarState extends ConsumerState<AnimatedAppBar> {
             Icons.arrow_back,
             color: scrolled ? Colors.black : Colors.white,
           ),
-          onPressed: () => Navigator.pop(context, false),
+          onPressed: () => widget.onClose(false),
         ),
         title: AnimatedOpacity(
           opacity: scrolled ? 1 : 0,

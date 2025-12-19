@@ -15,16 +15,16 @@ class MyRecipesPage extends ConsumerStatefulWidget {
 class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   void updateUI() => ref.invalidate(recipesProvider);
 
-  Future<void> _openRecipeOverview(int id) async {
+  Future<void> _openRecipeOverview(int id, String title) async {
     try {
-      final deleted =
+      final updated =
           await Navigator.push<bool>(
             context,
-            MaterialPageRoute(builder: (_) => RecipeOverviewPage(recipeId: id)),
+            MaterialPageRoute(builder: (_) => RecipeOverviewPage(recipeId: id, title: title)),
           ) ??
           false;
 
-      if (deleted) {
+      if (updated) {
         updateUI();
 
         if (!mounted) return;
@@ -48,7 +48,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
             TextButton(
               onPressed: () {
                 Navigator.pop(ctx);
-                _openRecipeOverview(id);
+                _openRecipeOverview(id, title);
               },
               child: const Text("Wiederholen"),
             ),
@@ -72,7 +72,6 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
       if (newRecipe == null) return;
 
-      // Otherwise, the recipe is going to be send to the backend api.
       final id = await ref.read(recipeCreateProvider(newRecipe).future);
 
       updateUI();
@@ -82,7 +81,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
         context,
       ).showSnackBar(const SnackBar(content: Text("Rezept gespeichert")));
 
-      _openRecipeOverview(id);
+      _openRecipeOverview(id, newRecipe.title);
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -113,7 +112,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
             return ListTile(
               title: Text(recipe.title),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => _openRecipeOverview(recipe.id),
+              onTap: () => _openRecipeOverview(recipe.id, recipe.title),
             );
           },
         ),

@@ -8,7 +8,9 @@ part of 'recipe.dart';
 
 Recipe _$RecipeFromJson(Map<String, dynamic> json) => Recipe(
   title: json['title'] as String,
-  tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  tags: (json['tags'] as List<dynamic>?)
+      ?.map((e) => Tag.fromJson(e as Map<String, dynamic>))
+      .toList(),
   imageId: (json['image_id'] as num?)?.toInt(),
   description: json['description'] as String?,
   timePrep: (json['time_prep'] as num?)?.toInt(),
