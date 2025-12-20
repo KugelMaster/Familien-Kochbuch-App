@@ -10,6 +10,7 @@ class Endpoints {
   static String ratingsRecipe(int recipeId) => "$ratings/$recipeId";
 
   static String tags = "/tags";
+  static String createTag(String name) => "$tags?tag_name=$name";
   static String tag(int tagId) => "$tags/$tagId";
 
   static String images = "/images";

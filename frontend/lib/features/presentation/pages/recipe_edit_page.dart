@@ -88,8 +88,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
 
     if (recipe.imageId == null) return;
 
-    final service = ref.read(recipeServiceProvider);
-    final image = await service.getImage(recipe.imageId!);
+    final image = await ref.read(imageServiceProvider).getImage(recipe.imageId!);
     setState(() => this.image = image);
   }
 
@@ -440,13 +439,11 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
     try {
       final picked = await picker.pickImage(source: ImageSource.camera);
       if (picked != null) {
-        setState(() {
-          image = picked;
-        });
+        setState(() => image = picked);
         imageId = null;
       }
     } catch (e) {
-      print(e);
+      print(e.toString());
       return;
     }
   }

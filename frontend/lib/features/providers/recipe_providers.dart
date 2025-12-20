@@ -3,11 +3,17 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/network/api_client_provider.dart';
 import 'package:frontend/features/data/models/recipe.dart';
+import 'package:frontend/features/data/services/image_service.dart';
 import 'package:frontend/features/data/services/recipe_service.dart';
 
 final recipeServiceProvider = Provider<RecipeService>((ref) {
   final client = ref.watch(apiClientProvider);
   return RecipeService(client);
+});
+
+final imageServiceProvider = Provider<ImageService>((ref) {
+  final client = ref.watch(apiClientProvider);
+  return ImageService(client);
 });
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,13 +25,14 @@ final recipeCreateProvider = FutureProvider.family<int, Recipe>((
   ref,
   recipe,
 ) async {
-  final service = ref.read(recipeServiceProvider);
+  final imageService = ref.read(imageServiceProvider);
+  final recipeService = ref.read(recipeServiceProvider);
 
   if (recipe.image != null) {
-    recipe.imageId = await service.sendImage(recipe.image!);
+    recipe.imageId = await imageService.sendImage(recipe.image!);
   }
 
-  final (id, created) = await service.createRecipe(recipe);
+  final (id, created) = await recipeService.createRecipe(recipe);
   created.image = recipe.image;
   ref.read(recipeCache)[id] = created;
 
@@ -70,13 +77,14 @@ class RecipeNotifier extends AsyncNotifier<Recipe> {
 
   Future<void> updateRecipe(RecipePatch patch) async {
     try {
-      final service = ref.read(recipeServiceProvider);
+      final imageService = ref.read(imageServiceProvider);
+  final recipeService = ref.read(recipeServiceProvider);
 
       if (patch.image != null) {
-        patch.imageId = await service.sendImage(patch.image!);
+        patch.imageId = await imageService.sendImage(patch.image!);
       }
 
-      final updated = await service.updateRecipe(recipeId, patch);
+      final updated = await recipeService.updateRecipe(recipeId, patch);
       updated.image = patch.image;
 
       cache[recipeId] = updated;

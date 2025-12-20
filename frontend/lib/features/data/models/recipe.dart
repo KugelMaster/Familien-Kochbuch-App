@@ -75,6 +75,7 @@ class RecipeSimple {
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
 class RecipePatch {
   String? title;
+  List<int>? tags;
   int? imageId;
   String? description;
   int? timePrep;
@@ -90,6 +91,7 @@ class RecipePatch {
 
   RecipePatch({
     this.title,
+    this.tags,
     this.imageId,
     this.description,
     this.timePrep,

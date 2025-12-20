@@ -1,10 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/utils/recipe_diff.dart';
+import 'package:frontend/features/data/models/tag.dart';
 import 'package:frontend/features/presentation/pages/recipe_edit_page.dart';
 import 'package:frontend/features/presentation/widgets/animated_app_bar.dart';
 import 'package:frontend/features/data/models/recipe.dart';
 import 'package:frontend/features/presentation/widgets/recipe_overview_widgets.dart';
+import 'package:frontend/features/presentation/widgets/tag_edit_sheet.dart';
 import 'package:frontend/features/providers/recipe_providers.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -33,6 +36,29 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
 
   void onClose(bool requestUpdate) {
     Navigator.pop(context, requestUpdate || recipeWasUpdated);
+  }
+
+  void updateRecipe(RecipePatch patch) {
+    ref.read(recipeProvider(widget.recipeId).notifier).updateRecipe(patch);
+    recipeWasUpdated = true;
+  }
+
+  void editTags() async {
+    List<Tag>? updated = await showModalBottomSheet<List<Tag>>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => TagEditSheet(selected: recipeAsync.value?.tags),
+    );
+
+    if (updated == null) return;
+
+    final idList = RecipeDiff.toIdList(updated);
+
+    if (listEquals(RecipeDiff.toIdList(recipeAsync.value?.tags), idList)) {
+      return;
+    }
+
+    updateRecipe(RecipePatch(tags: idList));
   }
 
   @override
@@ -66,7 +92,7 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
               const SizedBox(height: 8),
 
               if (recipe.tags != null)
-                RecipeOverviewWidgets.buildTags(recipe.tags!),
+                RecipeOverviewWidgets.buildTags(recipe.tags!, editTags),
               const SizedBox(height: 8),
 
               RecipeOverviewWidgets.buildTitle(recipe.title),
@@ -109,11 +135,6 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     );
   }
 
-  void updateRecipe(RecipePatch patch) {
-    ref.read(recipeProvider(widget.recipeId).notifier).updateRecipe(patch);
-    recipeWasUpdated = true;
-  }
-
   Future<XFile?> getImage() async {
     if (recipeAsync.value == null) return null;
 
@@ -127,8 +148,7 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
       return null;
     }
 
-    final service = ref.read(recipeServiceProvider);
-    return await service.getImage(recipe.imageId!);
+    return await ref.read(imageServiceProvider).getImage(recipe.imageId!);
   }
 
   Future<void> takePhoto() async {

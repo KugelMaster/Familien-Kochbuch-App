@@ -46,9 +46,7 @@ class RecipeOverviewWidgets {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(
-            child: Text(
-              "Fehler beim Laden des Bildes: ${snapshot.error}",
-            ),
+            child: Text("Fehler beim Laden des Bildes: ${snapshot.error}"),
           );
         } else if (snapshot.hasData && snapshot.data != null) {
           return FutureBuilder<Uint8List>(
@@ -107,37 +105,39 @@ class RecipeOverviewWidgets {
     );
   }
 
-  static Widget buildTags(List<Tag> tags) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Wrap(
-        spacing: 8,
-        children: tags.map((tag) {
-          return Chip(label: Text(tag.name), backgroundColor: Colors.amber);
-        }).toList(),
-      ),
-    );
-  }
+  static Widget buildTags(List<Tag> tags, void Function() editTags) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children: [
+        ...tags.map(
+          (tag) => Chip(label: Text(tag.name), backgroundColor: Colors.amber),
+        ),
+        ActionChip(
+          label: const Text("Kategorie hinzufügen"),
+          avatar: const Icon(Icons.add),
+          onPressed: editTags,
+        ),
+      ],
+    ),
+  );
 
-  static Widget buildTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
+  static Widget buildTitle(String title) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Text(
+      title,
+      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+    ),
+  );
 
-  static Widget buildDescription(String description) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Text(
-        description,
-        style: const TextStyle(fontSize: 16, color: Colors.black87),
-      ),
-    );
-  }
+  static Widget buildDescription(String description) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    child: Text(
+      description,
+      style: const TextStyle(fontSize: 16, color: Colors.black87),
+    ),
+  );
 
   static Widget buildRatingSummary(List<Rating> ratings) {
     final avgStars = ratings.isEmpty
@@ -177,168 +177,155 @@ class RecipeOverviewWidgets {
     );
   }
 
-  static Widget buildInfoChips(Recipe recipe, Color iconColor) {
-    return Padding(
+  static Widget buildInfoChips(Recipe recipe, Color iconColor) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Row(
+      children: [
+        Icon(Icons.timer, color: iconColor),
+        const SizedBox(width: 6),
+        Text(_formatTime(recipe.timePrep)),
+
+        const SizedBox(width: 12),
+        Container(width: 1, height: 16, color: Colors.grey.shade500),
+        const SizedBox(width: 12),
+
+        Icon(Icons.schedule, color: iconColor),
+        const SizedBox(width: 6),
+        Text(_formatTime(recipe.timeTotal)),
+
+        const SizedBox(width: 12),
+        Container(width: 1, height: 16, color: Colors.grey.shade500),
+        const SizedBox(width: 12),
+
+        Icon(Icons.fastfood, color: iconColor),
+        const SizedBox(width: 6),
+        Text("${Format.number(recipe.portions)} Stück"),
+      ],
+    ),
+  );
+
+  static Widget buildUriButton(String uri) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: OutlinedButton.icon(
+      icon: const Icon(Icons.open_in_new),
+      label: const Text("Originalrezept öffnen"),
+      onPressed: () async {
+        if (!await launchUrl(
+          Uri.parse(uri),
+          mode: LaunchMode.externalApplication,
+        )) {
+          throw Exception("Could not launch $uri");
+        }
+      },
+    ),
+  );
+
+  static List<Widget> buildIngredients(List<Ingredient> ingredients) => [
+    Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Icon(Icons.timer, color: iconColor),
-          const SizedBox(width: 6),
-          Text(_formatTime(recipe.timePrep)),
-
-          const SizedBox(width: 12),
-          Container(width: 1, height: 16, color: Colors.grey.shade500),
-          const SizedBox(width: 12),
-
-          Icon(Icons.schedule, color: iconColor),
-          const SizedBox(width: 6),
-          Text(_formatTime(recipe.timeTotal)),
-
-          const SizedBox(width: 12),
-          Container(width: 1, height: 16, color: Colors.grey.shade500),
-          const SizedBox(width: 12),
-
-          Icon(Icons.fastfood, color: iconColor),
-          const SizedBox(width: 6),
-          Text("${Format.number(recipe.portions)} Stück"),
-        ],
+      child: const Text(
+        "Zutaten",
+        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
       ),
-    );
-  }
+    ),
 
-  static Widget buildUriButton(String uri) {
-    return Padding(
+    const SizedBox(height: 8),
+
+    Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: OutlinedButton.icon(
-        icon: const Icon(Icons.open_in_new),
-        label: const Text("Originalrezept öffnen"),
-        onPressed: () async {
-          if (!await launchUrl(
-            Uri.parse(uri),
-            mode: LaunchMode.externalApplication,
-          )) {
-            throw Exception("Could not launch $uri");
-          }
-        },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: ingredients.map((ing) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Text(
+              "• ${Format.number(ing.amount)} ${ing.unit} ${ing.name}",
+              style: const TextStyle(fontSize: 16),
+            ),
+          );
+        }).toList(),
       ),
-    );
-  }
+    ),
+  ];
 
-  static List<Widget> buildIngredients(List<Ingredient> ingredients) {
-    return [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: const Text(
-          "Zutaten",
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        ),
+  static List<Widget> buildNutritions(List<Nutrition>? nutritions) => [
+    Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: const Text(
+        "Nährwerte",
+        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
       ),
+    ),
 
-      const SizedBox(height: 8),
+    const SizedBox(height: 8),
 
+    if (nutritions != null && nutritions.isNotEmpty)
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: ingredients.map((ing) {
+          children: nutritions.map((nut) {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Text(
-                "• ${Format.number(ing.amount)} ${ing.unit} ${ing.name}",
+                "• ${Format.number(nut.amount)} ${nut.unit} ${nut.name}",
                 style: const TextStyle(fontSize: 16),
               ),
             );
           }).toList(),
         ),
+      )
+    else
+      Text(
+        "<noch nicht eingetragen>",
+        style: TextStyle(fontStyle: FontStyle.italic),
       ),
-    ];
-  }
+  ];
 
-  static List<Widget> buildNutritions(List<Nutrition>? nutritions) {
-    return [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: const Text(
-          "Nährwerte",
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-      ),
-
-      const SizedBox(height: 8),
-
-      if (nutritions != null && nutritions.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: nutritions.map((nut) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Text(
-                  "• ${Format.number(nut.amount)} ${nut.unit} ${nut.name}",
-                  style: const TextStyle(fontSize: 16),
-                ),
-              );
-            }).toList(),
+  static Widget buildUserNotes(List<UserNote> usernotes) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: usernotes.map((note) {
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-        )
-      else
-        Text(
-          "<noch nicht eingetragen>",
-          style: TextStyle(fontStyle: FontStyle.italic),
-        ),
-    ];
-  }
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  child: Icon(Icons.person), // TODO: Hier Profilbild anzeigen
+                ),
+                const SizedBox(width: 12),
 
-  static Widget buildUserNotes(List<UserNote> usernotes) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: usernotes.map((note) {
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    radius: 20,
-                    child: Icon(Icons.person), // TODO: Hier Profilbild anzeigen
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(note.text, style: const TextStyle(fontSize: 16)),
+
+                      const SizedBox(height: 6),
+
+                      Text(
+                        _formatNoteDate(note),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(note.text, style: const TextStyle(fontSize: 16)),
-
-                        const SizedBox(height: 6),
-
-                        Text(
-                          _formatNoteDate(note),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          );
-        }).toList(),
-      ),
-    );
-  }
+          ),
+        );
+      }).toList(),
+    ),
+  );
 
   static String _formatNoteDate(UserNote n) {
     final created =

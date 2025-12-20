@@ -62,6 +62,9 @@ Map<String, dynamic> _$RecipeSimpleToJson(RecipeSimple instance) =>
 
 RecipePatch _$RecipePatchFromJson(Map<String, dynamic> json) => RecipePatch(
   title: json['title'] as String?,
+  tags: (json['tags'] as List<dynamic>?)
+      ?.map((e) => (e as num).toInt())
+      .toList(),
   imageId: (json['image_id'] as num?)?.toInt(),
   description: json['description'] as String?,
   timePrep: (json['time_prep'] as num?)?.toInt(),
@@ -79,6 +82,7 @@ RecipePatch _$RecipePatchFromJson(Map<String, dynamic> json) => RecipePatch(
 Map<String, dynamic> _$RecipePatchToJson(RecipePatch instance) =>
     <String, dynamic>{
       'title': ?instance.title,
+      'tags': ?instance.tags,
       'image_id': ?instance.imageId,
       'description': ?instance.description,
       'time_prep': ?instance.timePrep,

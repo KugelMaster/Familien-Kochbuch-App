@@ -1,12 +1,12 @@
 # Aufgaben von RecipeOverviewPage
-- Tags (add, edit, delete)
-- user_notes: Außen
-- ratings: Außen
+- user_notes: add, edit, delete
+- ratings: add, edit, delete
 - Haken (✓)
 
 # Aufgaben (sortiert nach Priorität)
 1. RecipeOverviewPage Aufgaben
 1. RecipeEditPage Image Hero bearbeiten Funktion sichtbarer machen
+1. Tag Verwaltungs Seite
 1. RecipeOverviewPage Design:
     - Tags Farbe
     - Reviews nicht klickbar
@@ -28,9 +28,8 @@
 - Offline-Modus (gecached Rezepte verwenden)
 
 # Aufgaben abgeschlossen:
-- RecipeOverviewPage AppBar wird nun sofort geladen
-- Bugfix: RecipeOverviewPage gibt nun Update-Signale über `Navigator.pop` zurück, wenn das Rezept bearbeitet oder gelöscht wurde
-- Einführung von der Datenklasse Tag mit id und name
+- Einführung der Datenklasse Tag mit id und name
+- Tags auf RecipeOverviewPage (add, edit, delete)
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`
