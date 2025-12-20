@@ -34,13 +34,45 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
   late AsyncValue<Recipe> recipeAsync;
   bool recipeWasUpdated = false;
 
-  void onClose(bool requestUpdate) {
-    Navigator.pop(context, requestUpdate || recipeWasUpdated);
+  void onClose(bool deleted) {
+    if (deleted) {
+      Navigator.pop(context, true);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Rezept gelöscht"),
+          action: SnackBarAction(
+            label: "Rückgängig",
+            onPressed: () {
+              // TODO: Löschen rückgängig machen
+              print("[Löschen] Rückgängig Knopf wurde gedrückt!");
+            },
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    Navigator.pop(context, recipeWasUpdated);
   }
 
   void updateRecipe(RecipePatch patch) {
     ref.read(recipeProvider(widget.recipeId).notifier).updateRecipe(patch);
     recipeWasUpdated = true;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Rezept aktualisiert"),
+        action: SnackBarAction(
+          label: "Rückgängig",
+          onPressed: () {
+            // TODO: Bearbeitung rückgängig machen
+            print("[Bearbeitung] Rückgängig Knopf wurde gedrückt!");
+          },
+        ),
+      ),
+    );
   }
 
   void editTags() async {
@@ -185,10 +217,5 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     if (patch.isEmpty) return;
 
     updateRecipe(patch);
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Rezept aktualisiert")));
   }
 }

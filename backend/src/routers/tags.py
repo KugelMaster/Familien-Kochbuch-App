@@ -29,6 +29,15 @@ def create_tag(tag_name: str, db: Session = Depends(get_db)):
 def list_tags(db: Session = Depends(get_db)):
     return db.query(Tag).all()
 
+@router.get("/{tag_id}", response_model=TagOut)
+def get_tag(tag_id: int, db: Session = Depends(get_db)):
+    tag = db.query(Tag).filter(Tag.id == tag_id).first()
+
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+
+    return tag
+
 @router.patch("/{tag_id}", response_model=TagOut)
 def rename_tag(tag_id: int, new_name: str, db: Session = Depends(get_db)):
     tag = db.query(Tag).filter(Tag.id == tag_id).first()

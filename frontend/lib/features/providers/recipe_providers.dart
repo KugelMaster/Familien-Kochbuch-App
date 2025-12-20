@@ -20,11 +20,7 @@ final imageServiceProvider = Provider<ImageService>((ref) {
 
 final recipeCache = Provider((_) => <int, Recipe>{});
 
-/// Nicht per `ref.watch()` ausführen!
-final recipeCreateProvider = FutureProvider.family<int, Recipe>((
-  ref,
-  recipe,
-) async {
+Future<int> createNewRecipe(WidgetRef ref, Recipe recipe) async {
   final imageService = ref.read(imageServiceProvider);
   final recipeService = ref.read(recipeServiceProvider);
 
@@ -37,7 +33,7 @@ final recipeCreateProvider = FutureProvider.family<int, Recipe>((
   ref.read(recipeCache)[id] = created;
 
   return id;
-});
+}
 
 final recipesProvider = FutureProvider<List<RecipeSimple>>((ref) async {
   // TODO: Caching for simple recipe list too
@@ -54,7 +50,7 @@ final recipeProvider =
 class RecipeNotifier extends AsyncNotifier<Recipe> {
   final int recipeId;
 
-  late final cache = ref.read(recipeCache);
+  late final cache = ref.watch(recipeCache);
 
   RecipeNotifier(this.recipeId);
 
@@ -78,7 +74,7 @@ class RecipeNotifier extends AsyncNotifier<Recipe> {
   Future<void> updateRecipe(RecipePatch patch) async {
     try {
       final imageService = ref.read(imageServiceProvider);
-  final recipeService = ref.read(recipeServiceProvider);
+      final recipeService = ref.read(recipeServiceProvider);
 
       if (patch.image != null) {
         patch.imageId = await imageService.sendImage(patch.image!);

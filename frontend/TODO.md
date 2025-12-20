@@ -20,6 +20,7 @@
 1. Testen, ob man Links für Koch Apps wie bspw. Cookido einfügen kann
 
 # Weitere Aufgaben (noch keine Priorität):
+- Rückgängig nach Löschen oder Bearbeiten
 - Task Leiste unten sieht schlecht aus
 - App Icon & Name ändern
 - Einzelne TODOs bearbeiten
@@ -28,8 +29,8 @@
 - Offline-Modus (gecached Rezepte verwenden)
 
 # Aufgaben abgeschlossen:
-- Einführung der Datenklasse Tag mit id und name
-- Tags auf RecipeOverviewPage (add, edit, delete)
+- Tag: Umbenennen- und Löschen-Methoden + Cache
+- Snackbars nach Bearbeitung oder Löschung
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

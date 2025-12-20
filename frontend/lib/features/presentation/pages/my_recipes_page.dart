@@ -20,17 +20,14 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
       final updated =
           await Navigator.push<bool>(
             context,
-            MaterialPageRoute(builder: (_) => RecipeOverviewPage(recipeId: id, title: title)),
+            MaterialPageRoute(
+              builder: (_) => RecipeOverviewPage(recipeId: id, title: title),
+            ),
           ) ??
           false;
 
       if (updated) {
         updateUI();
-
-        if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Rezept gelöscht")));
       }
     } catch (error) {
       if (!mounted) return;
@@ -72,7 +69,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
       if (newRecipe == null) return;
 
-      final id = await ref.read(recipeCreateProvider(newRecipe).future);
+      final id = await createNewRecipe(ref, newRecipe);
 
       updateUI();
 
