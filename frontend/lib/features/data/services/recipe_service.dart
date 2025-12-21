@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:frontend/core/utils/logger.dart';
 import 'package:frontend/features/data/models/recipe.dart';
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/endpoints.dart';
@@ -28,7 +29,7 @@ class RecipeService {
     );
 
     if (response.data == null) {
-      print(
+      logger.d(
         "Get recipe by ID failed: ${response.statusCode} ${response.statusMessage}",
       );
       throw Exception("Failed to load recipe");
@@ -45,7 +46,7 @@ class RecipeService {
     );
 
     if (response.data == null) {
-      print("Creating recipe failed: ${response.statusCode}");
+      logger.d("Creating recipe failed: ${response.statusCode} ${response.statusMessage}");
       throw Exception("Failed to create recipe");
     }
 
@@ -60,7 +61,7 @@ class RecipeService {
     );
 
     if (response.data == null) {
-      print("Update recipe failed: ${response.statusCode}");
+      logger.d("Update recipe failed: ${response.statusCode} ${response.statusMessage}");
       throw Exception("Failed to update recipe");
     }
 
@@ -71,7 +72,7 @@ class RecipeService {
     final response = await _client.dio.delete(Endpoints.recipe(recipeId));
 
     if (response.statusCode != 200) {
-      print("Deleting recipe failed: ${response.statusCode}");
+      logger.d("Deleting recipe failed: ${response.statusCode} ${response.statusMessage}");
       throw Exception("Failed to delete recipe");
     }
   }

@@ -1,12 +1,16 @@
-# TODOs:
+# Offene Aufgaben:
 - Alle Rezepte mit bestimmten Tag returnen
 - Bilder upload planen (URL-Erstellung / ID?)
 - Objekt editierbar machen
 - Objekt löschbar machen (+ Backup 30 Tage für Notfälle!)
 - Ingredients und Nutritions einzelnd editierbar machen
 
-- Documentation übersichtlicher machen (OpenAPI)
+- Dokumentation übersichtlicher machen (OpenAPI)
 
+# Aufgaben abgeschlossen:
+- Umbenennen UserNote -> RecipeNote
+- Relations für RecipeNotes aktualisiert
+- HTTP Methoden für RecipeNote implementiert
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11):

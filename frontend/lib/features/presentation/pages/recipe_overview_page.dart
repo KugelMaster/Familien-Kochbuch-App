@@ -153,8 +153,8 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
               ...RecipeOverviewWidgets.buildNutritions(recipe.nutritions),
               const SizedBox(height: 40),
 
-              if (recipe.usernotes != null)
-                RecipeOverviewWidgets.buildUserNotes(recipe.usernotes!),
+              if (recipe.recipeNotes != null)
+                RecipeOverviewWidgets.buildRecipeNotes(recipe.recipeNotes!),
               const SizedBox(height: 320),
             ],
           ),

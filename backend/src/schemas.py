@@ -16,10 +16,10 @@ class NutritionCreate(BaseModel):
     amount: Optional[float] = None
     unit: Optional[str] = None
 
-class UserNoteCreate(BaseModel):
+class RecipeNoteCreate(BaseModel):
     recipe_id: int
     user_id: Optional[int] = None # FIXME, wenn User-Authentifizierung implementiert ist
-    text: str
+    content: str
 
 class RatingCreate(BaseModel):
     recipe_id: int
@@ -44,10 +44,11 @@ class TagOut(BaseModel):
     id: int
     name: str
 
-class UserNoteOut(BaseModel):
+class RecipeNoteOut(BaseModel):
     id: int
-    user_id: int
-    text: str
+    recipe_id: int
+    user_id: Optional[int] = None # FIXME, wenn User-Authentifizierung implementiert ist
+    content: str
 
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
@@ -81,7 +82,7 @@ class RecipeResponse(BaseModel):
 
     ingredients: Optional[list[IngredientCreate]] = None
     nutritions: Optional[list[NutritionCreate]] = None # Vllt. später automatisch aus Zutaten berechnen?
-    user_notes: Optional[list[UserNoteOut]] = None
+    recipe_notes: Optional[list[RecipeNoteOut]] = None
     ratings: Optional[list[RatingOut]] = None
 
     created_at: datetime
@@ -113,3 +114,6 @@ class RecipeUpdate(BaseModel):
 
     class Config:
         from_attributes = True
+
+class RecipeNoteUpdate(BaseModel):
+    content: str

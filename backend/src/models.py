@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, String, Text, ForeignKey, DateTime, func
+from sqlalchemy import Column, Integer, Float, String, Text, ForeignKey, DateTime, UniqueConstraint, func
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -16,12 +16,13 @@ class Recipe(Base):
 
     ingredients = relationship("Ingredient", cascade="all, delete-orphan")
     nutritions = relationship("Nutrition", cascade="all, delete-orphan")
-    user_notes = relationship("UserNote", cascade="all, delete-orphan")
+    recipe_notes = relationship("RecipeNote", back_populates="recipe", cascade="all, delete-orphan")
     ratings = relationship("Rating", cascade="all, delete-orphan")
     tags = relationship("Tag", secondary="recipe_tags", backref="recipes")
 
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
+
 
 class Ingredient(Base):
     __tablename__ = "ingredients"
@@ -32,6 +33,7 @@ class Ingredient(Base):
     amount = Column(Float, nullable=True) # type: ignore
     unit = Column(String, nullable=True)
 
+
 class Nutrition(Base):
     __tablename__ = "nutritions"
 
@@ -41,16 +43,25 @@ class Nutrition(Base):
     amount = Column(Float, nullable=True) # type: ignore
     unit = Column(String, nullable=True)
 
-class UserNote(Base):
-    __tablename__ = "usernotes"
+
+class RecipeNote(Base):
+    __tablename__ = "recipe_notes"
 
     id = Column(Integer, primary_key=True, index=True)
-    recipe_id = Column(Integer, ForeignKey("recipes.id"))
-    user_id = Column(Integer, ForeignKey("users.id"))
-    text = Column(Text, nullable=False)
+    recipe_id = Column(Integer, ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True) # FIXME: wenn User-Authentifizierung implementiert ist
+    content = Column(Text, nullable=False)
+
+    recipe = relationship("Recipe", back_populates="recipe_notes")
+    user = relationship("User", back_populates="recipe_notes")
 
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint('recipe_id', 'user_id', name='uq_user_recipe_note'),
+    )
+
 
 class Rating(Base):
     __tablename__ = "ratings"
@@ -82,7 +93,13 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    # TODO
+    name = Column(String, nullable=False)
+    #TODO: 
+    
+    recipe_notes = relationship("RecipeNote", back_populates="user")
+
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now())
 """
 class User(BaseModel):
     id: UUID

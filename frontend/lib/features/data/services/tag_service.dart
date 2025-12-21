@@ -1,5 +1,6 @@
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/endpoints.dart';
+import 'package:frontend/core/utils/logger.dart';
 import 'package:frontend/features/data/models/tag.dart';
 
 class TagService {
@@ -11,7 +12,9 @@ class TagService {
     final response = await _client.dio.get(Endpoints.tags);
 
     if (response.data == null) {
-      print("Error when fetching tags: ${response.statusCode}");
+      logger.d(
+        "Error when fetching tags: ${response.statusCode} ${response.statusMessage}",
+      );
       throw Exception("Failed to get tags");
     }
 
@@ -24,7 +27,9 @@ class TagService {
     final response = await _client.dio.get(Endpoints.tag(id));
 
     if (response.data == null || response.statusCode != 200) {
-      print("Error when fetching tag: ${response.statusCode}");
+      logger.d(
+        "Error when fetching tag: ${response.statusCode} ${response.statusMessage}",
+      );
       throw Exception("Failed to get tag");
     }
 
@@ -35,7 +40,9 @@ class TagService {
     final response = await _client.dio.post(Endpoints.createTag(tagName));
 
     if (response.data == null || response.statusCode != 200) {
-      print("Error when creating new tag: ${response.statusCode}");
+      logger.d(
+        "Error when creating new tag: ${response.statusCode} ${response.statusMessage}",
+      );
       throw Exception("Failed to create new tag");
     }
 
@@ -46,7 +53,9 @@ class TagService {
     final response = await _client.dio.patch(Endpoints.renameTag(id, tagName));
 
     if (response.data == null || response.statusCode != 200) {
-      print("Error when renaming tag: ${response.statusCode}");
+      logger.d(
+        "Error when renaming tag: ${response.statusCode} ${response.statusMessage}",
+      );
       throw Exception("Failed to rename tag");
     }
 
@@ -57,7 +66,9 @@ class TagService {
     final response = await _client.dio.patch(Endpoints.tag(id));
 
     if (response.data == null || response.statusCode != 200) {
-      print("Error when deleting tag: ${response.statusCode}");
+      logger.d(
+        "Error when deleting tag: ${response.statusCode} ${response.statusMessage}",
+      );
       throw Exception("Failed to delete tag");
     }
   }

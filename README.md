@@ -1,13 +1,17 @@
-# Kochen-Vorschläge App
+# Familien Kochbuch App
 ## Kurze Beschreibung
-Eine iOS / Andriod App, die Essens-Vorschläge für die Familie liefern kann. Z.B:
-- Rezepte anzeigen für übrige Zutaten
-- Filtern von Rezepten je nach Jahreszeit
-- ... (ich schreibe später noch mehr wenn ich Zeit und Lust habe)
+Eine iOS / Android App, die Rezept Vorschläge für die Familie liefern kann. Die App kann Folgendes:
+- Eine Suche nach allen eingetragenen Rezepten
+- Kategorisierung der Rezepte
+- Anzeigen einer Rezept-Übersicht mit allen Koch-spezifischen Daten sowie Zutaten, Nährstoffe, Benutzer Notizen und Bewertungen eines jeweiligen Nutzers
+- Rezepte selber erstellen, bearbeiten und löschen
+- Rezepte nach übrigen Zutaten filtern (TODO)
+- ... und vieles mehr
 ## Aktueller Fortschritt
 ### App
 - Entdecken Seite: Suchleiste und Kategorie-Auswahl
-- Meine Rezepte: Anzeigen aller gespeichterer Rezepte von der Datenbank & Anzeigen der Informationen eines ausgewählten Rezepts (z.B. auch Überleitung von der Suche) 
+- Meine Rezepte: Anzeigen aller gespeichterer Rezepte von der Datenbank
+- Rezept-Übersicht: Alle Informationen nötig fürs Kochen
 - Planer: nix
 - Verlauf: nix
 - Einstellungen: nix
@@ -15,12 +19,9 @@ Eine iOS / Andriod App, die Essens-Vorschläge für die Familie liefern kann. Z.
 - PostgresDB auf Port 5432
 - PostgreSQL Modele
 - Pydantic Schemen
-- API Routen:
-    - [Recipes](http://localhost:8000/recipes)
-    - [UserNotes](http://localhost:8000/usernotes)
-    - [Ratings](http://localhost:8000/ratings)
-    - [Images](http://localhost:8000/images)
-    - [Tags](http://localhost:8000/tags)
+- Verschiedene API-Routen: [OpenAPI Docs](http://localhost:8000/docs)
+
+-> Informationen, zu was neu ist / was sich geändert hat kann man ab diesen Commit immer in den jeweiligen `TODO.md` Dateien in den Ordnern `frontend/` und `backend/` sehen!
 
 <br>
 <br>

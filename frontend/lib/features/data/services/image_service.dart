@@ -3,15 +3,16 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/endpoints.dart';
+import 'package:frontend/core/utils/logger.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ImageService {
-    final ApiClient _client;
+  final ApiClient _client;
 
-    ImageService(this._client);
+  ImageService(this._client);
 
-    Future<int> sendImage(XFile image) async {
+  Future<int> sendImage(XFile image) async {
     final file = await MultipartFile.fromFile(image.path, filename: image.name);
     final formData = FormData.fromMap({"file": file});
 
@@ -36,8 +37,8 @@ class ImageService {
     final bytes = response.data;
 
     if (bytes == null) {
-      print(
-        "Recieving Image failed: ${response.statusCode} ${response.statusMessage}",
+      logger.d(
+        "Failed to load image: ${response.statusCode} ${response.statusMessage}",
       );
       throw Exception("Failed to load image");
     }

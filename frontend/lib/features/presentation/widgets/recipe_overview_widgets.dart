@@ -6,7 +6,7 @@ import 'package:frontend/features/data/models/nutrition.dart';
 import 'package:frontend/features/data/models/rating.dart';
 import 'package:frontend/features/data/models/recipe.dart';
 import 'package:frontend/features/data/models/tag.dart';
-import 'package:frontend/features/data/models/usernote.dart';
+import 'package:frontend/features/data/models/recipe_note.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -282,11 +282,11 @@ class RecipeOverviewWidgets {
       ),
   ];
 
-  static Widget buildUserNotes(List<UserNote> usernotes) => Padding(
+  static Widget buildRecipeNotes(List<RecipeNote> recipeNotes) => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: usernotes.map((note) {
+      children: recipeNotes.map((note) {
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 8),
           elevation: 2,
@@ -308,7 +308,7 @@ class RecipeOverviewWidgets {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(note.text, style: const TextStyle(fontSize: 16)),
+                      Text(note.content, style: const TextStyle(fontSize: 16)),
 
                       const SizedBox(height: 6),
 
@@ -327,7 +327,7 @@ class RecipeOverviewWidgets {
     ),
   );
 
-  static String _formatNoteDate(UserNote n) {
+  static String _formatNoteDate(RecipeNote n) {
     final created =
         "${n.createdAt.day}.${n.createdAt.month}.${n.createdAt.year}";
     final updated = n.updatedAt != n.createdAt ? " (bearbeitet)" : "";

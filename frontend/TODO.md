@@ -1,5 +1,5 @@
 # Aufgaben von RecipeOverviewPage
-- user_notes: add, edit, delete
+- recipe_notes: add, edit, delete
 - ratings: add, edit, delete
 - Haken (✓)
 
@@ -29,8 +29,8 @@
 - Offline-Modus (gecached Rezepte verwenden)
 
 # Aufgaben abgeschlossen:
-- Tag: Umbenennen- und Löschen-Methoden + Cache
-- Snackbars nach Bearbeitung oder Löschung
+- Umbenennen UserNote -> RecipeNote
+- prints ersetzen mit einem Logger im Debug-Modus
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

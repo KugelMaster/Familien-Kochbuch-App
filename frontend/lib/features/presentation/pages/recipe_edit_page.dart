@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/utils/format.dart';
+import 'package:frontend/core/utils/logger.dart';
 import 'package:frontend/features/data/models/ingredient.dart';
 import 'package:frontend/features/data/models/nutrition.dart';
 import 'package:frontend/features/data/models/recipe.dart';
@@ -443,7 +444,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
         imageId = null;
       }
     } catch (e) {
-      print(e.toString());
+      logger.e("Error when picking image", error: e);
       return;
     }
   }

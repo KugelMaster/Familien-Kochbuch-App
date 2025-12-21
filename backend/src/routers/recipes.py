@@ -170,4 +170,4 @@ def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
     db.delete(recipe)
     db.commit()
 
-    return {"message": "deleted"}
+    return {"message": "Recipe deleted"}
