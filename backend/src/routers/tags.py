@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from database import get_db
 from sqlalchemy.orm import Session
 
-from schemas import TagOut
+from schemas import Message, TagOut
 from models import Tag
 
 
@@ -51,7 +51,7 @@ def rename_tag(tag_id: int, new_name: str, db: Session = Depends(get_db)):
 
     return tag
 
-@router.delete("/{tag_id}", response_model=dict)
+@router.delete("/{tag_id}", response_model=Message)
 def delete_tag(tag_id: int, db: Session = Depends(get_db)):
     tag = db.query(Tag).filter(Tag.id == tag_id).first()
 
@@ -61,6 +61,6 @@ def delete_tag(tag_id: int, db: Session = Depends(get_db)):
     db.delete(tag)
     db.commit()
 
-    return {"message": "deleted"}
+    return Message(detail="Tag deleted successfully")
 
 # TODO: Function for sending all recipe ids associated with a tag

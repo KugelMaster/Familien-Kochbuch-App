@@ -49,7 +49,7 @@ class RecipeNote(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     recipe_id = Column(Integer, ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True) # FIXME: wenn User-Authentifizierung implementiert ist
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     content = Column(Text, nullable=False)
 
     recipe = relationship("Recipe", back_populates="recipe_notes")

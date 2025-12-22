@@ -3,7 +3,7 @@ from sqlalchemy import select
 from database import get_db
 from sqlalchemy.orm import Session
 
-from schemas import RecipeCreate, RecipeOutSimple, RecipeResponse, RecipeUpdate
+from schemas import Message, RecipeCreate, RecipeOutSimple, RecipeResponse, RecipeUpdate
 from models import Image, Recipe, Ingredient, Nutrition, Tag
 
 
@@ -160,7 +160,7 @@ def update_recipe(recipe_id: int, patch: RecipeUpdate, db: Session = Depends(get
 
     return recipe
 
-@router.delete("/{recipe_id}", response_model=dict)
+@router.delete("/{recipe_id}", response_model=Message)
 def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
@@ -170,4 +170,4 @@ def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
     db.delete(recipe)
     db.commit()
 
-    return {"message": "Recipe deleted"}
+    return Message(detail="Recipe deleted successfully")

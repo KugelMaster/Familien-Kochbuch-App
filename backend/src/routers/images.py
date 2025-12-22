@@ -7,7 +7,7 @@ import uuid
 
 from models import Image
 from config import RECIPE_IMAGE_DIR
-from schemas import ImageUploadResponse
+from schemas import ImageUploadResponse, Message
 
 
 router = APIRouter(
@@ -38,7 +38,7 @@ def upload_image(file: UploadFile, db: Session = Depends(get_db)):
 
     return img
 
-@router.get("/filename/{filename}")
+@router.get("/filename/{filename}", response_class=FileResponse)
 def get_image_by_filename(filename: str, db: Session = Depends(get_db)):
     img = db.query(Image).filter(Image.filename == filename).first()
 
@@ -47,7 +47,7 @@ def get_image_by_filename(filename: str, db: Session = Depends(get_db)):
     
     return FileResponse(str(img.file_path))
 
-@router.get("/{image_id}")
+@router.get("/{image_id}", response_class=FileResponse)
 def get_image_by_id(image_id: int, db: Session = Depends(get_db)):
     img = db.query(Image).filter(Image.id == image_id).first()
 
@@ -56,7 +56,7 @@ def get_image_by_id(image_id: int, db: Session = Depends(get_db)):
     
     return FileResponse(str(img.file_path))
 
-@router.delete("/{image_id}")
+@router.delete("/{image_id}", response_model=Message)
 def delete_image(image_id: int, db: Session = Depends(get_db)):
     img = db.query(Image).filter(Image.id == image_id).first()
 
@@ -75,4 +75,4 @@ def delete_image(image_id: int, db: Session = Depends(get_db)):
     db.delete(img)
     db.commit()
 
-    return {"detail": "Image deleted successfully"}
+    return Message(detail="Image deleted successfully")

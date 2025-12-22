@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from database import get_db
 from sqlalchemy.orm import Session
 
-from schemas import RecipeNoteCreate, RecipeNoteOut, RecipeNoteUpdate
+from schemas import Message, RecipeNoteCreate, RecipeNoteOut, RecipeNoteUpdate
 from models import Recipe, RecipeNote, User
 
 
@@ -17,7 +17,7 @@ def create_recipe_note(recipe_note: RecipeNoteCreate, db: Session = Depends(get_
     if db.query(Recipe).filter(Recipe.id == recipe_note.recipe_id).first() is None:
         raise HTTPException(status_code=404, detail="Recipe not found")
     
-    if recipe_note.user_id is not None and db.query(User).filter(User.id == recipe_note.user_id).first() is None:
+    if db.query(User).filter(User.id == recipe_note.user_id).first() is None:
         raise HTTPException(status_code=404, detail="User not found")
 
     db_recipe_note = RecipeNote(
@@ -55,7 +55,7 @@ def edit_recipe_note(note_id: int, patch: RecipeNoteUpdate, db: Session = Depend
 
     return db_recipe_note
 
-@router.delete("/{note_id}", response_model=dict)
+@router.delete("/{note_id}", response_model=Message)
 def delete_recipe_note(note_id: int, db: Session = Depends(get_db)):
     db_recipe_note = db.query(RecipeNote).filter(RecipeNote.id == note_id).first()
 
@@ -65,4 +65,4 @@ def delete_recipe_note(note_id: int, db: Session = Depends(get_db)):
     db.delete(db_recipe_note)
     db.commit()
 
-    return {"detail": "Recipe note deleted"}
+    return Message(detail="Recipe note deleted successfully")

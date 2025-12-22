@@ -6,7 +6,7 @@ part 'recipe_note.g.dart';
 class RecipeNote {
   int id;
   int recipeId;
-  int? userId; // FIXME: Make required after adding user authentification
+  int? userId;
   String content;
 
   @JsonKey(includeToJson: false)

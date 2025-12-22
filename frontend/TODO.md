@@ -30,9 +30,7 @@
 - Offline-Modus (gecached Rezepte verwenden)
 
 # Aufgaben abgeschlossen:
-- Vereinfachen von den RecipeProviders
-- Bei refresh von repository werden alle provider neu gebaut
-- Formattieren von Datum
+
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

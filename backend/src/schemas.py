@@ -18,12 +18,12 @@ class NutritionCreate(BaseModel):
 
 class RecipeNoteCreate(BaseModel):
     recipe_id: int
-    user_id: Optional[int] = None # FIXME, wenn User-Authentifizierung implementiert ist
+    user_id: int
     content: str
 
 class RatingCreate(BaseModel):
     recipe_id: int
-    user_id: Optional[int] = None # FIXME, wenn User-Authentifizierung implementiert ist
+    user_id: int
     stars: float # Zwischen 0 und 5 mit 0,5 Schritten
     comment: Optional[str] = None
 
@@ -47,7 +47,7 @@ class TagOut(BaseModel):
 class RecipeNoteOut(BaseModel):
     id: int
     recipe_id: int
-    user_id: Optional[int] = None # FIXME, wenn User-Authentifizierung implementiert ist
+    user_id: Optional[int]
     content: str
 
     created_at: Optional[datetime]
@@ -117,3 +117,8 @@ class RecipeUpdate(BaseModel):
 
 class RecipeNoteUpdate(BaseModel):
     content: str
+
+
+
+class Message(BaseModel):
+    detail: str
