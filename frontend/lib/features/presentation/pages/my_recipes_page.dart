@@ -96,7 +96,12 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Meine Rezepte"),
-        actions: [IconButton(onPressed: updateUI, icon: Icon(Icons.replay))],
+        actions: [
+          IconButton(
+            onPressed: () => invalidateRepository(ref),
+            icon: Icon(Icons.replay),
+          ),
+        ],
       ),
       body: recipesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),

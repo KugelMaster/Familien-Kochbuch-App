@@ -89,7 +89,7 @@ class _AnimatedAppBarState extends ConsumerState<AnimatedAppBar> {
 
     if (!(confirmed ?? false)) return;
 
-    await ref.read(recipeProvider(widget.recipeId).notifier).deleteRecipe();
+    await ref.read(recipeRepositoryProvider.notifier).deleteRecipe(widget.recipeId);
 
     widget.onClose(true);
   }

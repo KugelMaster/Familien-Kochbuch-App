@@ -38,7 +38,10 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
   final List<IngredientOrNutritionDraft> ingredients = [];
   final List<IngredientOrNutritionDraft> nutritions = [];
 
-  final metadataLabelStyle = TextStyle(color: Colors.grey.shade600, fontSize: 12);
+  final metadataLabelStyle = TextStyle(
+    color: Colors.grey.shade600,
+    fontSize: 12,
+  );
 
   @override
   void initState() {
@@ -89,7 +92,9 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
 
     if (recipe.imageId == null) return;
 
-    final image = await ref.read(imageServiceProvider).getImage(recipe.imageId!);
+    final image = await ref
+        .read(imageServiceProvider)
+        .getImage(recipe.imageId!);
     setState(() => this.image = image);
   }
 
@@ -115,6 +120,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
       ),
       body: Form(
         key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
@@ -160,8 +166,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
                   : Image.file(File(image!.path), fit: BoxFit.cover),
             ),
           ),
-          if (imageId != null)
-            Text("ID: $imageId"),
+          if (imageId != null) Text("ID: $imageId"),
         ],
       ),
     ),
@@ -224,7 +229,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
     validator: (value) {
       if (value == null || value.isEmpty) return null;
 
-      final parsed = double.tryParse(value.replaceAll(',', '.'));
+      final parsed = Format.parseString(value);
       if (parsed == null || parsed < 0) {
         return "Ungültige Portionsanzahl";
       }
@@ -304,9 +309,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
             validator: (value) {
               if (value == null) return null;
 
-              final number = double.tryParse(value);
-
-              return number == null ? "Zahl!" : null;
+              return Format.parseString(value) == null ? "Zahl!" : null;
             },
           ),
         ),
@@ -384,9 +387,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
             validator: (value) {
               if (value == null) return null;
 
-              final number = double.tryParse(value);
-
-              return number == null ? "Zahl!" : null;
+              return Format.parseString(value) == null ? "Zahl!" : null;
             },
           ),
         ),
@@ -421,7 +422,8 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Rezept ID: ${widget.recipeId}", style: metadataLabelStyle),
+        if (widget.recipeId != null)
+          Text("Rezept ID: ${widget.recipeId}", style: metadataLabelStyle),
         if (widget.recipe?.createdAt != null)
           Text(
             "Erstellt: ${Format.date(widget.recipe!.createdAt)}",
@@ -457,7 +459,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
         .map(
           (i) => Ingredient(
             name: i.name.text.trim(),
-            amount: double.tryParse(i.amount.text.replaceAll(",", ".")),
+            amount: Format.parseString(i.amount.text),
             unit: i.unit,
           ),
         )
@@ -468,7 +470,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
         .map(
           (i) => Nutrition(
             name: i.name.text.trim(),
-            amount: double.tryParse(i.amount.text.replaceAll(",", ".")),
+            amount: Format.parseString(i.amount.text),
             unit: i.unit,
           ),
         )
@@ -482,7 +484,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
       description: descCtrl.text,
       timePrep: int.tryParse(timePrepCtrl.text),
       timeTotal: int.tryParse(timeTotalCtrl.text),
-      portions: double.tryParse(portionsCtrl.text.replaceAll(",", ".")),
+      portions: Format.parseString(portionsCtrl.text),
       recipeUri: recipeUri,
 
       ingredients: ingredientModels,

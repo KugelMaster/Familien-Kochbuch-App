@@ -9,6 +9,12 @@ class Format {
         defaultReturn;
   }
 
+  static double? parseString(String value) {
+    return double.tryParse(value.replaceAll(",", "."));
+  }
+
+  /// Formats the given DateTime into a relative value.
+  /// If it is older than 7 days, the date is returned in German format.
   static String date(DateTime? date) {
     if (date == null) return "";
 
@@ -17,14 +23,26 @@ class Format {
 
     if (difference.inDays < 7) {
       if (difference.inDays == 0) {
-        if (difference.inHours == 0 && difference.inMinutes <= 3) return "Gerade eben";
+        if (difference.inHours == 0) {
+          if (difference.inMinutes <= 1) {
+            return "Gerade eben";
+          }
+          return "Vor ${difference.inMinutes} Min.";
+        }
         return "Vor ${difference.inHours} Std.";
       }
       if (difference.inDays == 1) return "Gestern";
       return "Vor ${difference.inDays} Tagen";
     }
 
-    // Wenn älter als 7 Tage -> Statisch
     return DateFormat.yMMMEd("de_DE").format(date);
+  }
+
+  static String dateWithUpdated(DateTime createdAt, DateTime updatedAt) {
+    final createdAtStr = Format.date(createdAt);
+
+    if (updatedAt.difference(createdAt).inSeconds <= 3) return createdAtStr;
+
+    return "$createdAt (bearbeitet)";
   }
 }

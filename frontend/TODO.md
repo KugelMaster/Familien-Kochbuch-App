@@ -4,9 +4,10 @@
 - Haken (✓)
 
 # Aufgaben (sortiert nach Priorität)
-1. RecipeOverviewPage Aufgaben
 1. RecipeEditPage Image Hero bearbeiten Funktion sichtbarer machen
 1. Tag Verwaltungs Seite
+1. Benutzer einführen
+1. RecipeOverviewPage Aufgaben
 1. RecipeOverviewPage Design:
     - Tags Farbe
     - Reviews nicht klickbar
@@ -29,8 +30,9 @@
 - Offline-Modus (gecached Rezepte verwenden)
 
 # Aufgaben abgeschlossen:
-- Umbenennen UserNote -> RecipeNote
-- prints ersetzen mit einem Logger im Debug-Modus
+- Vereinfachen von den RecipeProviders
+- Bei refresh von repository werden alle provider neu gebaut
+- Formattieren von Datum
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

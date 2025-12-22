@@ -3,7 +3,7 @@ from database import get_db
 from sqlalchemy.orm import Session
 
 from schemas import RecipeNoteCreate, RecipeNoteOut, RecipeNoteUpdate
-from models import RecipeNote
+from models import Recipe, RecipeNote, User
 
 
 router = APIRouter(
@@ -14,6 +14,12 @@ router = APIRouter(
 
 @router.post("", response_model=RecipeNoteOut)
 def create_recipe_note(recipe_note: RecipeNoteCreate, db: Session = Depends(get_db)):
+    if db.query(Recipe).filter(Recipe.id == recipe_note.recipe_id).first() is None:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    
+    if recipe_note.user_id is not None and db.query(User).filter(User.id == recipe_note.user_id).first() is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
     db_recipe_note = RecipeNote(
         recipe_id=recipe_note.recipe_id,
         user_id=recipe_note.user_id,

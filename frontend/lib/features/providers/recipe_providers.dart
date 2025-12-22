@@ -16,87 +16,86 @@ final imageServiceProvider = Provider<ImageService>((ref) {
   return ImageService(client);
 });
 
-///////////////////////////////////////////////////////////////////////////////
 
-final recipeCache = Provider((_) => <int, Recipe>{});
+final recipeRepositoryInvalidationProvider = NotifierProvider<RecipeRepositoryInvalidationNotifier, int>(RecipeRepositoryInvalidationNotifier.new);
+class RecipeRepositoryInvalidationNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
 
-Future<int> createNewRecipe(WidgetRef ref, Recipe recipe) async {
-  final imageService = ref.read(imageServiceProvider);
-  final recipeService = ref.read(recipeServiceProvider);
-
-  if (recipe.image != null) {
-    recipe.imageId = await imageService.sendImage(recipe.image!);
-  }
-
-  final (id, created) = await recipeService.createRecipe(recipe);
-  created.image = recipe.image;
-  ref.read(recipeCache)[id] = created;
-
-  return id;
+  void trigger() => state++;
 }
 
-final recipesProvider = FutureProvider<List<RecipeSimple>>((ref) async {
-  // TODO: Caching for simple recipe list too
 
-  final service = ref.watch(recipeServiceProvider);
-  return service.getAllSimple();
-});
-
-final recipeProvider =
-    AsyncNotifierProvider.family<RecipeNotifier, Recipe, int>(
-      RecipeNotifier.new,
-    );
-
-class RecipeNotifier extends AsyncNotifier<Recipe> {
-  final int recipeId;
-
-  late final cache = ref.watch(recipeCache);
-
-  RecipeNotifier(this.recipeId);
+final recipeRepositoryProvider = NotifierProvider<RecipeRepositoryNotifier, Map<int, Recipe>>(RecipeRepositoryNotifier.new);
+class RecipeRepositoryNotifier extends Notifier<Map<int, Recipe>> {
+  late final RecipeService _recipeService = ref.read(recipeServiceProvider);
+  late final ImageService _imageService = ref.read(imageServiceProvider);
 
   @override
-  Future<Recipe> build() async {
-    final cached = cache[recipeId];
+  Map<int, Recipe> build() {
+    ref.watch(recipeRepositoryInvalidationProvider);
+    return {};
+  }
 
-    if (cached != null) {
-      return cached;
-    }
+  Future<Recipe> getById(int recipeId) async {
+    final cached = state[recipeId];
+    if (cached != null) return cached;
 
-    final fetched = await ref.read(recipeServiceProvider).getById(recipeId);
-    cache[recipeId] = fetched;
+    final fetched = await _recipeService.getById(recipeId);
+    state = {...state, recipeId: fetched};
     return fetched;
   }
 
-  void setFromExternal(Recipe recipe) {
-    state = AsyncData(recipe);
+  Future<List<RecipeSimple>> fetchAllSimple() async {
+    return _recipeService.getAllSimple();
   }
 
-  Future<void> updateRecipe(RecipePatch patch) async {
-    try {
-      final imageService = ref.read(imageServiceProvider);
-      final recipeService = ref.read(recipeServiceProvider);
-
-      if (patch.image != null) {
-        patch.imageId = await imageService.sendImage(patch.image!);
-      }
-
-      final updated = await recipeService.updateRecipe(recipeId, patch);
-      updated.image = patch.image;
-
-      cache[recipeId] = updated;
-
-      state = AsyncData(updated);
-    } catch (error, stackTrace) {
-      state = AsyncError(error, stackTrace);
-      rethrow;
+  Future<int> createRecipe(Recipe recipe) async {
+    if (recipe.image != null) {
+      recipe.imageId = await _imageService.sendImage(recipe.image!);
     }
+
+    final (id, created) = await _recipeService.createRecipe(recipe);
+    created.image = recipe.image;
+
+    state = {...state, id: created};
+    return id;
   }
 
-  Future<void> deleteRecipe() async {
-    await ref.read(recipeServiceProvider).deleteRecipe(recipeId);
+  Future<Recipe> updateRecipe(int recipeId, RecipePatch patch) async {
+    if (patch.image != null) {
+      patch.imageId = await _imageService.sendImage(patch.image!);
+    }
 
-    cache.remove(recipeId);
+    final updated = await _recipeService.updateRecipe(recipeId, patch);
+    updated.image = patch.image;
 
-    ref.invalidateSelf();
+    state = {...state, recipeId: updated};
+    return updated;
   }
+
+  Future<void> deleteRecipe(int recipeId) async {
+    await _recipeService.deleteRecipe(recipeId);
+    final newState = Map<int, Recipe>.from(state);
+    newState.remove(recipeId);
+    state = newState;
+  }
+}
+
+Future<int> createNewRecipe(WidgetRef ref, Recipe recipe) async {
+  return ref.read(recipeRepositoryProvider.notifier).createRecipe(recipe);
+}
+
+final recipesProvider = FutureProvider<List<RecipeSimple>>((ref) async {
+  ref.watch(recipeRepositoryInvalidationProvider);
+  return ref.read(recipeRepositoryProvider.notifier).fetchAllSimple();
+});
+
+final recipeByIdProvider = FutureProvider.family<Recipe, int>((ref, recipeId) async {
+  ref.watch(recipeRepositoryInvalidationProvider);
+  return ref.read(recipeRepositoryProvider.notifier).getById(recipeId);
+});
+
+void invalidateRepository(WidgetRef ref) {
+  ref.read(recipeRepositoryInvalidationProvider.notifier).trigger();
 }

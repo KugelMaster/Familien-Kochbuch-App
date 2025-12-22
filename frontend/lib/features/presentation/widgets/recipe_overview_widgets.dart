@@ -313,7 +313,7 @@ class RecipeOverviewWidgets {
                       const SizedBox(height: 6),
 
                       Text(
-                        _formatNoteDate(note),
+                        Format.dateWithUpdated(note.createdAt, note.updatedAt),
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
@@ -326,13 +326,6 @@ class RecipeOverviewWidgets {
       }).toList(),
     ),
   );
-
-  static String _formatNoteDate(RecipeNote n) {
-    final created =
-        "${n.createdAt.day}.${n.createdAt.month}.${n.createdAt.year}";
-    final updated = n.updatedAt != n.createdAt ? " (bearbeitet)" : "";
-    return "Erstellt am $created$updated";
-  }
 
   static String _formatTime(int? time) {
     if (time == null) {

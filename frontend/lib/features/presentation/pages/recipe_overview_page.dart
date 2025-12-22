@@ -58,7 +58,7 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
   }
 
   void updateRecipe(RecipePatch patch) {
-    ref.read(recipeProvider(widget.recipeId).notifier).updateRecipe(patch);
+    ref.read(recipeRepositoryProvider.notifier).updateRecipe(widget.recipeId, patch);
     recipeWasUpdated = true;
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -95,7 +95,7 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
 
   @override
   Widget build(BuildContext context) {
-    recipeAsync = ref.watch(recipeProvider(widget.recipeId));
+    recipeAsync = ref.watch(recipeByIdProvider(widget.recipeId));
 
     final double triggerOffset = MediaQuery.of(context).size.height * 0.6;
 
