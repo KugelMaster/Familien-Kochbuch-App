@@ -12,6 +12,7 @@ part 'recipe.g.dart';
 class Recipe {
   String title;
   List<Tag>? tags;
+
   /// If [Recipe.imageId] is null, but [Recipe.image] is not null, then the image is new and should be sent to the backend immediately to retrieve a new imageId.
   int? imageId;
   String? description;
@@ -62,12 +63,10 @@ class RecipeSimple {
   int id;
   String title;
 
-  RecipeSimple({
-    required this.id,
-    required this.title,
-  });
+  RecipeSimple({required this.id, required this.title});
 
-  factory RecipeSimple.fromJson(Map<String, dynamic> json) => _$RecipeSimpleFromJson(json);
+  factory RecipeSimple.fromJson(Map<String, dynamic> json) =>
+      _$RecipeSimpleFromJson(json);
 
   Map<String, dynamic> toJson() => _$RecipeSimpleToJson(this);
 }
@@ -103,9 +102,21 @@ class RecipePatch {
     this.image,
   });
 
-  factory RecipePatch.fromJson(Map<String, dynamic> json) => _$RecipePatchFromJson(json);
+  factory RecipePatch.fromJson(Map<String, dynamic> json) =>
+      _$RecipePatchFromJson(json);
 
   Map<String, dynamic> toJson() => _$RecipePatchToJson(this);
 
-  bool get isEmpty => [title, imageId, description, timePrep, timeTotal, portions, recipeUri, ingredients, nutritions, image].every((attr) => attr == null);
+  bool get isEmpty => [
+    title,
+    imageId,
+    description,
+    timePrep,
+    timeTotal,
+    portions,
+    recipeUri,
+    ingredients,
+    nutritions,
+    image,
+  ].every((attr) => attr == null);
 }

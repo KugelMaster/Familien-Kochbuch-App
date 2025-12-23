@@ -38,7 +38,9 @@ class Format {
     return DateFormat.yMMMEd("de_DE").format(date);
   }
 
-  static String dateWithUpdated(DateTime createdAt, DateTime updatedAt) {
+  static String dateWithUpdated(DateTime? createdAt, DateTime? updatedAt) {
+    if (createdAt == null || updatedAt == null) return "";
+
     final createdAtStr = Format.date(createdAt);
 
     if (updatedAt.difference(createdAt).inSeconds <= 3) return createdAtStr;

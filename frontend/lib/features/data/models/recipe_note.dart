@@ -4,23 +4,23 @@ part 'recipe_note.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class RecipeNote {
-  int id;
+  int? id;
   int recipeId;
   int? userId;
   String content;
 
   @JsonKey(includeToJson: false)
-  DateTime createdAt;
+  DateTime? createdAt;
   @JsonKey(includeToJson: false)
-  DateTime updatedAt;
+  DateTime? updatedAt;
 
   RecipeNote({
-    required this.id,
+    this.id,
     required this.recipeId,
     required this.userId,
     required this.content,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory RecipeNote.fromJson(Map<String, dynamic> json) =>

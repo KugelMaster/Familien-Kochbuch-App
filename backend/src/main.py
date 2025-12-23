@@ -4,6 +4,8 @@ from fastapi.responses import HTMLResponse
 from routers import recipe_notes, recipes, ratings, images, tags
 from database import Base, engine
 
+from tests.test_user import main as test_user_main
+
 
 tags_metadata = [
     {
@@ -31,7 +33,7 @@ tags_metadata = [
 app = FastAPI(
     title="Family Cookbook API",
     description="Backend API for the Family Cookbook App",
-    version="0.1.0",
+    version="0.1.1",
     openapi_tags=tags_metadata
 )
 
@@ -51,3 +53,5 @@ async def root():
             <a href="/docs" style="font-size: 100px">Hier ist der Link zu den Docs</a>
         </div>
     """
+
+test_user_main()

@@ -7,14 +7,20 @@ part of 'rating.dart';
 // **************************************************************************
 
 Rating _$RatingFromJson(Map<String, dynamic> json) => Rating(
+  id: (json['id'] as num?)?.toInt(),
   userId: (json['user_id'] as num).toInt(),
   stars: (json['stars'] as num).toDouble(),
   comment: json['comment'] as String?,
-  createdAt: DateTime.parse(json['created_at'] as String),
-  updatedAt: DateTime.parse(json['updated_at'] as String),
+  createdAt: json['created_at'] == null
+      ? null
+      : DateTime.parse(json['created_at'] as String),
+  updatedAt: json['updated_at'] == null
+      ? null
+      : DateTime.parse(json['updated_at'] as String),
 );
 
 Map<String, dynamic> _$RatingToJson(Rating instance) => <String, dynamic>{
+  'id': instance.id,
   'user_id': instance.userId,
   'stars': instance.stars,
   'comment': instance.comment,

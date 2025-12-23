@@ -4,21 +4,23 @@ part 'rating.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class Rating {
-  final int userId;
-  final double stars;
-  final String? comment;
+  int? id;
+  int userId;
+  double stars;
+  String? comment;
 
   @JsonKey(includeToJson: false)
-  final DateTime createdAt;
+  DateTime? createdAt;
   @JsonKey(includeToJson: false)
-  final DateTime updatedAt;
+  DateTime? updatedAt;
 
-  const Rating({
+  Rating({
+    this.id,
     required this.userId,
     required this.stars,
     this.comment,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory Rating.fromJson(Map<String, dynamic> json) => _$RatingFromJson(json);
