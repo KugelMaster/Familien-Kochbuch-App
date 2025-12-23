@@ -13,7 +13,7 @@ class MyRecipesPage extends ConsumerStatefulWidget {
 }
 
 class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
-  void updateUI() => ref.invalidate(recipesProvider);
+  void updateUI() => ref.invalidate(recipeSimpleListProvider);
 
   Future<void> _openRecipeOverview(int id, String title) async {
     try {
@@ -69,7 +69,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
       if (newRecipe == null) return;
 
-      final id = await createNewRecipe(ref, newRecipe);
+      final id = await ref.read(recipeRepositoryProvider.notifier).createRecipe(newRecipe);
 
       updateUI();
 
@@ -91,7 +91,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
   @override
   Widget build(BuildContext context) {
-    AsyncValue<List<RecipeSimple>> recipesAsync = ref.watch(recipesProvider);
+    AsyncValue<List<RecipeSimple>> recipesAsync = ref.watch(recipeSimpleListProvider);
 
     return Scaffold(
       appBar: AppBar(

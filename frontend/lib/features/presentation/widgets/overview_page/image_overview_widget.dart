@@ -20,7 +20,7 @@ class ImageOverviewWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final imageAsync = ref.watch(
-      recipeByIdProvider(
+      recipeProvider(
         recipeId,
       ).select((recipeAsync) => recipeAsync.whenData((r) => r.image)),
     );

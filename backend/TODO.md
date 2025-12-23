@@ -7,10 +7,8 @@
 - Dokumentation übersichtlicher machen (OpenAPI)
 
 # Aufgaben abgeschlossen:
-- Neues Message Schema
-- FileResponse Typ angegeben für Dokumentation
-- RecipeNotes und Ratings müssen keine `user_id` haben, da der Benutzer auch gelöscht sein kann \
--> Bei Erstellen muss aber eine `user_id` angegeben werden
+- Benutzer können nun beliebig viele RecipeNotes schreiben
+- RecipeNotes können auch getrennt vom Rezept angefordert und bearbeitet werden 
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11):

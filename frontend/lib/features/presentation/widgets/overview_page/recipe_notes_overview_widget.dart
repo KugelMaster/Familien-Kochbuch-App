@@ -6,21 +6,16 @@ import 'package:frontend/features/providers/recipe_note_providers.dart';
 
 class RecipeNotesOverviewWidget extends ConsumerStatefulWidget {
   final int recipeId;
-  final List<RecipeNote> recipeNotes;
 
-  const RecipeNotesOverviewWidget({
-    super.key,
-    required this.recipeId,
-    List<RecipeNote>? recipeNotes,
-  }) : recipeNotes = recipeNotes ?? const [];
+  const RecipeNotesOverviewWidget({super.key, required this.recipeId});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() =>
-      _RecipeNotesSectionState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _RecipeNotesOWState();
 }
 
-class _RecipeNotesSectionState extends ConsumerState<RecipeNotesOverviewWidget> {
+class _RecipeNotesOWState extends ConsumerState<RecipeNotesOverviewWidget> {
   final _controller = TextEditingController();
+  late final currentUserId = ref.watch(currentUserIdProvider);
 
   @override
   void dispose() {
@@ -30,46 +25,63 @@ class _RecipeNotesSectionState extends ConsumerState<RecipeNotesOverviewWidget> 
 
   @override
   Widget build(BuildContext context) {
-    final currentUserId = ref.watch(currentUserIdProvider);
+    final recipeNotesAsync = ref.watch(recipeNotesProvider(widget.recipeId));
+
+    final newNote = _newNoteInput();
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        children: [
-          for (final note in widget.recipeNotes)
-            _RecipeNoteTile(
-              note: note,
-              isOwnNote: note.userId == currentUserId,
-              onDelete: () => ref
-                  .read(recipeNoteProvider.notifier)
-                  .deleteRecipeNote(note.id!),
-              onEdit: (content) => ref
-                  .read(recipeNoteProvider.notifier)
-                  .updateRecipeNote(note.id!, content),
-            ),
-
-          const SizedBox(height: 24),
-
-          _NewNoteInput(
-            controller: _controller,
-            onSubmit: () {
-              final text = _controller.text.trim();
-              if (text.isEmpty) return;
-
-              final note = RecipeNote(
-                recipeId: widget.recipeId,
-                userId: currentUserId,
-                content: text,
-              );
-
-              ref.read(recipeNoteProvider.notifier).createRecipeNote(note);
-              _controller.clear();
-            },
-          ),
-        ],
+      child: recipeNotesAsync.when(
+        loading: () => const CircularProgressIndicator(),
+        error: (e, _) => Text("Error: $e"),
+        data: (recipeNotes) => recipeNotes.isEmpty
+            ? newNote
+            : Column(
+                children: [
+                  ..._recipeNoteTiles(recipeNotes),
+                  const SizedBox(height: 24),
+                  newNote,
+                ],
+              ),
       ),
     );
   }
+
+  Iterable<_RecipeNoteTile> _recipeNoteTiles(List<RecipeNote> notes) =>
+      notes.map(
+        (note) => _RecipeNoteTile(
+          note: note,
+          isOwnNote: note.userId == currentUserId,
+          onDelete: () => ref
+              .read(recipeNoteRepositoryProvider.notifier)
+              .deleteRecipeNote(note.recipeId, note.id!),
+          onEdit: (content) {
+            note.content = content;
+            ref
+                .read(recipeNoteRepositoryProvider.notifier)
+                .updateRecipeNote(note.recipeId, note);
+          },
+        ),
+      );
+
+  _NewNoteInput _newNoteInput() => _NewNoteInput(
+    controller: _controller,
+    onSubmit: () {
+      final text = _controller.text.trim();
+      if (text.isEmpty) return;
+
+      final note = RecipeNote(
+        recipeId: widget.recipeId,
+        userId: currentUserId,
+        content: text,
+      );
+
+      ref
+          .read(recipeNoteRepositoryProvider.notifier)
+          .createRecipeNote(note.recipeId, note);
+      _controller.clear();
+    },
+  );
 }
 
 class _RecipeNoteTile extends StatelessWidget {

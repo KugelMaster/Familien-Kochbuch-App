@@ -1,5 +1,4 @@
 # Aufgaben von RecipeOverviewPage
-- recipe_notes: add, edit, delete
 - ratings: add, edit, delete
 - Haken (✓)
 
@@ -19,9 +18,10 @@
     - Transition AppBar schlecht
 1. API-Calls reduzieren
 1. HTTP-Fehler handeln
-1. Testen, ob man Links für Koch Apps wie bspw. Cookido einfügen kann
 
 # Weitere Aufgaben (noch keine Priorität):
+- CircularProgressIndicator bei Rezept laden korrigieren
+- Reload on Pull MyRecipesPage
 - Rückgängig nach Löschen oder Bearbeiten
 - Task Leiste unten sieht schlecht aus
 - App Icon & Name ändern
@@ -29,11 +29,12 @@
 - Dokumentation schreiben
 - Neues Attribut: Wann wurde das Rezept das letzte mal gekocht?
 - Offline-Modus (gecached Rezepte verwenden)
+- Testen, ob man Links für Koch Apps wie bspw. Cookido einfügen kann
 - Websocket; Wenn zwei Nutzer gleichzeitig ein Rezept bearbeiten, werden die Daten zwischen Server und Client gewechselt
 
 # Aufgaben abgeschlossen:
-- RecipeOverviewWidgets in einzelne Klassen verschieben
-- Widgets werden bei Update geupdated (ja, wirklich :-)
+- RecipeNotes von RecipeRepository getrennt
+- recipe_notes: add, edit, delete
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, String, Text, ForeignKey, DateTime, UniqueConstraint, func
+from sqlalchemy import Column, Integer, Float, String, Text, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -57,10 +57,6 @@ class RecipeNote(Base):
 
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
-
-    __table_args__ = (
-        UniqueConstraint('recipe_id', 'user_id', name='uq_user_recipe_note'),
-    )
 
 
 class Rating(Base):

@@ -22,6 +22,21 @@ class RecipeNoteService {
     return RecipeNote.fromJson(response.data!);
   }
 
+  Future<List<RecipeNote>> getByRecipeId(int recipeId) async {
+    final response = await _client.dio.get(Endpoints.recipeNotesRecipe(recipeId));
+
+    if (response.data == null) {
+      logger.d(
+        "Fetching recipe notes failed: ${response.statusCode} ${response.statusMessage}",
+      );
+      throw Exception("Failed to fetch recipe notes");
+    }
+
+    final data = response.data as List;
+
+    return data.map((json) => RecipeNote.fromJson(json)).toList();
+  }
+
   Future<RecipeNote> createRecipeNote(RecipeNote note) async {
     final response = await _client.dio.post<Map<String, dynamic>>(
       Endpoints.recipeNotes,

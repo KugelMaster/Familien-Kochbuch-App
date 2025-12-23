@@ -2,70 +2,83 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/network/api_client_provider.dart';
 import 'package:frontend/features/data/models/recipe_note.dart';
 import 'package:frontend/features/data/services/recipe_note_service.dart';
+import 'package:frontend/features/providers/recipe_providers.dart';
 
 final recipeNoteServiceProvider = Provider((ref) {
   final client = ref.watch(apiClientProvider);
   return RecipeNoteService(client);
 });
 
-final recipeNoteProvider =
-    NotifierProvider<RecipeNoteProvider, Map<int, RecipeNote>>(
-      RecipeNoteProvider.new,
+final recipeNoteRepositoryProvider =
+    NotifierProvider<RecipeNoteRepositoryNotifier, Map<int, List<RecipeNote>>>(
+      RecipeNoteRepositoryNotifier.new,
     );
 
-class RecipeNoteProvider extends Notifier<Map<int, RecipeNote>> {
+class RecipeNoteRepositoryNotifier
+    extends Notifier<Map<int, List<RecipeNote>>> {
   late final RecipeNoteService _recipeNoteService = ref.read(
     recipeNoteServiceProvider,
   );
 
   @override
-  Map<int, RecipeNote> build() {
+  Map<int, List<RecipeNote>> build() {
+    ref.watch(recipeRepositoryInvalidationProvider);
     return {};
   }
 
-  Future<RecipeNote> getById(int noteId) async {
-    final cached = state[noteId];
+  Future<List<RecipeNote>> getByRecipeId(int recipeId) async {
+    final cached = state[recipeId];
     if (cached != null) return cached;
 
-    final fetched = await _recipeNoteService.getById(noteId);
-    state = {...state, fetched.id!: fetched};
-    return fetched;
+    final notes = await _recipeNoteService.getByRecipeId(recipeId);
+    state = {...state, recipeId: notes};
+    return notes;
   }
 
-  /// Adds the given RecipeNotes without interacting with the backend. Useful for caching
-  Future<void> addRecipeNotes(List<RecipeNote>? notes) async {
-    if (notes == null) return;
-
-    state = {...state, for (var note in notes) note.id!: note};
-  }
-
-  Future<int> createRecipeNote(RecipeNote note) async {
+  Future<int> createRecipeNote(int recipeId, RecipeNote note) async {
     final created = await _recipeNoteService.createRecipeNote(note);
 
-    state = {...state, created.id!: created};
+    final notes = state[recipeId] ?? [];
+    notes.add(created);
+    state = {...state, recipeId: notes};
 
     return created.id!;
   }
 
-  Future<RecipeNote> updateRecipeNote(int noteId, String content) async {
-    final updated = await _recipeNoteService.updateRecipeNote(noteId, content);
+  Future<RecipeNote> updateRecipeNote(
+    int recipeId,
+    RecipeNote updatedNote,
+  ) async {
+    final updated = await _recipeNoteService.updateRecipeNote(
+      updatedNote.id!,
+      updatedNote.content,
+    );
 
-    state = {...state, noteId: updated};
+    final notes = state[recipeId] ?? [];
+    final noteIndex = notes.indexWhere((note) => note.id == updatedNote.id);
+    if (noteIndex != -1) {
+      notes[noteIndex] = updatedNote;
+      state = {...state, recipeId: notes};
+    }
 
     return updated;
   }
 
-  Future<void> deleteRecipeNote(int noteId) async {
+  Future<void> deleteRecipeNote(int recipeId, int noteId) async {
     await _recipeNoteService.deleteRecipeNote(noteId);
-    final newState = Map<int, RecipeNote>.from(state);
-    newState.remove(noteId);
-    state = newState;
+
+    final notes = state[recipeId] ?? [];
+    notes.removeWhere((note) => note.id == noteId);
+    state = {...state, recipeId: notes};
   }
 }
 
-final recipeNoteByIdProvider = FutureProvider.family<RecipeNote, int>((
+final recipeNotesProvider = FutureProvider.family<List<RecipeNote>, int>((
   ref,
-  noteId,
+  recipeId,
 ) async {
-  return ref.read(recipeNoteProvider.notifier).getById(noteId);
+  ref.watch(recipeNoteRepositoryProvider);
+  return ref
+      .read(recipeNoteRepositoryProvider.notifier)
+      .getByRecipeId(recipeId);
 });

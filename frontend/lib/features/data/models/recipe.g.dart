@@ -23,9 +23,6 @@ Recipe _$RecipeFromJson(Map<String, dynamic> json) => Recipe(
   nutritions: (json['nutritions'] as List<dynamic>?)
       ?.map((e) => Nutrition.fromJson(e as Map<String, dynamic>))
       .toList(),
-  recipeNotes: (json['recipe_notes'] as List<dynamic>?)
-      ?.map((e) => RecipeNote.fromJson(e as Map<String, dynamic>))
-      .toList(),
   ratings: (json['ratings'] as List<dynamic>?)
       ?.map((e) => Rating.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -48,7 +45,6 @@ Map<String, dynamic> _$RecipeToJson(Recipe instance) => <String, dynamic>{
   'recipe_uri': instance.recipeUri,
   'ingredients': instance.ingredients,
   'nutritions': instance.nutritions,
-  'recipe_notes': instance.recipeNotes,
   'ratings': instance.ratings,
 };
 

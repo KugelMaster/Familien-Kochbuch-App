@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/network/api_client_provider.dart';
 import 'package:frontend/features/data/models/recipe.dart';
 import 'package:frontend/features/data/services/image_service.dart';
+import 'package:frontend/features/data/services/recipe_note_service.dart';
 import 'package:frontend/features/data/services/recipe_service.dart';
-import 'package:frontend/features/providers/recipe_note_providers.dart';
 
 final recipeServiceProvider = Provider<RecipeService>((ref) {
   final client = ref.watch(apiClientProvider);
@@ -17,8 +17,16 @@ final imageServiceProvider = Provider<ImageService>((ref) {
   return ImageService(client);
 });
 
+final recipeNoteServiceProvider = Provider<RecipeNoteService>((ref) {
+  final client = ref.watch(apiClientProvider);
+  return RecipeNoteService(client);
+});
 
-final recipeRepositoryInvalidationProvider = NotifierProvider<RecipeRepositoryInvalidationNotifier, int>(RecipeRepositoryInvalidationNotifier.new);
+final recipeRepositoryInvalidationProvider =
+    NotifierProvider<RecipeRepositoryInvalidationNotifier, int>(
+      RecipeRepositoryInvalidationNotifier.new,
+    );
+
 class RecipeRepositoryInvalidationNotifier extends Notifier<int> {
   @override
   int build() => 0;
@@ -26,8 +34,11 @@ class RecipeRepositoryInvalidationNotifier extends Notifier<int> {
   void trigger() => state++;
 }
 
+final recipeRepositoryProvider =
+    NotifierProvider<RecipeRepositoryNotifier, Map<int, Recipe>>(
+      RecipeRepositoryNotifier.new,
+    );
 
-final recipeRepositoryProvider = NotifierProvider<RecipeRepositoryNotifier, Map<int, Recipe>>(RecipeRepositoryNotifier.new);
 class RecipeRepositoryNotifier extends Notifier<Map<int, Recipe>> {
   late final RecipeService _recipeService = ref.read(recipeServiceProvider);
   late final ImageService _imageService = ref.read(imageServiceProvider);
@@ -49,7 +60,6 @@ class RecipeRepositoryNotifier extends Notifier<Map<int, Recipe>> {
     }
 
     state = {...state, recipeId: fetched};
-    ref.read(recipeNoteProvider.notifier).addRecipeNotes(fetched.recipeNotes);
     return fetched;
   }
 
@@ -81,7 +91,7 @@ class RecipeRepositoryNotifier extends Notifier<Map<int, Recipe>> {
 
     state = {...state, recipeId: updated};
 
-    ref.invalidate(recipeByIdProvider(recipeId));
+    ref.invalidate(recipeProvider(recipeId));
     return updated;
   }
 
@@ -93,17 +103,19 @@ class RecipeRepositoryNotifier extends Notifier<Map<int, Recipe>> {
   }
 }
 
-Future<int> createNewRecipe(WidgetRef ref, Recipe recipe) async {
-  return ref.read(recipeRepositoryProvider.notifier).createRecipe(recipe);
-}
-
-final recipesProvider = FutureProvider<List<RecipeSimple>>((ref) async {
+final recipeSimpleListProvider = FutureProvider<List<RecipeSimple>>((
+  ref,
+) async {
   ref.watch(recipeRepositoryInvalidationProvider);
   return ref.read(recipeRepositoryProvider.notifier).fetchAllSimple();
 });
 
-final recipeByIdProvider = FutureProvider.family<Recipe, int>((ref, recipeId) async {
+final recipeProvider = FutureProvider.family<Recipe, int>((
+  ref,
+  recipeId,
+) async {
   ref.watch(recipeRepositoryInvalidationProvider);
+  ref.watch(recipeRepositoryProvider);
   return ref.read(recipeRepositoryProvider.notifier).getById(recipeId);
 });
 

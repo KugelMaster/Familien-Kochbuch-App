@@ -133,7 +133,7 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
 
   @override
   Widget build(BuildContext context) {
-    recipeAsync = ref.watch(recipeByIdProvider(widget.recipeId));
+    recipeAsync = ref.watch(recipeProvider(widget.recipeId));
 
     final double triggerOffset = MediaQuery.of(context).size.height * 0.6;
 
@@ -203,11 +203,9 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
         NutritionsOverviewWidget(nutritions: recipe.nutritions!),
       const SizedBox(height: 40),
 
-      if (recipe.recipeNotes != null)
-        RecipeNotesOverviewWidget(
-          recipeId: widget.recipeId,
-          recipeNotes: recipe.recipeNotes,
-        ),
+      RecipeNotesOverviewWidget(
+        recipeId: widget.recipeId,
+      ),
       const SizedBox(height: 320),
     ],
   );
