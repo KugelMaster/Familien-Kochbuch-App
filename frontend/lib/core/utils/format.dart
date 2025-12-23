@@ -47,4 +47,15 @@ class Format {
 
     return "$createdAt (bearbeitet)";
   }
+
+  static String time(int? time) {
+    if (time == null) {
+      return "N/A";
+    }
+
+    final int hours = time ~/ 60;
+    final int minutes = time % 60;
+
+    return "${hours == 0 ? "" : "$hours Std. "}$minutes Min";
+  }
 }

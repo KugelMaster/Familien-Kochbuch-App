@@ -6,10 +6,17 @@ import 'package:frontend/features/data/models/tag.dart';
 import 'package:frontend/features/presentation/pages/recipe_edit_page.dart';
 import 'package:frontend/features/presentation/widgets/animated_app_bar.dart';
 import 'package:frontend/features/data/models/recipe.dart';
-import 'package:frontend/features/presentation/widgets/recipe_overview_widgets.dart';
+import 'package:frontend/features/presentation/widgets/overview_page/image_overview_widget.dart';
+import 'package:frontend/features/presentation/widgets/overview_page/info_chips_overview_widget.dart';
+import 'package:frontend/features/presentation/widgets/overview_page/ingredients_overview_widget.dart';
+import 'package:frontend/features/presentation/widgets/overview_page/nutritions_overview_widget.dart';
+import 'package:frontend/features/presentation/widgets/overview_page/rating_overview_widget.dart';
+import 'package:frontend/features/presentation/widgets/overview_page/recipe_notes_overview_widget.dart';
+import 'package:frontend/features/presentation/widgets/overview_page/tags_overview_widget.dart';
 import 'package:frontend/features/presentation/widgets/tag_edit_sheet.dart';
 import 'package:frontend/features/providers/recipe_providers.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Shows a detailed user interface of a recipe.
 ///
@@ -58,7 +65,9 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
   }
 
   void updateRecipe(RecipePatch patch) {
-    ref.read(recipeRepositoryProvider.notifier).updateRecipe(widget.recipeId, patch);
+    ref
+        .read(recipeRepositoryProvider.notifier)
+        .updateRecipe(widget.recipeId, patch);
     recipeWasUpdated = true;
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -75,7 +84,19 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     );
   }
 
-  void editTags() async {
+  Future<void> onTakePhoto() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 85,
+    );
+
+    if (image != null) {
+      updateRecipe(RecipePatch(image: image));
+    }
+  }
+
+  Future<void> onEditTags() async {
     List<Tag>? updated = await showModalBottomSheet<List<Tag>>(
       context: context,
       isScrollControlled: true,
@@ -93,116 +114,7 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     updateRecipe(RecipePatch(tags: idList));
   }
 
-  @override
-  Widget build(BuildContext context) {
-    recipeAsync = ref.watch(recipeByIdProvider(widget.recipeId));
-
-    final double triggerOffset = MediaQuery.of(context).size.height * 0.6;
-
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AnimatedAppBar(
-        scrollController: _scrollController,
-        recipeId: widget.recipeId,
-        title: recipeAsync.value?.title ?? widget.title ?? "<Name unbekannt>",
-        triggerOffset: triggerOffset,
-        onClose: onClose,
-      ),
-      body: recipeAsync.when(
-        loading: () => const CircularProgressIndicator(),
-        error: (e, _) => Text("Fehler: $e"),
-        data: (recipe) => SingleChildScrollView(
-          controller: _scrollController,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              RecipeOverviewWidgets.buildImage(
-                getPhoto: takePhoto,
-                screenHeight: MediaQuery.of(context).size.height,
-                getImage: getImage,
-              ),
-              const SizedBox(height: 8),
-
-              if (recipe.tags != null)
-                RecipeOverviewWidgets.buildTags(recipe.tags!, editTags),
-              const SizedBox(height: 8),
-
-              RecipeOverviewWidgets.buildTitle(recipe.title),
-              if (recipe.description != null)
-                RecipeOverviewWidgets.buildDescription(recipe.description!),
-              const SizedBox(height: 6),
-
-              if (recipe.ratings != null)
-                RecipeOverviewWidgets.buildRatingSummary(recipe.ratings!),
-              const SizedBox(height: 12),
-
-              RecipeOverviewWidgets.buildInfoChips(
-                recipe,
-                Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(height: 24),
-
-              if (recipe.recipeUri != null)
-                RecipeOverviewWidgets.buildUriButton(recipe.recipeUri!),
-              const SizedBox(height: 24),
-
-              if (recipe.ingredients != null)
-                ...RecipeOverviewWidgets.buildIngredients(recipe.ingredients!),
-              const SizedBox(height: 24),
-
-              ...RecipeOverviewWidgets.buildNutritions(recipe.nutritions),
-              const SizedBox(height: 40),
-
-              if (recipe.recipeNotes != null)
-                RecipeOverviewWidgets.buildRecipeNotes(recipe.recipeNotes!),
-              const SizedBox(height: 320),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: openEditView,
-        child: const Icon(Icons.edit),
-      ),
-    );
-  }
-
-  Future<XFile?> getImage() async {
-    if (recipeAsync.value == null) return null;
-
-    Recipe recipe = recipeAsync.value!;
-
-    if (recipe.image != null) {
-      return recipe.image;
-    }
-
-    if (recipe.imageId == null) {
-      return null;
-    }
-
-    return await ref.read(imageServiceProvider).getImage(recipe.imageId!);
-  }
-
-  Future<void> takePhoto() async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 85,
-    );
-
-    if (image != null) {
-      updateRecipe(RecipePatch(image: image));
-    }
-  }
-
-  void openEditView() async {
-    if (recipeAsync.value == null) {
-      throw Exception(
-        "How is this possible? You should not open a recipe overview page with no recipe to show and then try to edit it!",
-      );
-    }
-
-    Recipe oldRecipe = recipeAsync.value!;
+  Future<void> openEditView(Recipe oldRecipe) async {
     final updatedRecipe = await Navigator.push<Recipe>(
       context,
       MaterialPageRoute(
@@ -218,4 +130,117 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
 
     updateRecipe(patch);
   }
+
+  @override
+  Widget build(BuildContext context) {
+    recipeAsync = ref.watch(recipeByIdProvider(widget.recipeId));
+
+    final double triggerOffset = MediaQuery.of(context).size.height * 0.6;
+
+    return recipeAsync.when(
+      loading: () {
+        print("Ich lade das Rezept...");
+        return const CircularProgressIndicator();
+      },
+      error: (e, _) => Text("Fehler: $e"),
+      data: (recipe) => Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AnimatedAppBar(
+          scrollController: _scrollController,
+          recipeId: widget.recipeId,
+          title: recipeAsync.value?.title ?? widget.title ?? "<Name unbekannt>",
+          triggerOffset: triggerOffset,
+          onClose: onClose,
+        ),
+        body: SingleChildScrollView(
+          controller: _scrollController,
+          child: _buildOverview(recipe),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => openEditView(recipe),
+          child: const Icon(Icons.edit),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOverview(Recipe recipe) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      ImageOverviewWidget(
+        recipeId: widget.recipeId,
+        takePhoto: onTakePhoto,
+        screenHeight: MediaQuery.of(context).size.height,
+      ),
+      const SizedBox(height: 8),
+
+      if (recipe.tags != null)
+        TagsOverviewWidget(tags: recipe.tags!, editTags: onEditTags),
+      const SizedBox(height: 8),
+
+      _title(recipe.title),
+      if (recipe.description != null) _description(recipe.description!),
+      const SizedBox(height: 6),
+
+      if (recipe.ratings != null)
+        RatingOverviewWidget(ratings: recipe.ratings!),
+      const SizedBox(height: 12),
+
+      InfoChipsOverviewWidget(
+        recipe: recipe,
+        iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      const SizedBox(height: 24),
+
+      if (recipe.recipeUri != null) _uriButton(recipe.recipeUri!),
+      const SizedBox(height: 24),
+
+      if (recipe.ingredients != null)
+        IngredientsOverviewWidget(ingredients: recipe.ingredients!),
+      const SizedBox(height: 24),
+
+      if (recipe.nutritions != null)
+        NutritionsOverviewWidget(nutritions: recipe.nutritions!),
+      const SizedBox(height: 40),
+
+      if (recipe.recipeNotes != null)
+        RecipeNotesOverviewWidget(
+          recipeId: widget.recipeId,
+          recipeNotes: recipe.recipeNotes,
+        ),
+      const SizedBox(height: 320),
+    ],
+  );
+
+  Widget _title(String title) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Text(
+      title,
+      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+    ),
+  );
+
+  Widget _description(String description) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    child: Text(
+      description,
+      style: const TextStyle(fontSize: 16, color: Colors.black87),
+    ),
+  );
+
+  Widget _uriButton(String uri) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: OutlinedButton.icon(
+      icon: const Icon(Icons.open_in_new),
+      label: const Text("Originalrezept öffnen"),
+      onPressed: () async {
+        if (!await launchUrl(
+          Uri.parse(uri),
+          mode: LaunchMode.externalApplication,
+        )) {
+          throw Exception("Could not launch $uri");
+        }
+      },
+    ),
+  );
 }

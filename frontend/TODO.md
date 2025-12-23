@@ -4,8 +4,8 @@
 - Haken (✓)
 
 # Aufgaben (sortiert nach Priorität)
-1. RecipeOverviewWidgets in einzelne Klassen verschieben
 1. RecipeOverviewPage Aufgaben
+1. Tag Providers neu schreiben
 1. RecipeEditPage Image Hero bearbeiten Funktion sichtbarer machen
 1. Tag Verwaltungs Seite
 1. Benutzer Verwaltung (add, edit, delete)
@@ -32,7 +32,8 @@
 - Websocket; Wenn zwei Nutzer gleichzeitig ein Rezept bearbeiten, werden die Daten zwischen Server und Client gewechselt
 
 # Aufgaben abgeschlossen:
-
+- RecipeOverviewWidgets in einzelne Klassen verschieben
+- Widgets werden bei Update geupdated (ja, wirklich :-)
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

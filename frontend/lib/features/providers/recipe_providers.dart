@@ -5,6 +5,7 @@ import 'package:frontend/core/network/api_client_provider.dart';
 import 'package:frontend/features/data/models/recipe.dart';
 import 'package:frontend/features/data/services/image_service.dart';
 import 'package:frontend/features/data/services/recipe_service.dart';
+import 'package:frontend/features/providers/recipe_note_providers.dart';
 
 final recipeServiceProvider = Provider<RecipeService>((ref) {
   final client = ref.watch(apiClientProvider);
@@ -42,7 +43,13 @@ class RecipeRepositoryNotifier extends Notifier<Map<int, Recipe>> {
     if (cached != null) return cached;
 
     final fetched = await _recipeService.getById(recipeId);
+
+    if (fetched.imageId != null) {
+      fetched.image = await _imageService.getImage(fetched.imageId!);
+    }
+
     state = {...state, recipeId: fetched};
+    ref.read(recipeNoteProvider.notifier).addRecipeNotes(fetched.recipeNotes);
     return fetched;
   }
 
@@ -63,14 +70,18 @@ class RecipeRepositoryNotifier extends Notifier<Map<int, Recipe>> {
   }
 
   Future<Recipe> updateRecipe(int recipeId, RecipePatch patch) async {
+    final image = patch.image ?? state[recipeId]?.image;
+
     if (patch.image != null) {
       patch.imageId = await _imageService.sendImage(patch.image!);
     }
 
     final updated = await _recipeService.updateRecipe(recipeId, patch);
-    updated.image = patch.image;
+    updated.image = image;
 
     state = {...state, recipeId: updated};
+
+    ref.invalidate(recipeByIdProvider(recipeId));
     return updated;
   }
 
