@@ -4,7 +4,8 @@ class Endpoints {
   static String recipe(int recipeId) => "$recipes/$recipeId";
 
   static String recipeNotes = "/recipe-notes";
-  static String recipeNote(int noteId) => "$recipeNotes/$noteId";
+  static String recipeNote(int noteId) => "$recipeNotes/note/$noteId";
+  static String recipeNotesRecipe(int recipeId) => "$recipeNotes/$recipeId";
 
   static String ratings = "/ratings";
   static String ratingsRecipe(int recipeId) => "$ratings/$recipeId";

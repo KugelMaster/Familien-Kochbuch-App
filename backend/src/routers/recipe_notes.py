@@ -32,7 +32,7 @@ def create_recipe_note(recipe_note: RecipeNoteCreate, db: Session = Depends(get_
 
     return db_recipe_note
 
-@router.get("/{note_id}", response_model=RecipeNoteOut)
+@router.get("/note/{note_id}", response_model=RecipeNoteOut)
 def get_recipe_note(note_id: int, db: Session = Depends(get_db)):
     db_recipe_note = db.query(RecipeNote).filter(RecipeNote.id == note_id).first()
 
@@ -41,7 +41,7 @@ def get_recipe_note(note_id: int, db: Session = Depends(get_db)):
     
     return db_recipe_note
 
-@router.patch("/{note_id}", response_model=RecipeNoteOut)
+@router.patch("/note/{note_id}", response_model=RecipeNoteOut)
 def edit_recipe_note(note_id: int, patch: RecipeNoteUpdate, db: Session = Depends(get_db)):
     db_recipe_note = db.query(RecipeNote).filter(RecipeNote.id == note_id).first()
 
@@ -55,7 +55,7 @@ def edit_recipe_note(note_id: int, patch: RecipeNoteUpdate, db: Session = Depend
 
     return db_recipe_note
 
-@router.delete("/{note_id}", response_model=Message)
+@router.delete("/note/{note_id}", response_model=Message)
 def delete_recipe_note(note_id: int, db: Session = Depends(get_db)):
     db_recipe_note = db.query(RecipeNote).filter(RecipeNote.id == note_id).first()
 
@@ -66,3 +66,24 @@ def delete_recipe_note(note_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return Message(detail="Recipe note deleted successfully")
+
+@router.get("/{recipe_id}", response_model=list[RecipeNoteOut])
+def get_notes_for_recipe(recipe_id: int, db: Session = Depends(get_db)):
+    db_recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+
+    if not db_recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    
+    return db.query(RecipeNote).filter(RecipeNote.recipe_id == recipe_id).all()
+
+@router.delete("/{recipe_id}", response_model=Message)
+def clear_notes_for_recipe(recipe_id: int, db: Session = Depends(get_db)):
+    db_recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+
+    if not db_recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    
+    db.query(RecipeNote).filter(RecipeNote.recipe_id == recipe_id).delete()
+    db.commit()
+
+    return Message(detail="All notes for the recipe have been deleted successfully")

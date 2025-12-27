@@ -2,7 +2,6 @@ import 'package:frontend/features/data/models/ingredient.dart';
 import 'package:frontend/features/data/models/nutrition.dart';
 import 'package:frontend/features/data/models/rating.dart';
 import 'package:frontend/features/data/models/tag.dart';
-import 'package:frontend/features/data/models/recipe_note.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -23,7 +22,6 @@ class Recipe {
 
   List<Ingredient>? ingredients;
   List<Nutrition>? nutritions;
-  List<RecipeNote>? recipeNotes;
   List<Rating>? ratings;
 
   @JsonKey(includeToJson: false)
@@ -46,7 +44,6 @@ class Recipe {
     this.recipeUri,
     this.ingredients,
     this.nutritions,
-    this.recipeNotes,
     this.ratings,
     this.createdAt,
     this.updatedAt,
