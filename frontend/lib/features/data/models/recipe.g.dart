@@ -8,24 +8,27 @@ part of 'recipe.dart';
 
 Recipe _$RecipeFromJson(Map<String, dynamic> json) => Recipe(
   title: json['title'] as String,
-  tags: (json['tags'] as List<dynamic>?)
-      ?.map((e) => Tag.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  tags:
+      (json['tags'] as List<dynamic>?)
+          ?.map((e) => Tag.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
   imageId: (json['image_id'] as num?)?.toInt(),
   description: json['description'] as String?,
   timePrep: (json['time_prep'] as num?)?.toInt(),
   timeTotal: (json['time_total'] as num?)?.toInt(),
   portions: (json['portions'] as num?)?.toDouble(),
   recipeUri: json['recipe_uri'] as String?,
-  ingredients: (json['ingredients'] as List<dynamic>?)
-      ?.map((e) => Ingredient.fromJson(e as Map<String, dynamic>))
-      .toList(),
-  nutritions: (json['nutritions'] as List<dynamic>?)
-      ?.map((e) => Nutrition.fromJson(e as Map<String, dynamic>))
-      .toList(),
-  ratings: (json['ratings'] as List<dynamic>?)
-      ?.map((e) => Rating.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  ingredients:
+      (json['ingredients'] as List<dynamic>?)
+          ?.map((e) => Ingredient.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  nutritions:
+      (json['nutritions'] as List<dynamic>?)
+          ?.map((e) => Nutrition.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
   createdAt: json['created_at'] == null
       ? null
       : DateTime.parse(json['created_at'] as String),
@@ -45,7 +48,6 @@ Map<String, dynamic> _$RecipeToJson(Recipe instance) => <String, dynamic>{
   'recipe_uri': instance.recipeUri,
   'ingredients': instance.ingredients,
   'nutritions': instance.nutritions,
-  'ratings': instance.ratings,
 };
 
 RecipeSimple _$RecipeSimpleFromJson(Map<String, dynamic> json) => RecipeSimple(

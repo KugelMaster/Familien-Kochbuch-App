@@ -37,7 +37,7 @@ class RecipeNoteService {
     return data.map((json) => RecipeNote.fromJson(json)).toList();
   }
 
-  Future<RecipeNote> createRecipeNote(RecipeNote note) async {
+  Future<RecipeNote> createRecipeNote(RecipeNoteCreate note) async {
     final response = await _client.dio.post<Map<String, dynamic>>(
       Endpoints.recipeNotes,
       data: note.toJson(),

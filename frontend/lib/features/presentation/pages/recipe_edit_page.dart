@@ -63,24 +63,25 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
     portionsCtrl.text = Format.number(recipe.portions, defaultReturn: "");
     linkCtrl.text = recipe.recipeUri ?? "";
 
-    recipe.ingredients?.forEach(
-      (ing) => ingredients.add(
+    for (var ing in recipe.ingredients) {
+      ingredients.add(
         IngredientOrNutritionDraft(
           name: ing.name,
           amount: ing.amount,
           unit: ing.unit,
         ),
-      ),
-    );
-    recipe.nutritions?.forEach(
-      (nut) => nutritions.add(
+      );
+    }
+
+    for (var nut in recipe.nutritions) {
+      nutritions.add(
         IngredientOrNutritionDraft(
           name: nut.name,
           amount: nut.amount,
           unit: nut.unit,
         ),
-      ),
-    );
+      );
+    }
 
     loadImage(recipe);
   }

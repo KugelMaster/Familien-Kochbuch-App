@@ -1,9 +1,4 @@
-# Aufgaben von RecipeOverviewPage
-- ratings: add, edit, delete
-- Haken (✓)
-
 # Aufgaben (sortiert nach Priorität)
-1. RecipeOverviewPage Aufgaben
 1. Tag Providers neu schreiben
 1. RecipeEditPage Image Hero bearbeiten Funktion sichtbarer machen
 1. Tag Verwaltungs Seite
@@ -33,8 +28,10 @@
 - Websocket; Wenn zwei Nutzer gleichzeitig ein Rezept bearbeiten, werden die Daten zwischen Server und Client gewechselt
 
 # Aufgaben abgeschlossen:
-- RecipeNotes von RecipeRepository getrennt
-- recipe_notes: add, edit, delete
+- Klickbare Bewertung auf der RecipeOverviewPage
+- RatingsDialog mit interaktiven Bewertungen
+- Live Updates bei Änderung + jeder Benutzer darf genau eine Bewertung machen
+- AsyncValueHandler für immer gleiches Layout bei einer AsyncValue von Riverpod
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

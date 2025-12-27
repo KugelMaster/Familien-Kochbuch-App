@@ -54,12 +54,12 @@ class _RecipeNotesOWState extends ConsumerState<RecipeNotesOverviewWidget> {
           isOwnNote: note.userId == currentUserId,
           onDelete: () => ref
               .read(recipeNoteRepositoryProvider.notifier)
-              .deleteRecipeNote(note.recipeId, note.id!),
+              .deleteRecipeNote(note.recipeId, note.id),
           onEdit: (content) {
             note.content = content;
             ref
                 .read(recipeNoteRepositoryProvider.notifier)
-                .updateRecipeNote(note.recipeId, note);
+                .updateRecipeNote(note);
           },
         ),
       );
@@ -70,15 +70,13 @@ class _RecipeNotesOWState extends ConsumerState<RecipeNotesOverviewWidget> {
       final text = _controller.text.trim();
       if (text.isEmpty) return;
 
-      final note = RecipeNote(
+      final note = RecipeNoteCreate(
         recipeId: widget.recipeId,
         userId: currentUserId,
         content: text,
       );
 
-      ref
-          .read(recipeNoteRepositoryProvider.notifier)
-          .createRecipeNote(note.recipeId, note);
+      ref.read(recipeNoteRepositoryProvider.notifier).createRecipeNote(note);
       _controller.clear();
     },
   );

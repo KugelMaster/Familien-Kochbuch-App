@@ -77,7 +77,7 @@ def get_notes_for_recipe(recipe_id: int, db: Session = Depends(get_db)):
     return db.query(RecipeNote).filter(RecipeNote.recipe_id == recipe_id).all()
 
 @router.delete("/{recipe_id}", response_model=Message)
-def clear_notes_for_recipe(recipe_id: int, db: Session = Depends(get_db)):
+def delete_all_notes_from_recipe(recipe_id: int, db: Session = Depends(get_db)):
     db_recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
     if not db_recipe:

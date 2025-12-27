@@ -1,6 +1,5 @@
 import 'package:frontend/features/data/models/ingredient.dart';
 import 'package:frontend/features/data/models/nutrition.dart';
-import 'package:frontend/features/data/models/rating.dart';
 import 'package:frontend/features/data/models/tag.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -10,7 +9,7 @@ part 'recipe.g.dart';
 @JsonSerializable(fieldRename: FieldRename.snake)
 class Recipe {
   String title;
-  List<Tag>? tags;
+  List<Tag> tags;
 
   /// If [Recipe.imageId] is null, but [Recipe.image] is not null, then the image is new and should be sent to the backend immediately to retrieve a new imageId.
   int? imageId;
@@ -20,9 +19,8 @@ class Recipe {
   double? portions;
   String? recipeUri;
 
-  List<Ingredient>? ingredients;
-  List<Nutrition>? nutritions;
-  List<Rating>? ratings;
+  List<Ingredient> ingredients;
+  List<Nutrition> nutritions;
 
   @JsonKey(includeToJson: false)
   DateTime? createdAt;
@@ -35,16 +33,15 @@ class Recipe {
 
   Recipe({
     required this.title,
-    this.tags,
+    this.tags = const [],
     this.imageId,
     this.description,
     this.timePrep,
     this.timeTotal,
     this.portions,
     this.recipeUri,
-    this.ingredients,
-    this.nutritions,
-    this.ratings,
+    this.ingredients = const [],
+    this.nutritions = const [],
     this.createdAt,
     this.updatedAt,
     this.image,
