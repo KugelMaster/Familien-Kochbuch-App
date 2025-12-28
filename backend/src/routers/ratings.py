@@ -1,8 +1,9 @@
+from typing import cast
 from fastapi import APIRouter, Depends, HTTPException
 from database import get_db
 from sqlalchemy.orm import Session
 
-from schemas import Message, RatingCreate, RatingOut, RatingUpdate
+from schemas import Message, RatingAverageOut, RatingCreate, RatingOut, RatingUpdate
 from models import Rating, Recipe, User
 
 
@@ -81,6 +82,24 @@ def list_ratings(recipe_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Recipe not found")
 
     return db.query(Rating).filter(Rating.recipe_id == recipe_id).all()
+
+@router.get("/{recipe_id}/average", response_model=RatingAverageOut)
+def get_average_rating(recipe_id: int, db: Session = Depends(get_db)):
+    if db.query(Recipe).filter(Recipe.id == recipe_id).first() is None:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+    ratings = db.query(Rating).filter(Rating.recipe_id == recipe_id).all()
+
+    if not ratings or len(ratings) == 0:
+        return 0.0
+
+    total_stars = sum(rating.stars for rating in ratings)
+    average = total_stars / len(ratings)
+
+    return RatingAverageOut(
+        average_stars=round(cast(float, average), 2),
+        total_ratings=len(ratings)
+    )
 
 @router.delete("/{recipe_id}", response_model=Message)
 def delete_all_ratings_from_recipe(recipe_id: int, db: Session = Depends(get_db)):

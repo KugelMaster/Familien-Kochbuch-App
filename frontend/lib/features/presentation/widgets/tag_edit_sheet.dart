@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/utils/async_value_handler.dart';
 import 'package:frontend/features/data/models/tag.dart';
 import 'package:frontend/features/providers/tag_providers.dart';
 
@@ -38,8 +39,12 @@ class _TagEditSheetState extends ConsumerState<TagEditSheet> {
             autofocus: true,
             decoration: InputDecoration(labelText: "Kategorie Name"),
             validator: (v) {
-              if (v == null || v.trim().isEmpty) return "Name darf nicht leer sein";
-              if (tagsAsync.value?.any((t) => t.name == v) ?? false) return "Diesen Namen gibt es bereits";
+              if (v == null || v.trim().isEmpty) {
+                return "Name darf nicht leer sein";
+              }
+              if (tagsAsync.value?.any((t) => t.name == v) ?? false) {
+                return "Diesen Namen gibt es bereits";
+              }
               return null;
             },
           ),
@@ -78,7 +83,6 @@ class _TagEditSheetState extends ConsumerState<TagEditSheet> {
 
   @override
   Widget build(BuildContext context) {
-    AsyncValue<List<Tag>> allTags = ref.watch(tagsProvider);
     final width = MediaQuery.of(context).size.width - 16;
 
     return SafeArea(
@@ -90,7 +94,7 @@ class _TagEditSheetState extends ConsumerState<TagEditSheet> {
           children: [
             _header(),
             const SizedBox(height: 12),
-            _tagList(allTags),
+            _tagList(),
             const SizedBox(height: 16),
             _actions(context),
           ],
@@ -115,30 +119,33 @@ class _TagEditSheetState extends ConsumerState<TagEditSheet> {
     ],
   );
 
-  Widget _tagList(AsyncValue<List<Tag>> tagsAsync) => ConstrainedBox(
-    constraints: const BoxConstraints(maxHeight: 300),
-    child: SingleChildScrollView(
-      child: tagsAsync.when(
-        loading: () => const CircularProgressIndicator(),
-        error: (e, _) => Text("Error: $e"),
-        data: (tags) => Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: tags.map((tag) {
-            final isSelected = selected.contains(tag);
+  Widget _tagList() {
+    final tagsAsync = ref.watch(tagsProvider);
 
-            return FilterChip(
-              label: Text(tag.name),
-              selected: isSelected,
-              onSelected: (v) {
-                setState(() => v ? selected.add(tag) : selected.remove(tag));
-              },
-            );
-          }).toList(),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: 300),
+      child: SingleChildScrollView(
+        child: AsyncValueHandler(
+          asyncValue: tagsAsync,
+          onData: (tags) => Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: tags.map((tag) {
+              final isSelected = selected.contains(tag);
+
+              return FilterChip(
+                label: Text(tag.name),
+                selected: isSelected,
+                onSelected: (v) {
+                  setState(() => v ? selected.add(tag) : selected.remove(tag));
+                },
+              );
+            }).toList(),
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 
   Widget _actions(BuildContext context) => Row(
     children: [

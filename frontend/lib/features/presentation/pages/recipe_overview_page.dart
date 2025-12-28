@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/utils/async_value_handler.dart';
 import 'package:frontend/core/utils/recipe_diff.dart';
+import 'package:frontend/core/utils/undo_snack_bar.dart';
 import 'package:frontend/features/presentation/pages/recipe_edit_page.dart';
 import 'package:frontend/features/presentation/widgets/animated_app_bar.dart';
 import 'package:frontend/features/data/models/recipe.dart';
@@ -41,17 +43,10 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     if (deleted) {
       Navigator.pop(context, true);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Rezept gelöscht"),
-          action: SnackBarAction(
-            label: "Rückgängig",
-            onPressed: () {
-              // TODO: Löschen rückgängig machen
-              print("[Löschen] Rückgängig Knopf wurde gedrückt!");
-            },
-          ),
-        ),
+      UndoSnackBar(
+        context: context,
+        content: "Rezept gelöscht",
+        onUndo: () => print("[RecipeOverviewPage] Löschen Rückgängig"),
       );
 
       return;
@@ -66,17 +61,10 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
         .updateRecipe(widget.recipeId, patch);
     recipeWasUpdated = true;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Rezept aktualisiert"),
-        action: SnackBarAction(
-          label: "Rückgängig",
-          onPressed: () {
-            // TODO: Bearbeitung rückgängig machen
-            print("[Bearbeitung] Rückgängig Knopf wurde gedrückt!");
-          },
-        ),
-      ),
+    UndoSnackBar(
+      context: context,
+      content: "Rezept bearbeitet",
+      onUndo: () => print("[RecipeOverviewPage] Bearbeitung Rückgängig"),
     );
   }
 
@@ -112,13 +100,11 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
   @override
   Widget build(BuildContext context) {
     final recipeAsync = ref.watch(recipeProvider(widget.recipeId));
-
     final double triggerOffset = MediaQuery.of(context).size.height * 0.6;
 
-    return recipeAsync.when(
-      loading: () => const CircularProgressIndicator(),
-      error: (e, _) => Text("Fehler: $e"),
-      data: (recipe) => Scaffold(
+    return AsyncValueHandler(
+      asyncValue: recipeAsync,
+      onData: (recipe) => Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AnimatedAppBar(
           scrollController: _scrollController,

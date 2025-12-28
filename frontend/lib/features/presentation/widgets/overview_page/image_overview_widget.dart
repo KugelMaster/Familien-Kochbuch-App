@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/utils/async_value_handler.dart';
 import 'package:frontend/features/providers/recipe_providers.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -25,17 +26,7 @@ class ImageOverviewWidget extends ConsumerWidget {
       ).select((recipeAsync) => recipeAsync.whenData((r) => r.image)),
     );
 
-    return imageAsync.when(
-      loading: () => SizedBox(
-        height: screenHeight * 0.6,
-        child: const Center(child: CircularProgressIndicator()),
-      ),
-      error: (e, _) => SizedBox(
-        height: screenHeight * 0.6,
-        child: Center(child: Text("Fehler: $e")),
-      ),
-      data: (image) => _buildImageWidget(image),
-    );
+    return AsyncValueHandler(asyncValue: imageAsync, onData: _buildImageWidget);
   }
 
   Widget _buildImageWidget(XFile? image) => SizedBox(

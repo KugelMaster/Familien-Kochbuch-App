@@ -67,6 +67,10 @@ class RatingOut(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+class RatingAverageOut(BaseModel):
+    average_stars: float = Field(ge=0, le=5, description="Average Rating in Stars from 0 to 5")
+    total_ratings: int
+
 class RatingUpdate(BaseModel):
     stars: float = Field(ge=0, le=5, description="Rating in Stars from 0 to 5 in 0,5 increments")
     comment: Optional[str] = None

@@ -37,6 +37,21 @@ class RatingService {
     return data.map((json) => Rating.fromJson(json)).toList();
   }
 
+  Future<(double, int)> getAverageStars(int recipeId) async {
+    final response = await _client.dio.get(Endpoints.ratingAvgStars(recipeId));
+
+    if (response.data == null) {
+      logger.d(
+        "Fetching average stars failed: ${response.statusCode} ${response.statusMessage}",
+      );
+      throw Exception("Failed to fetch average stars");
+    }
+
+    Map<String, dynamic> data = response.data;
+
+    return (data["average_stars"] as double, data["total_ratings"] as int);
+  }
+
   Future<Rating> createRating(RatingCreate rating) async {
     final response = await _client.dio.post<Map<String, dynamic>>(
       Endpoints.ratings,

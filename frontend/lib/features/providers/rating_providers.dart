@@ -29,6 +29,21 @@ class RatingRepositoryProvider extends Notifier<Map<int, List<Rating>>> {
     return ratings;
   }
 
+  Future<(double, int)> getAverageStars(int recipeId) async {
+    final cached = state[recipeId];
+
+    if (cached != null) {
+      return (
+        cached.isNotEmpty
+            ? cached.map((r) => r.stars).reduce((a, b) => a + b) / cached.length
+            : 0.0,
+        cached.length,
+      );
+    }
+
+    return await _ratingService.getAverageStars(recipeId);
+  }
+
   Future<Rating> createRating(RatingCreate rating) async {
     final created = await _ratingService.createRating(rating);
 
@@ -69,4 +84,12 @@ final ratingProvider = FutureProvider.family<List<Rating>, int>((
 ) async {
   ref.watch(ratingRepositoryProvider);
   return ref.read(ratingRepositoryProvider.notifier).getByRecipeId(recipeId);
+});
+
+final ratingAvgStarsProvider = FutureProvider.family<(double, int), int>((
+  ref,
+  recipeId,
+) async {
+  ref.watch(ratingRepositoryProvider);
+  return ref.read(ratingRepositoryProvider.notifier).getAverageStars(recipeId);
 });

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/network/api_client_provider.dart';
+import 'package:frontend/core/utils/async_value_handler.dart';
 import 'package:frontend/features/data/models/recipe_note.dart';
 import 'package:frontend/features/providers/recipe_note_providers.dart';
 
@@ -26,15 +27,13 @@ class _RecipeNotesOWState extends ConsumerState<RecipeNotesOverviewWidget> {
   @override
   Widget build(BuildContext context) {
     final recipeNotesAsync = ref.watch(recipeNotesProvider(widget.recipeId));
-
     final newNote = _newNoteInput();
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16),
-      child: recipeNotesAsync.when(
-        loading: () => const CircularProgressIndicator(),
-        error: (e, _) => Text("Error: $e"),
-        data: (recipeNotes) => recipeNotes.isEmpty
+      child: AsyncValueHandler(
+        asyncValue: recipeNotesAsync,
+        onData: (recipeNotes) => recipeNotes.isEmpty
             ? newNote
             : Column(
                 children: [

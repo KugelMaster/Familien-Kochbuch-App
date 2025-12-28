@@ -15,6 +15,7 @@
 1. HTTP-Fehler handeln
 
 # Weitere Aufgaben (noch keine Priorität):
+- RatingsDialog schöner gestalten
 - CircularProgressIndicator bei Rezept laden korrigieren
 - Reload on Pull MyRecipesPage
 - Rückgängig nach Löschen oder Bearbeiten
@@ -28,10 +29,8 @@
 - Websocket; Wenn zwei Nutzer gleichzeitig ein Rezept bearbeiten, werden die Daten zwischen Server und Client gewechselt
 
 # Aufgaben abgeschlossen:
-- Klickbare Bewertung auf der RecipeOverviewPage
-- RatingsDialog mit interaktiven Bewertungen
-- Live Updates bei Änderung + jeder Benutzer darf genau eine Bewertung machen
-- AsyncValueHandler für immer gleiches Layout bei einer AsyncValue von Riverpod
+- UndoSnackBar für leichteres Anzeigen einer SnackBar mit Rückgängig Knopf
+- SnackBars für Bewertungen, falls sich was ändert
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

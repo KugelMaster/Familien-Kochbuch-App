@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/utils/async_value_handler.dart';
+import 'package:frontend/core/utils/undo_snack_bar.dart';
 import 'package:frontend/features/data/models/rating.dart';
 import 'package:frontend/features/presentation/widgets/delete_prompt.dart';
 import 'package:frontend/features/providers/rating_providers.dart';
@@ -23,16 +24,22 @@ class _RatingsDialogState extends ConsumerState<RatingsDialog> {
   void _openCreateDialog() => showDialog(
     context: context,
     builder: (_) => RatingEditDialog(
-      onSave: (stars, comment) => ref
-          .read(ratingRepositoryProvider.notifier)
-          .createRating(
-            RatingCreate(
-              userId: widget.currentUserId,
-              recipeId: widget.recipeId,
-              stars: stars,
-              comment: comment,
-            ),
-          ),
+      onSave: (stars, comment) {
+        ref
+            .read(ratingRepositoryProvider.notifier)
+            .createRating(
+              RatingCreate(
+                userId: widget.currentUserId,
+                recipeId: widget.recipeId,
+                stars: stars,
+                comment: comment,
+              ),
+            );
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Bewertung erstellt")));
+      },
     ),
   );
 
@@ -41,16 +48,24 @@ class _RatingsDialogState extends ConsumerState<RatingsDialog> {
     builder: (_) => RatingEditDialog(
       initialStars: rating.stars,
       initialComment: rating.comment,
-      onSave: (stars, comment) => ref
-          .read(ratingRepositoryProvider.notifier)
-          .updateRating(
-            RatingPatch(
-              id: rating.id,
-              recipeId: rating.recipeId,
-              stars: stars,
-              comment: comment,
-            ),
-          ),
+      onSave: (stars, comment) {
+        ref
+            .read(ratingRepositoryProvider.notifier)
+            .updateRating(
+              RatingPatch(
+                id: rating.id,
+                recipeId: rating.recipeId,
+                stars: stars,
+                comment: comment,
+              ),
+            );
+
+        UndoSnackBar(
+          context: context,
+          content: "Bewertung bearbeitet",
+          onUndo: () => print("Bewertung Bearbeitung Rückgängig"),
+        );
+      },
     ),
   );
 
@@ -66,6 +81,14 @@ class _RatingsDialogState extends ConsumerState<RatingsDialog> {
     await ref
         .read(ratingRepositoryProvider.notifier)
         .deleteRating(rating.recipeId, rating.id);
+
+    if (!mounted) return;
+
+    UndoSnackBar(
+      context: context,
+      content: "Bewertung gelöscht",
+      onUndo: () => print("Bewertung Löschen Rückgängig"),
+    );
   }
 
   @override
@@ -192,7 +215,7 @@ class _RatingsDialogState extends ConsumerState<RatingsDialog> {
 class RatingEditDialog extends StatefulWidget {
   final double? initialStars;
   final String? initialComment;
-  final void Function(double stars, String? comment) onSave;
+  final void Function(double stars, String comment) onSave;
 
   const RatingEditDialog({
     super.key,
@@ -246,12 +269,7 @@ class _RatingEditDialogState extends State<RatingEditDialog> {
       ),
       TextButton(
         onPressed: () {
-          widget.onSave(
-            stars,
-            commentController.text.trim().isEmpty
-                ? null
-                : commentController.text.trim(),
-          );
+          widget.onSave(stars, commentController.text.trim());
           Navigator.pop(context);
         },
         child: const Text("Speichern"),
