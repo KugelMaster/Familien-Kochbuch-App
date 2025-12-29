@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, String, Text, ForeignKey, DateTime, func
+from sqlalchemy import Column, Integer, Float, Numeric, String, Text, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -65,7 +65,7 @@ class Rating(Base):
     id = Column(Integer, primary_key=True, index=True)
     recipe_id = Column(Integer, ForeignKey("recipes.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
-    stars = Column(Float, nullable=False) # type: ignore
+    stars = Column(Numeric(precision=2, scale=1, asdecimal=False), nullable=False)
     comment = Column(Text, nullable=True)
 
     created_at = Column(DateTime, server_default=func.now())

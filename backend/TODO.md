@@ -1,14 +1,13 @@
 # Offene Aufgaben:
 - Alle Rezepte mit bestimmten Tag returnen
 - Bilder upload planen (URL-Erstellung / ID?)
-- Objekt editierbar machen
-- Objekt löschbar machen (+ Backup 30 Tage für Notfälle!)
+- Backups für Bearbeitung / Löschung
 - Ingredients und Nutritions einzelnd editierbar machen
 - Dokumentation übersichtlicher machen (OpenAPI)
 
 # Aufgaben abgeschlossen:
-- Benutzer können nun beliebig viele RecipeNotes schreiben
-- RecipeNotes können auch getrennt vom Rezept angefordert und bearbeitet werden 
+- Rating.stars ist nun ein Numeric in der Datenbank. Somit kann Python es als Float verwenden
+- Durchschnittliche Anzahl an Sternen als neue Route
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11):

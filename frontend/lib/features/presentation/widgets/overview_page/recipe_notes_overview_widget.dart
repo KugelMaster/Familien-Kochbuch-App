@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/network/api_client_provider.dart';
+import 'package:frontend/core/utils/async_value_handler.dart';
 import 'package:frontend/features/data/models/recipe_note.dart';
 import 'package:frontend/features/providers/recipe_note_providers.dart';
 
@@ -26,15 +27,13 @@ class _RecipeNotesOWState extends ConsumerState<RecipeNotesOverviewWidget> {
   @override
   Widget build(BuildContext context) {
     final recipeNotesAsync = ref.watch(recipeNotesProvider(widget.recipeId));
-
     final newNote = _newNoteInput();
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16),
-      child: recipeNotesAsync.when(
-        loading: () => const CircularProgressIndicator(),
-        error: (e, _) => Text("Error: $e"),
-        data: (recipeNotes) => recipeNotes.isEmpty
+      child: AsyncValueHandler(
+        asyncValue: recipeNotesAsync,
+        onData: (recipeNotes) => recipeNotes.isEmpty
             ? newNote
             : Column(
                 children: [
@@ -54,12 +53,12 @@ class _RecipeNotesOWState extends ConsumerState<RecipeNotesOverviewWidget> {
           isOwnNote: note.userId == currentUserId,
           onDelete: () => ref
               .read(recipeNoteRepositoryProvider.notifier)
-              .deleteRecipeNote(note.recipeId, note.id!),
+              .deleteRecipeNote(note.recipeId, note.id),
           onEdit: (content) {
             note.content = content;
             ref
                 .read(recipeNoteRepositoryProvider.notifier)
-                .updateRecipeNote(note.recipeId, note);
+                .updateRecipeNote(note);
           },
         ),
       );
@@ -70,15 +69,13 @@ class _RecipeNotesOWState extends ConsumerState<RecipeNotesOverviewWidget> {
       final text = _controller.text.trim();
       if (text.isEmpty) return;
 
-      final note = RecipeNote(
+      final note = RecipeNoteCreate(
         recipeId: widget.recipeId,
         userId: currentUserId,
         content: text,
       );
 
-      ref
-          .read(recipeNoteRepositoryProvider.notifier)
-          .createRecipeNote(note.recipeId, note);
+      ref.read(recipeNoteRepositoryProvider.notifier).createRecipeNote(note);
       _controller.clear();
     },
   );

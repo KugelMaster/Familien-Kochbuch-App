@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/utils/async_value_handler.dart';
 import 'package:frontend/features/data/models/recipe.dart';
 import 'package:frontend/features/presentation/pages/recipe_edit_page.dart';
 import 'package:frontend/features/presentation/pages/recipe_overview_page.dart';
@@ -69,7 +70,9 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
       if (newRecipe == null) return;
 
-      final id = await ref.read(recipeRepositoryProvider.notifier).createRecipe(newRecipe);
+      final id = await ref
+          .read(recipeRepositoryProvider.notifier)
+          .createRecipe(newRecipe);
 
       updateUI();
 
@@ -91,7 +94,9 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
   @override
   Widget build(BuildContext context) {
-    AsyncValue<List<RecipeSimple>> recipesAsync = ref.watch(recipeSimpleListProvider);
+    AsyncValue<List<RecipeSimple>> recipesAsync = ref.watch(
+      recipeSimpleListProvider,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -103,10 +108,9 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
           ),
         ],
       ),
-      body: recipesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(child: Text("Fehler: $error")),
-        data: (recipes) => ListView.builder(
+      body: AsyncValueHandler(
+        asyncValue: recipesAsync,
+        onData: (recipes) => ListView.builder(
           itemCount: recipes.length,
           itemBuilder: (context, index) {
             final recipe = recipes[index];

@@ -1,8 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/utils/async_value_handler.dart';
 import 'package:frontend/core/utils/recipe_diff.dart';
-import 'package:frontend/features/data/models/tag.dart';
+import 'package:frontend/core/utils/undo_snack_bar.dart';
 import 'package:frontend/features/presentation/pages/recipe_edit_page.dart';
 import 'package:frontend/features/presentation/widgets/animated_app_bar.dart';
 import 'package:frontend/features/data/models/recipe.dart';
@@ -13,7 +13,6 @@ import 'package:frontend/features/presentation/widgets/overview_page/nutritions_
 import 'package:frontend/features/presentation/widgets/overview_page/rating_overview_widget.dart';
 import 'package:frontend/features/presentation/widgets/overview_page/recipe_notes_overview_widget.dart';
 import 'package:frontend/features/presentation/widgets/overview_page/tags_overview_widget.dart';
-import 'package:frontend/features/presentation/widgets/tag_edit_sheet.dart';
 import 'package:frontend/features/providers/recipe_providers.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -38,24 +37,16 @@ class RecipeOverviewPage extends ConsumerStatefulWidget {
 class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
   final ScrollController _scrollController = ScrollController();
 
-  late AsyncValue<Recipe> recipeAsync;
   bool recipeWasUpdated = false;
 
   void onClose(bool deleted) {
     if (deleted) {
       Navigator.pop(context, true);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Rezept gelöscht"),
-          action: SnackBarAction(
-            label: "Rückgängig",
-            onPressed: () {
-              // TODO: Löschen rückgängig machen
-              print("[Löschen] Rückgängig Knopf wurde gedrückt!");
-            },
-          ),
-        ),
+      UndoSnackBar(
+        context: context,
+        content: "Rezept gelöscht",
+        onUndo: () => print("[RecipeOverviewPage] Löschen Rückgängig"),
       );
 
       return;
@@ -70,17 +61,10 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
         .updateRecipe(widget.recipeId, patch);
     recipeWasUpdated = true;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Rezept aktualisiert"),
-        action: SnackBarAction(
-          label: "Rückgängig",
-          onPressed: () {
-            // TODO: Bearbeitung rückgängig machen
-            print("[Bearbeitung] Rückgängig Knopf wurde gedrückt!");
-          },
-        ),
-      ),
+    UndoSnackBar(
+      context: context,
+      content: "Rezept bearbeitet",
+      onUndo: () => print("[RecipeOverviewPage] Bearbeitung Rückgängig"),
     );
   }
 
@@ -94,24 +78,6 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     if (image != null) {
       updateRecipe(RecipePatch(image: image));
     }
-  }
-
-  Future<void> onEditTags() async {
-    List<Tag>? updated = await showModalBottomSheet<List<Tag>>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => TagEditSheet(selected: recipeAsync.value?.tags),
-    );
-
-    if (updated == null) return;
-
-    final idList = RecipeDiff.toIdList(updated);
-
-    if (listEquals(RecipeDiff.toIdList(recipeAsync.value?.tags), idList)) {
-      return;
-    }
-
-    updateRecipe(RecipePatch(tags: idList));
   }
 
   Future<void> openEditView(Recipe oldRecipe) async {
@@ -133,17 +99,12 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
 
   @override
   Widget build(BuildContext context) {
-    recipeAsync = ref.watch(recipeProvider(widget.recipeId));
-
+    final recipeAsync = ref.watch(recipeProvider(widget.recipeId));
     final double triggerOffset = MediaQuery.of(context).size.height * 0.6;
 
-    return recipeAsync.when(
-      loading: () {
-        print("Ich lade das Rezept...");
-        return const CircularProgressIndicator();
-      },
-      error: (e, _) => Text("Fehler: $e"),
-      data: (recipe) => Scaffold(
+    return AsyncValueHandler(
+      asyncValue: recipeAsync,
+      onData: (recipe) => Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AnimatedAppBar(
           scrollController: _scrollController,
@@ -174,16 +135,15 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
       ),
       const SizedBox(height: 8),
 
-      if (recipe.tags != null)
-        TagsOverviewWidget(tags: recipe.tags!, editTags: onEditTags),
+      if (recipe.tags.isNotEmpty)
+        TagsOverviewWidget(tags: recipe.tags, updateRecipe: updateRecipe),
       const SizedBox(height: 8),
 
       _title(recipe.title),
       if (recipe.description != null) _description(recipe.description!),
       const SizedBox(height: 6),
 
-      if (recipe.ratings != null)
-        RatingOverviewWidget(ratings: recipe.ratings!),
+      RatingOverviewWidget(recipeId: widget.recipeId),
       const SizedBox(height: 12),
 
       InfoChipsOverviewWidget(
@@ -195,17 +155,13 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
       if (recipe.recipeUri != null) _uriButton(recipe.recipeUri!),
       const SizedBox(height: 24),
 
-      if (recipe.ingredients != null)
-        IngredientsOverviewWidget(ingredients: recipe.ingredients!),
+      IngredientsOverviewWidget(ingredients: recipe.ingredients),
       const SizedBox(height: 24),
 
-      if (recipe.nutritions != null)
-        NutritionsOverviewWidget(nutritions: recipe.nutritions!),
+      NutritionsOverviewWidget(nutritions: recipe.nutritions),
       const SizedBox(height: 40),
 
-      RecipeNotesOverviewWidget(
-        recipeId: widget.recipeId,
-      ),
+      RecipeNotesOverviewWidget(recipeId: widget.recipeId),
       const SizedBox(height: 320),
     ],
   );

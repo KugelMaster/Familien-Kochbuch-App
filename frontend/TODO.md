@@ -1,9 +1,4 @@
-# Aufgaben von RecipeOverviewPage
-- ratings: add, edit, delete
-- Haken (✓)
-
 # Aufgaben (sortiert nach Priorität)
-1. RecipeOverviewPage Aufgaben
 1. Tag Providers neu schreiben
 1. RecipeEditPage Image Hero bearbeiten Funktion sichtbarer machen
 1. Tag Verwaltungs Seite
@@ -20,6 +15,7 @@
 1. HTTP-Fehler handeln
 
 # Weitere Aufgaben (noch keine Priorität):
+- RatingsDialog schöner gestalten
 - CircularProgressIndicator bei Rezept laden korrigieren
 - Reload on Pull MyRecipesPage
 - Rückgängig nach Löschen oder Bearbeiten
@@ -33,8 +29,8 @@
 - Websocket; Wenn zwei Nutzer gleichzeitig ein Rezept bearbeiten, werden die Daten zwischen Server und Client gewechselt
 
 # Aufgaben abgeschlossen:
-- RecipeNotes von RecipeRepository getrennt
-- recipe_notes: add, edit, delete
+- UndoSnackBar für leichteres Anzeigen einer SnackBar mit Rückgängig Knopf
+- SnackBars für Bewertungen, falls sich was ändert
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

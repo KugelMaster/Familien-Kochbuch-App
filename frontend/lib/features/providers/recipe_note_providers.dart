@@ -35,30 +35,27 @@ class RecipeNoteRepositoryNotifier
     return notes;
   }
 
-  Future<int> createRecipeNote(int recipeId, RecipeNote note) async {
+  Future<int> createRecipeNote(RecipeNoteCreate note) async {
     final created = await _recipeNoteService.createRecipeNote(note);
 
-    final notes = state[recipeId] ?? [];
+    final notes = state[created.recipeId] ?? [];
     notes.add(created);
-    state = {...state, recipeId: notes};
+    state = {...state, created.recipeId: notes};
 
-    return created.id!;
+    return created.id;
   }
 
-  Future<RecipeNote> updateRecipeNote(
-    int recipeId,
-    RecipeNote updatedNote,
-  ) async {
+  Future<RecipeNote> updateRecipeNote(RecipeNote note) async {
     final updated = await _recipeNoteService.updateRecipeNote(
-      updatedNote.id!,
-      updatedNote.content,
+      note.id,
+      note.content,
     );
 
-    final notes = state[recipeId] ?? [];
-    final noteIndex = notes.indexWhere((note) => note.id == updatedNote.id);
+    final notes = state[note.recipeId] ?? [];
+    final noteIndex = notes.indexWhere((oldNote) => oldNote.id == note.id);
     if (noteIndex != -1) {
-      notes[noteIndex] = updatedNote;
-      state = {...state, recipeId: notes};
+      notes[noteIndex] = note;
+      state = {...state, note.recipeId: notes};
     }
 
     return updated;
