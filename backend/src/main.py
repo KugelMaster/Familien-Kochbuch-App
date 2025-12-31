@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-from routers import recipe_notes, recipes, ratings, images, tags
+from routers import recipe_notes, recipes, ratings, images, search, tags
 from database import Base, engine
 
 from tests.test_user import main as test_user_main
@@ -27,6 +27,10 @@ tags_metadata = [
     {
         "name": "Tags",
         "description": "Operations with tags.",
+    },
+    {
+        "name": "Search",
+        "description": "Search for recipes.",
     }
 ]
 
@@ -44,6 +48,7 @@ app.include_router(recipe_notes.router)
 app.include_router(ratings.router)
 app.include_router(images.router)
 app.include_router(tags.router)
+app.include_router(search.router)
 
 
 @app.get("/", response_class=HTMLResponse)

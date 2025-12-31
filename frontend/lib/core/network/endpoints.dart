@@ -2,6 +2,18 @@ class Endpoints {
   static String recipes = "/recipes";
   static String recipesSimple = "$recipes/simple";
   static String recipe(int recipeId) => "$recipes/$recipeId";
+  static String searchRecipes(
+    String query, [
+    int maxResults = 10,
+    int? userId,
+  ]) => Uri(
+    path: "/search",
+    queryParameters: {
+      "query": query,
+      "max_results": maxResults.toString(),
+      if (userId != null) "user_id": userId,
+    },
+  ).toString();
 
   static String recipeNotes = "/recipe-notes";
   static String recipeNote(int noteId) => "$recipeNotes/note/$noteId";

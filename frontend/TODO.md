@@ -1,3 +1,6 @@
+# DiscoverPage Aufgaben:
+- Kategorie Tabs implementieren
+
 # Aufgaben (sortiert nach Priorität)
 1. Tag Providers neu schreiben
 1. RecipeEditPage Image Hero bearbeiten Funktion sichtbarer machen
@@ -29,8 +32,9 @@
 - Websocket; Wenn zwei Nutzer gleichzeitig ein Rezept bearbeiten, werden die Daten zwischen Server und Client gewechselt
 
 # Aufgaben abgeschlossen:
-- UndoSnackBar für leichteres Anzeigen einer SnackBar mit Rückgängig Knopf
-- SnackBars für Bewertungen, falls sich was ändert
+- Material3 Suchleiste mit Autovorschlägen
+- Weiterleitung zur OverviewPage
+- AsyncDebouncer: Wenn Benutzer vor 300ms Timer noch einen Input macht, wird kein API Request geschickt
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

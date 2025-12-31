@@ -6,8 +6,7 @@
 - Dokumentation übersichtlicher machen (OpenAPI)
 
 # Aufgaben abgeschlossen:
-- Rating.stars ist nun ein Numeric in der Datenbank. Somit kann Python es als Float verwenden
-- Durchschnittliche Anzahl an Sternen als neue Route
+- Rezept Suche API Router
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11):

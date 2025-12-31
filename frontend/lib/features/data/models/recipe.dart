@@ -63,6 +63,9 @@ class RecipeSimple {
       _$RecipeSimpleFromJson(json);
 
   Map<String, dynamic> toJson() => _$RecipeSimpleToJson(this);
+
+  @override
+  String toString() => "RecipeSimple(id=$id, title=$title)";
 }
 
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)

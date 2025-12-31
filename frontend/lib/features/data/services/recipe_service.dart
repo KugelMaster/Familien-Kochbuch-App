@@ -46,7 +46,9 @@ class RecipeService {
     );
 
     if (response.data == null) {
-      logger.d("Creating recipe failed: ${response.statusCode} ${response.statusMessage}");
+      logger.d(
+        "Creating recipe failed: ${response.statusCode} ${response.statusMessage}",
+      );
       throw Exception("Failed to create recipe");
     }
 
@@ -61,7 +63,9 @@ class RecipeService {
     );
 
     if (response.data == null) {
-      logger.d("Update recipe failed: ${response.statusCode} ${response.statusMessage}");
+      logger.d(
+        "Update recipe failed: ${response.statusCode} ${response.statusMessage}",
+      );
       throw Exception("Failed to update recipe");
     }
 
@@ -72,8 +76,31 @@ class RecipeService {
     final response = await _client.dio.delete(Endpoints.recipe(recipeId));
 
     if (response.statusCode != 200) {
-      logger.d("Deleting recipe failed: ${response.statusCode} ${response.statusMessage}");
+      logger.d(
+        "Deleting recipe failed: ${response.statusCode} ${response.statusMessage}",
+      );
       throw Exception("Failed to delete recipe");
     }
+  }
+
+  Future<List<RecipeSimple>> searchRecipes({
+    required String query,
+    int maxResults = 10,
+    int? userId,
+  }) async {
+    final response = await _client.dio.get(
+      Endpoints.searchRecipes(query, maxResults, userId),
+    );
+
+    if (response.statusCode != 200) {
+      logger.d(
+        "Searching recipes failed: ${response.statusCode} ${response.statusMessage}",
+      );
+      throw Exception("Failed to search recipes");
+    }
+
+    final data = response.data as List;
+
+    return data.map((json) => RecipeSimple.fromJson(json)).toList();
   }
 }
