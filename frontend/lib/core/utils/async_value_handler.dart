@@ -15,7 +15,7 @@ class AsyncValueHandler<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return asyncValue.when(
       loading: () => const CircularProgressIndicator(),
-      error: (e, _) => Text("Error: $e"),
+      error: (e, _) => Text("In: Async Value Handler\nError: $e"),
       data: onData,
     );
   }

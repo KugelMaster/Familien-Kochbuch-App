@@ -91,7 +91,10 @@ def get_average_rating(recipe_id: int, db: Session = Depends(get_db)):
     ratings = db.query(Rating).filter(Rating.recipe_id == recipe_id).all()
 
     if not ratings or len(ratings) == 0:
-        return 0.0
+        return RatingAverageOut(
+            average_stars=0.0,
+            total_ratings=0
+        )
 
     total_stars = sum(rating.stars for rating in ratings)
     average = total_stars / len(ratings)

@@ -6,8 +6,10 @@ part 'tag.g.dart';
 class Tag {
   int id;
   String name;
+  @JsonKey(includeFromJson: false, includeToJson: false) // TODO: Add images to tags in backend
+  String? imageUrl;
 
-  Tag({required this.id, required this.name});
+  Tag({required this.id, required this.name, this.imageUrl});
 
   factory Tag.fromJson(Map<String, dynamic> json) => _$TagFromJson(json);
 
