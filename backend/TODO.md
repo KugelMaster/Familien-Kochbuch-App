@@ -6,7 +6,7 @@
 - Dokumentation übersichtlicher machen (OpenAPI)
 
 # Aufgaben abgeschlossen:
-- Rezept Suche API Router
+- Bugfix für Durchschnittliche Bewertung
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11):

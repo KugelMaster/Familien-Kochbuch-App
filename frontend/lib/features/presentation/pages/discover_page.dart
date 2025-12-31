@@ -46,7 +46,10 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                 controller.closeView(recipe.title);
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => RecipeOverviewPage(recipeId: recipe.id),
+                    builder: (_) => RecipeOverviewPage(
+                      recipeId: recipe.id,
+                      title: recipe.title,
+                    ),
                   ),
                 );
               },

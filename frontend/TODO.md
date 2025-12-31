@@ -32,9 +32,8 @@
 - Websocket; Wenn zwei Nutzer gleichzeitig ein Rezept bearbeiten, werden die Daten zwischen Server und Client gewechselt
 
 # Aufgaben abgeschlossen:
-- Material3 Suchleiste mit Autovorschlägen
-- Weiterleitung zur OverviewPage
-- AsyncDebouncer: Wenn Benutzer vor 300ms Timer noch einen Input macht, wird kein API Request geschickt
+- Optimierung: Sende Titel mit zur OverviewPage wenn über Suche geöffnet
+- Fehler besser gekennzeichnet in AsyncValueHandler
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`
