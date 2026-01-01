@@ -1,67 +1,83 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
-
-final selectedCategoryProvider = StateProvider<String?>((ref) => null);
+import 'package:frontend/features/data/models/tag.dart';
+import 'package:frontend/features/presentation/pages/tag_recipe_page.dart';
+import 'package:frontend/features/providers/tag_providers.dart';
 
 class TagGrid extends ConsumerWidget {
   const TagGrid({super.key});
 
-  final List<String> _categories = const [
-    'Frühstück',
-    'Mittag',
-    'Abendessen',
-    'Schnell',
-    'Vegetarisch',
-    'Vegan',
-    'Dessert',
-    'Backen',
-    'Kinder',
-    'Party',
-  ];
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selected = ref.watch(selectedCategoryProvider);
+    final tagsAsync = ref.watch(tagsProvider);
 
-    return GridView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
-        childAspectRatio: 4,
+    return tagsAsync.when(
+      loading: () => const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.only(top: 32),
+          child: Center(child: CircularProgressIndicator()),
+        ),
       ),
-      itemCount: _categories.length,
-      itemBuilder: (context, index) {
-        final cat = _categories[index];
-        final isSelected = selected == cat;
-
-        return GestureDetector(
-          onTap: () {
-            ref.read(selectedCategoryProvider.notifier).state = isSelected
-                ? null
-                : cat;
-            // Optionally trigger a search/filter action here using other providers
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              cat,
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.black87,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-              ),
-            ),
+      error: (e, _) => SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.only(top: 32),
+          child: Text('Fehler: $e'),
+        ),
+      ),
+      data: (tags) {
+        return SliverGrid(
+          delegate: SliverChildBuilderDelegate((context, index) {
+            final tag = tags[index];
+            return _TagCard(tag: tag);
+          }, childCount: tags.length),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.2,
           ),
         );
       },
     );
   }
+}
+
+class _TagCard extends StatelessWidget {
+  final Tag tag;
+
+  const _TagCard({required this.tag});
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    borderRadius: BorderRadius.circular(16),
+    onTap: () {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => TagRecipePage(tag: tag)));
+    },
+    child: Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Stack(
+        children: [
+          // TODO: Bild hier anzeigen falls implementiert
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: Colors.grey.shade200,
+              ),
+            ),
+          ),
+          Center(
+            child: Text(
+              tag.name,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }

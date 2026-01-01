@@ -1,6 +1,3 @@
-# DiscoverPage Aufgaben:
-- Kategorie Tabs implementieren
-
 # Aufgaben (sortiert nach Priorität)
 1. RecipeEditPage Image Hero bearbeiten Funktion sichtbarer machen
 1. Tag Verwaltungs Seite
@@ -17,6 +14,7 @@
 1. HTTP-Fehler handeln
 
 # Weitere Aufgaben (noch keine Priorität):
+- Rezept Suche mit Filter (z.B. Tags)
 - RatingsDialog schöner gestalten
 - CircularProgressIndicator bei Rezept laden korrigieren
 - Reload on Pull MyRecipesPage
@@ -31,11 +29,10 @@
 - Websocket; Wenn zwei Nutzer gleichzeitig ein Rezept bearbeiten, werden die Daten zwischen Server und Client gewechselt
 
 # Aufgaben abgeschlossen:
-- Bugfix: Kreisbezug von recipeProvider und recipeRepositoryProvider in der update Methode aufgelöst
-- Bugfix: Endpoints mit Strings werden mit Uri Klasse generiert
-- Bugfix: Tag Hinzufügen Knopf wird nun auch angezeigt, wenn keine Tags vorhanden sind
-- Tag Providers neu geschrieben und Abhängigkeiten geupdated (AsyncNotifier + FutureProvider)
-- Refactor: SearchBar in neue Datei schieben für Leserlichkeit
+- Update DiscoverPage mit Sticky Suchleiste
+- Kategorie Karten darunter
+- Neue Seite: TagRecipePage
+- Optional Bilder für Tags im Modell
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`
