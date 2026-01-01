@@ -91,12 +91,12 @@ class RecipeRepositoryNotifier extends Notifier<Map<int, Recipe>> {
 
     state = {...state, recipeId: updated};
 
-    ref.invalidate(recipeProvider(recipeId));
     return updated;
   }
 
   Future<void> deleteRecipe(int recipeId) async {
     await _recipeService.deleteRecipe(recipeId);
+
     final newState = Map<int, Recipe>.from(state);
     newState.remove(recipeId);
     state = newState;

@@ -10,65 +10,55 @@ final tagServiceProvider = Provider<TagService>((ref) {
   return TagService(client);
 });
 
-///////////////////////////////////////////////////////////////////////////////
+final tagRepositoryProvider =
+    AsyncNotifierProvider<TagRepositoryNotifier, Map<int, Tag>>(
+      TagRepositoryNotifier.new,
+    );
 
-final tagCache = Provider((_) => <int, String>{});
-
-Future<Tag> createNewTag(WidgetRef ref, String name) async {
-  final tag = await ref.read(tagServiceProvider).createTag(name);
-
-  ref.read(tagCache)[tag.id] = tag.name;
-
-  return tag;
-}
-
-final tagsProvider = FutureProvider<List<Tag>>((ref) async {
-  final service = ref.watch(tagServiceProvider);
-  return await service.getTags();
-});
-
-final tagProvider = AsyncNotifierProvider.family<TagNotifier, Tag, int>(
-  TagNotifier.new,
-);
-
-class TagNotifier extends AsyncNotifier<Tag> {
-  final int tagId;
-
-  late final cache = ref.watch(tagCache);
-
-  TagNotifier(this.tagId);
+class TagRepositoryNotifier extends AsyncNotifier<Map<int, Tag>> {
+  late final _tagService = ref.read(tagServiceProvider);
 
   @override
-  Future<Tag> build() async {
-    final cached = cache[tagId];
+  Future<Map<int, Tag>> build() async {
+    final tagList = await _tagService.getTags();
 
-    if (cached != null) {
-      return Tag(id: tagId, name: cached);
-    }
-
-    final fetched = await ref.read(tagServiceProvider).getById(tagId);
-    cache[tagId] = fetched.name;
-    return fetched;
+    return {for (var tag in tagList) tag.id: tag};
   }
 
-  Future<void> updateTag(String name) async {
-    try {
-      final updated = await ref.read(tagServiceProvider).renameTag(tagId, name);
+  Future<List<Tag>> getTags() async {
+    final currentState = await future;
 
-      cache[tagId] = name;
-
-      state = AsyncData(updated);
-    } catch (error, stackTrace) {
-      state = AsyncError(error, stackTrace);
-      rethrow;
-    }
+    return currentState.values.toList();
   }
 
-  Future<void> deleteTag() async {
-    await ref.read(tagServiceProvider).deleteTag(tagId);
+  Future<Tag> createTag(String name) async {
+    final created = await _tagService.createTag(name);
+    final currentState = await future;
 
-    cache.remove(tagId);
+    state = AsyncData({...currentState, created.id: created});
 
-    ref.invalidateSelf();
+    return created;
+  }
+
+  Future<Tag> renameTag(int tagId, String name) async {
+    final updated = await _tagService.renameTag(tagId, name);
+    final currentState = await future;
+
+    state = AsyncData({...currentState, updated.id: updated});
+
+    return updated;
+  }
+
+  Future<void> deleteTag(int id) async {
+    await _tagService.deleteTag(id);
+
+    final newState = await future;
+    newState.remove(id);
+    state = AsyncData(newState);
   }
 }
+
+final tagsProvider = FutureProvider((ref) {
+  ref.watch(tagRepositoryProvider);
+  return ref.read(tagRepositoryProvider.notifier).getTags();
+});

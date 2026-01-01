@@ -2,7 +2,6 @@
 - Kategorie Tabs implementieren
 
 # Aufgaben (sortiert nach Priorität)
-1. Tag Providers neu schreiben
 1. RecipeEditPage Image Hero bearbeiten Funktion sichtbarer machen
 1. Tag Verwaltungs Seite
 1. Benutzer Verwaltung (add, edit, delete)
@@ -32,8 +31,11 @@
 - Websocket; Wenn zwei Nutzer gleichzeitig ein Rezept bearbeiten, werden die Daten zwischen Server und Client gewechselt
 
 # Aufgaben abgeschlossen:
-- Optimierung: Sende Titel mit zur OverviewPage wenn über Suche geöffnet
-- Fehler besser gekennzeichnet in AsyncValueHandler
+- Bugfix: Kreisbezug von recipeProvider und recipeRepositoryProvider in der update Methode aufgelöst
+- Bugfix: Endpoints mit Strings werden mit Uri Klasse generiert
+- Bugfix: Tag Hinzufügen Knopf wird nun auch angezeigt, wenn keine Tags vorhanden sind
+- Tag Providers neu geschrieben und Abhängigkeiten geupdated (AsyncNotifier + FutureProvider)
+- Refactor: SearchBar in neue Datei schieben für Leserlichkeit
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

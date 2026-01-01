@@ -22,10 +22,12 @@ class _TagEditSheetState extends ConsumerState<TagEditSheet> {
     selected = widget.selected != null ? {...widget.selected!} : {};
   }
 
-  void _createTagDialog() {
+  void _createTagDialog() async {
     final controller = TextEditingController();
     final formKey = GlobalKey<FormState>();
-    final tagsAsync = ref.watch(tagsProvider);
+    final occupiedTags = await ref.read(tagRepositoryProvider.notifier).getTags();
+
+    if (!mounted) return;
 
     showDialog(
       context: context,
@@ -42,7 +44,7 @@ class _TagEditSheetState extends ConsumerState<TagEditSheet> {
               if (v == null || v.trim().isEmpty) {
                 return "Name darf nicht leer sein";
               }
-              if (tagsAsync.value?.any((t) => t.name == v) ?? false) {
+              if (occupiedTags.any((t) => t.name == v)) {
                 return "Diesen Namen gibt es bereits";
               }
               return null;
@@ -72,13 +74,11 @@ class _TagEditSheetState extends ConsumerState<TagEditSheet> {
     if (name.isEmpty) return false;
 
     try {
-      await ref.read(tagServiceProvider).createTag(name);
-      ref.invalidate(tagsProvider);
+      await ref.read(tagRepositoryProvider.notifier).createTag(name);
+      return true;
     } catch (e) {
       return false;
     }
-
-    return true;
   }
 
   @override
