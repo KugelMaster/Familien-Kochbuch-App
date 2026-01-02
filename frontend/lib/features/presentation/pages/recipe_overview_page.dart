@@ -129,7 +129,7 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       ImageOverviewWidget(
-        recipeId: widget.recipeId,
+        imageId: recipe.imageId,
         takePhoto: onTakePhoto,
         screenHeight: MediaQuery.of(context).size.height,
       ),

@@ -8,7 +8,7 @@ import 'package:frontend/core/utils/logger.dart';
 import 'package:frontend/features/data/models/ingredient.dart';
 import 'package:frontend/features/data/models/nutrition.dart';
 import 'package:frontend/features/data/models/recipe.dart';
-import 'package:frontend/features/providers/recipe_providers.dart';
+import 'package:frontend/features/providers/image_providers.dart';
 import 'package:image_picker/image_picker.dart';
 
 class RecipeEditPage extends ConsumerStatefulWidget {
@@ -93,9 +93,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
 
     if (recipe.imageId == null) return;
 
-    final image = await ref
-        .read(imageServiceProvider)
-        .getImage(recipe.imageId!);
+    final image = await ref.read(imageProvider(recipe.imageId).future);
     setState(() => this.image = image);
   }
 

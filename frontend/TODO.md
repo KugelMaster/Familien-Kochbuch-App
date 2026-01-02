@@ -1,4 +1,6 @@
 # Aufgaben (sortiert nach Priorität)
+1. TagRecipePage Bilder laden nicht!!!
+1. ImageRepository weiter verwenden
 1. RecipeEditPage Image Hero bearbeiten Funktion sichtbarer machen
 1. Tag Verwaltungs Seite
 1. Benutzer Verwaltung (add, edit, delete)
@@ -29,10 +31,10 @@
 - Websocket; Wenn zwei Nutzer gleichzeitig ein Rezept bearbeiten, werden die Daten zwischen Server und Client gewechselt
 
 # Aufgaben abgeschlossen:
-- Update DiscoverPage mit Sticky Suchleiste
-- Kategorie Karten darunter
-- Neue Seite: TagRecipePage
-- Optional Bilder für Tags im Modell
+- TagRecipePage fertig erstellt
+- RecipeSimple Modell angepasst für mehr Informationen
+- Neuer Provider: ImageProvider
+- RecipeImage (vllt. für alle Widgets verwenden?)
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`
