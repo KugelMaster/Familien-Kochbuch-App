@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
 from database import get_db
 from sqlalchemy.orm import Session
 
 from schemas import Message, RecipeCreate, RecipeOutSimple, RecipeResponse, RecipeUpdate
 from models import Image, Recipe, Ingredient, Nutrition, Tag
+from utils.statements import recipe_simple_statement
 
 
 router = APIRouter(
@@ -77,7 +77,7 @@ def list_recipes(db: Session = Depends(get_db)):
 
 @router.get("/simple", response_model=list[RecipeOutSimple])
 def list_recipes_simple(db: Session = Depends(get_db)):
-    return db.execute(select(Recipe.id, Recipe.title).order_by(Recipe.id)).all()
+    return db.execute(recipe_simple_statement).all()
 
 @router.get("/{recipe_id}", response_model=RecipeResponse)
 def get_recipe(recipe_id: int, db: Session = Depends(get_db)):

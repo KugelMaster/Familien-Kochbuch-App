@@ -1,6 +1,7 @@
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/endpoints.dart';
 import 'package:frontend/core/utils/logger.dart';
+import 'package:frontend/features/data/models/recipe.dart';
 import 'package:frontend/features/data/models/tag.dart';
 
 class TagService {
@@ -71,5 +72,20 @@ class TagService {
       );
       throw Exception("Failed to delete tag");
     }
+  }
+
+  Future<List<RecipeSimple>> getRecipesByTag(int tagId) async {
+    final response = await _client.dio.get(Endpoints.recipesByTag(tagId));
+
+    if (response.statusCode != 200) {
+      logger.d(
+        "Error when fetching recipes by tag: ${response.statusCode} ${response.statusMessage}",
+      );
+      throw Exception("Failed to fetch recipes by tag");
+    }
+
+    final data = response.data as List;
+
+    return data.map((json) => RecipeSimple.fromJson(json)).toList();
   }
 }

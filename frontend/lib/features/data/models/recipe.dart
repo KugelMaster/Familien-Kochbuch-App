@@ -52,12 +52,23 @@ class Recipe {
   Map<String, dynamic> toJson() => _$RecipeToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class RecipeSimple {
   int id;
   String title;
+  int? imageId;
+  int? timeTotal;
+  double rating;
+  int totalRatings;
 
-  RecipeSimple({required this.id, required this.title});
+  RecipeSimple({
+    required this.id,
+    required this.title,
+    this.imageId,
+    this.timeTotal,
+    required this.rating,
+    required this.totalRatings,
+  });
 
   factory RecipeSimple.fromJson(Map<String, dynamic> json) =>
       _$RecipeSimpleFromJson(json);

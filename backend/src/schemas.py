@@ -140,6 +140,10 @@ class RecipeUpdate(BaseModel):
 class RecipeOutSimple(BaseModel):
     id: int
     title: str
+    image_id: Optional[int] = None
+    time_total: Optional[int]
+    rating: float = Field(ge=0, le=5)
+    total_ratings: int
 
     class Config:
         from_attributes = True

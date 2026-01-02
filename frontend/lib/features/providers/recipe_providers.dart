@@ -3,18 +3,14 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/network/api_client_provider.dart';
 import 'package:frontend/features/data/models/recipe.dart';
-import 'package:frontend/features/data/services/image_service.dart';
 import 'package:frontend/features/data/services/recipe_note_service.dart';
 import 'package:frontend/features/data/services/recipe_service.dart';
+import 'package:frontend/features/providers/image_providers.dart';
+import 'package:frontend/features/providers/tag_providers.dart';
 
 final recipeServiceProvider = Provider<RecipeService>((ref) {
   final client = ref.watch(apiClientProvider);
   return RecipeService(client);
-});
-
-final imageServiceProvider = Provider<ImageService>((ref) {
-  final client = ref.watch(apiClientProvider);
-  return ImageService(client);
 });
 
 final recipeNoteServiceProvider = Provider<RecipeNoteService>((ref) {
@@ -40,8 +36,9 @@ final recipeRepositoryProvider =
     );
 
 class RecipeRepositoryNotifier extends Notifier<Map<int, Recipe>> {
-  late final RecipeService _recipeService = ref.read(recipeServiceProvider);
-  late final ImageService _imageService = ref.read(imageServiceProvider);
+  late final _recipeService = ref.read(recipeServiceProvider);
+  ImageRepositoryNotifier get _imageRepo => ref.read(imageRepositoryProvider.notifier);
+  late final _tagService = ref.read(tagServiceProvider);
 
   @override
   Map<int, Recipe> build() {
@@ -56,10 +53,20 @@ class RecipeRepositoryNotifier extends Notifier<Map<int, Recipe>> {
     final fetched = await _recipeService.getById(recipeId);
 
     if (fetched.imageId != null) {
-      fetched.image = await _imageService.getImage(fetched.imageId!);
+      fetched.image = await _imageRepo.getImage(fetched.imageId!);
     }
 
     state = {...state, recipeId: fetched};
+    return fetched;
+  }
+
+  Future<List<RecipeSimple>> getByTag(int tagId) async {
+    // FIXME: Not enough information to certainly know that we have every recipe of backend cached :-(
+    //final cached = state.values.where((r) => r.tags.any((t) => t.id == tagId)).toList();
+    //if (cached.isNotEmpty) return cached;
+
+    final fetched = await _tagService.getRecipesByTag(tagId);
+
     return fetched;
   }
 
@@ -69,7 +76,7 @@ class RecipeRepositoryNotifier extends Notifier<Map<int, Recipe>> {
 
   Future<int> createRecipe(Recipe recipe) async {
     if (recipe.image != null) {
-      recipe.imageId = await _imageService.sendImage(recipe.image!);
+      recipe.imageId = await _imageRepo.uploadImage(recipe.image!);
     }
 
     final (id, created) = await _recipeService.createRecipe(recipe);
@@ -83,7 +90,7 @@ class RecipeRepositoryNotifier extends Notifier<Map<int, Recipe>> {
     final image = patch.image ?? state[recipeId]?.image;
 
     if (patch.image != null) {
-      patch.imageId = await _imageService.sendImage(patch.image!);
+      patch.imageId = await _imageRepo.uploadImage(patch.image!);
     }
 
     final updated = await _recipeService.updateRecipe(recipeId, patch);
@@ -114,9 +121,16 @@ final recipeProvider = FutureProvider.family<Recipe, int>((
   ref,
   recipeId,
 ) async {
-  ref.watch(recipeRepositoryInvalidationProvider);
   ref.watch(recipeRepositoryProvider);
   return ref.read(recipeRepositoryProvider.notifier).getById(recipeId);
+});
+
+final recipesByTagProvider = FutureProvider.family<List<RecipeSimple>, int>((
+  ref,
+  tagId,
+) {
+  ref.watch(recipeRepositoryProvider);
+  return ref.read(recipeRepositoryProvider.notifier).getByTag(tagId);
 });
 
 void invalidateRepository(WidgetRef ref) {

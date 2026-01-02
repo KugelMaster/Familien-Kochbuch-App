@@ -30,6 +30,7 @@ class Endpoints {
   static String tag(int tagId) => "$tags/$tagId";
   static String renameTag(int id, String name) =>
       Uri(path: "$tags/$id", queryParameters: {"new_name": name}).toString();
+  static String recipesByTag(int tagId) => "$tags/$tagId/recipes";
 
   static String images = "/images";
   static String image(int imageId) => "$images/$imageId";

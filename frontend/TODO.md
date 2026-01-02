@@ -29,10 +29,9 @@
 - Websocket; Wenn zwei Nutzer gleichzeitig ein Rezept bearbeiten, werden die Daten zwischen Server und Client gewechselt
 
 # Aufgaben abgeschlossen:
-- Update DiscoverPage mit Sticky Suchleiste
-- Kategorie Karten darunter
-- Neue Seite: TagRecipePage
-- Optional Bilder für Tags im Modell
+- Bugfix: Bilder laden nun richtig auf TagRecipePage
+- RecipeImage Widget extrahiert (vllt. überall nutzen?)
+- RecipeEditPage nutzt nun imageProvider
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

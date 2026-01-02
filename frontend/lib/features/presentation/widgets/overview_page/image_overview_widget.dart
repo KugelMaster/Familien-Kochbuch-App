@@ -3,28 +3,24 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/utils/async_value_handler.dart';
-import 'package:frontend/features/providers/recipe_providers.dart';
+import 'package:frontend/features/providers/image_providers.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImageOverviewWidget extends ConsumerWidget {
-  final int recipeId;
+  final int? imageId;
   final Future<void> Function() takePhoto;
   final double screenHeight;
 
   const ImageOverviewWidget({
     super.key,
-    required this.recipeId,
+    required this.imageId,
     required this.takePhoto,
     required this.screenHeight,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final imageAsync = ref.watch(
-      recipeProvider(
-        recipeId,
-      ).select((recipeAsync) => recipeAsync.whenData((r) => r.image)),
-    );
+    final imageAsync = ref.watch(imageProvider(imageId));
 
     return AsyncValueHandler(asyncValue: imageAsync, onData: _buildImageWidget);
   }

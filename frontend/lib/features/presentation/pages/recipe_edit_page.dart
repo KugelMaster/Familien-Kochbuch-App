@@ -8,7 +8,7 @@ import 'package:frontend/core/utils/logger.dart';
 import 'package:frontend/features/data/models/ingredient.dart';
 import 'package:frontend/features/data/models/nutrition.dart';
 import 'package:frontend/features/data/models/recipe.dart';
-import 'package:frontend/features/providers/recipe_providers.dart';
+import 'package:frontend/features/providers/image_providers.dart';
 import 'package:image_picker/image_picker.dart';
 
 class RecipeEditPage extends ConsumerStatefulWidget {
@@ -48,7 +48,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
     super.initState();
 
     if (widget.recipe == null) return;
-    Recipe recipe = widget.recipe!;
+    final recipe = widget.recipe!;
 
     titleCtrl.text = recipe.title;
     descCtrl.text = recipe.description ?? "";
@@ -83,20 +83,13 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
       );
     }
 
-    loadImage(recipe);
-  }
+    imageId = recipe.imageId;
+    image = recipe.image;
 
-  Future<void> loadImage(Recipe recipe) async {
-    setState(() => imageId = recipe.imageId);
-
-    if (recipe.image != null) setState(() => this.image = recipe.image);
-
-    if (recipe.imageId == null) return;
-
-    final image = await ref
-        .read(imageServiceProvider)
-        .getImage(recipe.imageId!);
-    setState(() => this.image = image);
+    Future.microtask(() async {
+      final image = await ref.read(imageProvider(imageId).future);
+      setState(() => this.image = image);
+    });
   }
 
   @override
@@ -148,30 +141,31 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
     );
   }
 
-  Widget _imageSection() => GestureDetector(
-    onTap: _pickImage,
-    child: Hero(
-      tag: "recipe-image",
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: image == null
-                  ? Container(
-                      color: Colors.grey.shade300,
-                      child: const Icon(Icons.camera_alt, size: 40),
-                    )
-                  : Image.file(File(image!.path), fit: BoxFit.cover),
+  Widget _imageSection() {
+    final imageWidget = image != null
+        ? Image.file(File(image!.path), fit: BoxFit.cover)
+        : Container(
+            color: Colors.grey.shade300,
+            child: const Icon(Icons.camera_alt, size: 40),
+          );
+
+    return GestureDetector(
+      onTap: _pickImage,
+      child: Hero(
+        tag: "recipe-image-$imageId",
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: AspectRatio(aspectRatio: 16 / 9, child: imageWidget),
             ),
-          ),
-          if (imageId != null) Text("ID: $imageId"),
-        ],
+            if (imageId != null) Text("ID: $imageId"),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   Widget _titleSection() => TextFormField(
     controller: titleCtrl,
@@ -443,8 +437,10 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
     try {
       final picked = await picker.pickImage(source: ImageSource.camera);
       if (picked != null) {
-        setState(() => image = picked);
-        imageId = null;
+        setState(() {
+          image = picked;
+          imageId = null;
+        });
       }
     } catch (e) {
       logger.e("Error when picking image", error: e);
