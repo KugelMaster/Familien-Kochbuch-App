@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/utils/async_value_handler.dart';
@@ -7,7 +5,7 @@ import 'package:frontend/core/utils/format.dart';
 import 'package:frontend/features/data/models/recipe.dart';
 import 'package:frontend/features/data/models/tag.dart';
 import 'package:frontend/features/presentation/pages/recipe_overview_page.dart';
-import 'package:frontend/features/providers/image_providers.dart';
+import 'package:frontend/features/presentation/widgets/recipe_image.dart';
 import 'package:frontend/features/providers/recipe_providers.dart';
 
 class TagRecipePage extends ConsumerWidget {
@@ -46,14 +44,14 @@ class _RecipeGrid extends StatelessWidget {
       crossAxisSpacing: 16,
       childAspectRatio: 0.75,
     ),
-    itemBuilder: (context, index) => RecipeCard(recipe: recipes[index]),
+    itemBuilder: (context, index) => _RecipeCard(recipe: recipes[index]),
   );
 }
 
-class RecipeCard extends StatelessWidget {
+class _RecipeCard extends StatelessWidget {
   final RecipeSimple recipe;
 
-  const RecipeCard({super.key, required this.recipe});
+  const _RecipeCard({required this.recipe});
 
   @override
   Widget build(BuildContext context) {
@@ -102,43 +100,6 @@ class RecipeCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class RecipeImage extends ConsumerWidget {
-  final int? imageId;
-
-  const RecipeImage({super.key, required this.imageId});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final imageAsync = ref.read(imageProvider(imageId));
-
-    return AsyncValueHandler(
-      asyncValue: imageAsync,
-      onData: (image) => Hero(
-        tag: "recipe-image-$imageId",
-        child: image != null
-            ? Image.file(
-                File(image.path),
-                width: double.infinity,
-                fit: BoxFit.cover,
-              )
-            : _placeholder(context),
-      ),
-    );
-  }
-
-  Widget _placeholder(BuildContext context) {
-    return Container(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      alignment: Alignment.center,
-      child: Icon(
-        Icons.restaurant,
-        size: 48,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
     );
   }
