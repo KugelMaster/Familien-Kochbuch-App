@@ -2,6 +2,18 @@ class Endpoints {
   static String recipes = "/recipes";
   static String recipesSimple = "$recipes/simple";
   static String recipe(int recipeId) => "$recipes/$recipeId";
+  static String searchRecipes(
+    String query, [
+    int maxResults = 10,
+    int? userId,
+  ]) => Uri(
+    path: "/search",
+    queryParameters: {
+      "query": query,
+      "max_results": maxResults.toString(),
+      if (userId != null) "user_id": userId,
+    },
+  ).toString();
 
   static String recipeNotes = "/recipe-notes";
   static String recipeNote(int noteId) => "$recipeNotes/note/$noteId";
@@ -13,9 +25,12 @@ class Endpoints {
   static String ratingAvgStars(int recipeId) => "$ratings/$recipeId/average";
 
   static String tags = "/tags";
-  static String createTag(String name) => "$tags?tag_name=$name";
+  static String createTag(String name) =>
+      Uri(path: tags, queryParameters: {"tag_name": name}).toString();
   static String tag(int tagId) => "$tags/$tagId";
-  static String renameTag(int id, String name) => "$tags/$id?new_name=$name";
+  static String renameTag(int id, String name) =>
+      Uri(path: "$tags/$id", queryParameters: {"new_name": name}).toString();
+  static String recipesByTag(int tagId) => "$tags/$tagId/recipes";
 
   static String images = "/images";
   static String image(int imageId) => "$images/$imageId";

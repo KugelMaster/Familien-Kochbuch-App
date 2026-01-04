@@ -129,14 +129,13 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       ImageOverviewWidget(
-        recipeId: widget.recipeId,
+        imageId: recipe.imageId,
         takePhoto: onTakePhoto,
         screenHeight: MediaQuery.of(context).size.height,
       ),
       const SizedBox(height: 8),
 
-      if (recipe.tags.isNotEmpty)
-        TagsOverviewWidget(tags: recipe.tags, updateRecipe: updateRecipe),
+      TagsOverviewWidget(tags: recipe.tags, updateRecipe: updateRecipe),
       const SizedBox(height: 8),
 
       _title(recipe.title),

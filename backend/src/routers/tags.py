@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from database import get_db
 from sqlalchemy.orm import Session
 
-from schemas import Message, TagOut
-from models import Tag
+from schemas import Message, RecipeOutSimple, TagOut
+from models import Recipe, Tag
+from utils.statements import recipe_simple_statement
 
 
 router = APIRouter(
@@ -63,4 +64,12 @@ def delete_tag(tag_id: int, db: Session = Depends(get_db)):
 
     return Message(detail="Tag deleted successfully")
 
-# TODO: Function for sending all recipe ids associated with a tag
+@router.get("/{tag_id}/recipes", response_model=list[RecipeOutSimple])
+def get_recipes_by_tag(tag_id: int, db: Session = Depends(get_db)):
+    tag = db.query(Tag).filter(Tag.id == tag_id).first()
+
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+
+    stmt = recipe_simple_statement.where(Recipe.tags.any(Tag.id == tag_id))
+    return db.execute(stmt).all()
