@@ -29,9 +29,7 @@
 - Websocket; Wenn zwei Nutzer gleichzeitig ein Rezept bearbeiten, werden die Daten zwischen Server und Client gewechselt
 
 # Aufgaben abgeschlossen:
-- Bugfix: Bilder laden nun richtig auf TagRecipePage
-- RecipeImage Widget extrahiert (vllt. überall nutzen?)
-- RecipeEditPage nutzt nun imageProvider
+- MainShell Refactor
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

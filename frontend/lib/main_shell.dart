@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/presentation/pages/discover_page.dart';
-import 'package:frontend/features/presentation/pages/history_page.dart';
 import 'package:frontend/features/presentation/pages/planer_page.dart';
 import 'package:frontend/features/presentation/pages/my_recipes_page.dart';
 import 'package:frontend/features/presentation/pages/settings_page.dart';
@@ -19,7 +18,6 @@ class _MainShellState extends State<MainShell> {
     const DiscoverPage(),
     const MyRecipesPage(),
     const PlanerPage(),
-    const HistoryPage(),
     const SettingsPage(),
   ];
 
@@ -30,43 +28,24 @@ class _MainShellState extends State<MainShell> {
     return Scaffold(
       body: PageView(
         controller: _controller,
-        onPageChanged: (index) => {
-          setState(() {
-            currentPage = index;
-          }),
-        },
+        onPageChanged: (index) => {setState(() => currentPage = index)},
         children: pages,
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentPage,
         onDestinationSelected: (value) {
-          setState(() {
-            currentPage = value;
-          });
+          setState(() => currentPage = value);
 
           _controller.animateToPage(
             value,
             duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut
+            curve: Curves.easeInOut,
           );
         },
         destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.search),
-            label: "Entdecken",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.book),
-            label: "Meine Rezepte",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.help),
-            label: "Planer",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.history),
-            label: "Verlauf",
-          ),
+          NavigationDestination(icon: Icon(Icons.search), label: "Entdecken"),
+          NavigationDestination(icon: Icon(Icons.book), label: "Meine Rezepte"),
+          NavigationDestination(icon: Icon(Icons.menu_book), label: "Planer"),
           NavigationDestination(
             icon: Icon(Icons.settings),
             label: "Einstellungen",
