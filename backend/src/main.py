@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-from routers import recipe_notes, recipes, ratings, images, search, tags
+from routers import recipe_notes, recipes, ratings, images, search, tags, planer
 from database import Base, engine
 
 from tests.test_user import main as test_user_main
@@ -31,6 +31,10 @@ tags_metadata = [
     {
         "name": "Search",
         "description": "Search for recipes.",
+    },
+    {
+        "name": "Planer",
+        "description": "Meal planning operations.",
     }
 ]
 
@@ -49,6 +53,7 @@ app.include_router(ratings.router)
 app.include_router(images.router)
 app.include_router(tags.router)
 app.include_router(search.router)
+app.include_router(planer.router)
 
 
 @app.get("/", response_class=HTMLResponse)

@@ -11,13 +11,7 @@ case "$1" in
         ;;
     rs)
         echo "Restarting the container..."
-        powershell.exe -Command "docker compose down"
-        powershell.exe -Command "docker compose up -d --build"
-        ;;
-    app)
-        echo "Starting the emulator application..."
-        cd frontend || exit 1
-        powershell.exe -Command "flutter emulators --launch Pixel_7_Pro"
+        powershell.exe -Command "docker compose down; docker compose up -d --build"
         ;;
     open-project)
         echo "Opening the project in VS Code..."
