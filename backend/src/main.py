@@ -1,11 +1,9 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-from routers import recipe_notes, recipes, ratings, images, search, tags, auth
 from database import Base, engine
-
+from routers import auth, images, ratings, recipe_notes, recipes, search, tags, test
 from tests.test_user import main as test_user_main
-
 
 tags_metadata = [
     {
@@ -36,6 +34,7 @@ tags_metadata = [
         "name": "Authentication",
         "description": "User registration and authentication.",
     },
+    {"name": "Test", "description": "A route for testing purposes."},
 ]
 
 app = FastAPI(
@@ -54,6 +53,7 @@ app.include_router(images.router)
 app.include_router(tags.router)
 app.include_router(search.router)
 app.include_router(auth.router)
+app.include_router(test.router)
 
 
 @app.get("/", response_class=HTMLResponse)

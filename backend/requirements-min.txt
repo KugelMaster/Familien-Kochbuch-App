@@ -2,4 +2,4 @@ fastapi[standard]
 sqlalchemy
 psycopg2-binary
 python-jose[cryptography]
-passlib[bcrypt]
+argon2-cffi

@@ -1,8 +1,9 @@
+from datetime import datetime, timezone
 from typing import Annotated
+
 from fastapi import Depends
 from sqlalchemy import create_engine, event
-from sqlalchemy.orm import sessionmaker, declarative_base, Session
-from datetime import datetime, timezone
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 from config import DATABASE_URL
 

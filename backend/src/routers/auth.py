@@ -1,40 +1,32 @@
-from datetime import datetime, timedelta
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
-from passlib.context import CryptContext
-from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordRequestForm as OAuth2Form
 from starlette import status
 
-from database import SessionLocal, db_dependency
+from database import db_dependency
 from models import User
+from schemas import Token, UserCreate
+from utils.authentication import authenticate_user, create_access_token, hash_password
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-bcyrpt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
-
-
-class CreateUserRequest(BaseModel):
-    username: str
-    password: str
-    email: str
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-def create_user(user: CreateUserRequest, db: db_dependency):
+def create_user(user: UserCreate, db: db_dependency):
     db_user = User(
         name=user.username,
-        password_hash=bcyrpt_context.hash(user.password),
+        password_hash=hash_password(user.password),
         email=user.email,
     )
 
     db.add(db_user)
     db.commit()
+
+
+@router.post("/token", response_model=Token)
+def login_for_access_token(data: Annotated[OAuth2Form, Depends()], db: db_dependency):
+    user = authenticate_user(data.username, data.password, db)
+    token = create_access_token(user.name, user.id)
+
+    return {"access_token": token, "token_type": "bearer"}
