@@ -1,34 +1,28 @@
-from fastapi import APIRouter, Depends, HTTPException
-from database import get_db
-from sqlalchemy.orm import Session
+from fastapi import APIRouter
+from starlette import status
 
+from dependencies import DBDependency
+from models import Image, Ingredient, Nutrition, Recipe, Tag
 from schemas import Message, RecipeCreate, RecipeOutSimple, RecipeResponse, RecipeUpdate
-from models import Image, Recipe, Ingredient, Nutrition, Tag
-from utils.statements import recipe_simple_statement
+from utils.http_exceptions import BadRequest, NotFound
+from utils.statements import ensure_exists, recipe_simple_statement
+
+router = APIRouter(prefix="/recipes", tags=["Recipes"])
 
 
-router = APIRouter(
-    prefix="/recipes",
-    tags=["Recipes"]
-)
-
-
-@router.post("", response_model=RecipeResponse)
-def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
+@router.post("", response_model=RecipeResponse, status_code=status.HTTP_201_CREATED)
+def create_recipe(recipe: RecipeCreate, db: DBDependency):
     # Check if all tags exist
     db_tags = []
     if (tags := recipe.tags) is not None:
         db_tags = db.query(Tag).filter(Tag.id.in_(tags)).all()
 
         if len(db_tags) != len(tags):
-            raise HTTPException(status_code=400, detail="One or more tags not found")
-        
-    if recipe.image_id is not None:
-        img = db.query(Image).filter(Image.id == recipe.image_id).first()
+            raise BadRequest("One or more tags not found")
 
-        if not img:
-            raise HTTPException(status_code=400, detail="Image not found")
-        
+    if recipe.image_id is not None:
+        ensure_exists(db, Image.id == recipe.image_id, BadRequest("Image not found"))
+
     if recipe.recipe_uri is not None and recipe.recipe_uri.strip() == "":
         recipe.recipe_uri = None
 
@@ -41,7 +35,7 @@ def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
         time_total=recipe.time_total,
         portions=recipe.portions,
         recipe_uri=recipe.recipe_uri,
-        tags=db_tags
+        tags=db_tags,
     )
 
     db.add(db_recipe)
@@ -54,7 +48,7 @@ def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
                 recipe_id=db_recipe.id,
                 name=ingredient.name,
                 amount=ingredient.amount,
-                unit=ingredient.unit
+                unit=ingredient.unit,
             )
             db.add(db_ingredient)
 
@@ -64,36 +58,40 @@ def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
                 recipe_id=db_recipe.id,
                 name=nutrition.name,
                 amount=nutrition.amount,
-                unit=nutrition.unit
+                unit=nutrition.unit,
             )
-            db.add(db_nutrition)    
+            db.add(db_nutrition)
 
     db.commit()
     return db_recipe
 
+
 @router.get("", response_model=list[RecipeResponse])
-def list_recipes(db: Session = Depends(get_db)):
+def list_recipes(db: DBDependency):
     return db.query(Recipe).order_by(Recipe.id).all()
 
+
 @router.get("/simple", response_model=list[RecipeOutSimple])
-def list_recipes_simple(db: Session = Depends(get_db)):
+def list_recipes_simple(db: DBDependency):
     return db.execute(recipe_simple_statement).all()
 
+
 @router.get("/{recipe_id}", response_model=RecipeResponse)
-def get_recipe(recipe_id: int, db: Session = Depends(get_db)):
+def get_recipe(recipe_id: int, db: DBDependency):
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
     if not recipe:
-        raise HTTPException(status_code=404, detail="Recipe not found")
+        raise NotFound("Recipe not found")
 
     return recipe
 
+
 @router.patch("/{recipe_id}", response_model=RecipeResponse)
-def update_recipe(recipe_id: int, patch: RecipeUpdate, db: Session = Depends(get_db)):
+def update_recipe(recipe_id: int, patch: RecipeUpdate, db: DBDependency):
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
     if not recipe:
-        raise HTTPException(status_code=404, detail="Recipe not found")
+        raise NotFound("Recipe not found")
 
     patch_data = patch.model_dump(exclude_unset=True)
 
@@ -102,11 +100,8 @@ def update_recipe(recipe_id: int, patch: RecipeUpdate, db: Session = Depends(get
         image_id = patch_data.pop("image_id")
 
         if image_id is not None:
-            img = db.query(Image).filter(Image.id == image_id).first()
+            ensure_exists(db, Image.id == image_id, BadRequest("Image doesn't exist"))
 
-            if not img:
-                raise HTTPException(status_code=400, detail="Image not found")
-        
         recipe.image_id = image_id
 
     if "ingredients" in patch_data:
@@ -121,7 +116,7 @@ def update_recipe(recipe_id: int, patch: RecipeUpdate, db: Session = Depends(get
                 recipe_id=recipe.id,
                 name=ingredient_data.get("name", ""),
                 amount=ingredient_data.get("amount", None),
-                unit=ingredient_data.get("unit", None)
+                unit=ingredient_data.get("unit", None),
             )
             db.add(db_ingredient)
 
@@ -137,7 +132,7 @@ def update_recipe(recipe_id: int, patch: RecipeUpdate, db: Session = Depends(get
                 recipe_id=recipe.id,
                 name=nutrition_data.get("name", ""),
                 amount=nutrition_data.get("amount", None),
-                unit=nutrition_data.get("unit", None)
+                unit=nutrition_data.get("unit", None),
             )
             db.add(db_nutrition)
 
@@ -147,8 +142,8 @@ def update_recipe(recipe_id: int, patch: RecipeUpdate, db: Session = Depends(get
         new_tags = db.query(Tag).filter(Tag.id.in_(tag_ids)).all()
 
         if len(new_tags) != len(tag_ids):
-            raise HTTPException(status_code=400, detail="One or more tags not found")
-        
+            raise BadRequest("One or more tags not found")
+
         recipe.tags = new_tags
 
     # Update normal fields
@@ -160,12 +155,13 @@ def update_recipe(recipe_id: int, patch: RecipeUpdate, db: Session = Depends(get
 
     return recipe
 
+
 @router.delete("/{recipe_id}", response_model=Message)
-def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
+def delete_recipe(recipe_id: int, db: DBDependency):
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
     if not recipe:
-        raise HTTPException(status_code=404, detail="Recipe not found")
+        raise NotFound("Recipe not found")
 
     db.delete(recipe)
     db.commit()

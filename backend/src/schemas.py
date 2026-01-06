@@ -1,15 +1,18 @@
-from pydantic import BaseModel, Field, field_validator
-from typing import Any, Optional
 from datetime import datetime
+from typing import Any, Optional
+
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 ###############################################[Tags]###############################################
 class TagCreate(BaseModel):
     name: str
 
+
 class TagOut(BaseModel):
     id: int
     name: str
+
 
 ###########################################[Ingredients]############################################
 class IngredientCreate(BaseModel):
@@ -17,17 +20,19 @@ class IngredientCreate(BaseModel):
     amount: Optional[float] = None
     unit: Optional[str] = None
 
+
 ############################################[Nutritions]############################################
 class NutritionCreate(BaseModel):
     name: str
     amount: Optional[float] = None
     unit: Optional[str] = None
 
+
 ###########################################[RecipeNotes]############################################
 class RecipeNoteCreate(BaseModel):
     recipe_id: int
-    user_id: int
     content: str
+
 
 class RecipeNoteOut(BaseModel):
     id: int
@@ -38,51 +43,66 @@ class RecipeNoteOut(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+
 class RecipeNoteUpdate(BaseModel):
     content: str
+
 
 #############################################[Ratings]##############################################
 class RatingCreate(BaseModel):
     recipe_id: int
-    user_id: int
-    stars: float = Field(ge=0, le=5, description="Rating in Stars from 0 to 5 in 0,5 increments")
+    stars: float = Field(
+        ge=0, le=5, description="Rating in Stars from 0 to 5 in 0,5 increments"
+    )
     comment: Optional[str] = None
 
     @field_validator("stars")
     @classmethod
     def validate_stars(cls, v: Any):
-        if not isinstance(v, float): raise TypeError("Stars must be a float")
+        if not isinstance(v, float):
+            raise TypeError("Stars must be a float")
 
         if v * 2 % 1 != 0:
             raise ValueError("Stars must be in 0.5 increments")
         return v
+
 
 class RatingOut(BaseModel):
     id: int
     recipe_id: int
     user_id: int
-    stars: float = Field(ge=0, le=5, description="Rating in Stars from 0 to 5 in 0,5 increments")
+    stars: float = Field(
+        ge=0, le=5, description="Rating in Stars from 0 to 5 in 0,5 increments"
+    )
     comment: Optional[str] = None
 
     created_at: datetime
     updated_at: datetime
 
+
 class RatingAverageOut(BaseModel):
-    average_stars: float = Field(ge=0, le=5, description="Average Rating in Stars from 0 to 5")
+    average_stars: float = Field(
+        ge=0, le=5, description="Average Rating in Stars from 0 to 5"
+    )
     total_ratings: int
 
+
 class RatingUpdate(BaseModel):
-    stars: float = Field(ge=0, le=5, description="Rating in Stars from 0 to 5 in 0,5 increments")
+    stars: float = Field(
+        ge=0, le=5, description="Rating in Stars from 0 to 5 in 0,5 increments"
+    )
     comment: Optional[str] = None
 
     @field_validator("stars")
     @classmethod
     def validate_stars(cls, v: Any):
-        if not isinstance(v, float): raise TypeError("Stars must be a float")
+        if not isinstance(v, float):
+            raise TypeError("Stars must be a float")
 
         if v * 2 % 1 != 0:
             raise ValueError("Stars must be in 0.5 increments")
         return v
+
 
 #############################################[Recipes]##############################################
 class RecipeCreate(BaseModel):
@@ -96,7 +116,10 @@ class RecipeCreate(BaseModel):
     recipe_uri: Optional[str] = None
 
     ingredients: Optional[list[IngredientCreate]] = None
-    nutritions: Optional[list[NutritionCreate]] = None # TODO: Vllt. später automatisch aus Zutaten berechnen?
+    nutritions: Optional[list[NutritionCreate]] = (
+        None  # TODO: Vllt. später automatisch aus Zutaten berechnen?
+    )
+
 
 class RecipeResponse(BaseModel):
     id: int
@@ -120,6 +143,7 @@ class RecipeResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class RecipeUpdate(BaseModel):
     title: Optional[str] = None
     tags: Optional[list[int]] = None
@@ -130,8 +154,8 @@ class RecipeUpdate(BaseModel):
     portions: Optional[float] = Field(None, gt=0)
     recipe_uri: Optional[str] = None
 
-    ingredients: Optional[list[IngredientCreate]] = None # FIXME: Später mit IDs arbeiten
-    nutritions: Optional[list[NutritionCreate]] = None # FIXME: Später mit IDs arbeiten
+    ingredients: Optional[list[IngredientCreate]] = None
+    nutritions: Optional[list[NutritionCreate]] = None
 
     class Config:
         from_attributes = True
@@ -148,13 +172,37 @@ class RecipeOutSimple(BaseModel):
     class Config:
         from_attributes = True
 
+
 ##############################################[Images]##############################################
 class ImageUploadResponse(BaseModel):
     id: int
-    filename: str
+    filename: str = Field(..., max_length=255, description="Filename without path")
 
     class Config:
-        from_attributes = True 
+        from_attributes = True
+
+
+##############################################[Users]###############################################
+class UserCreate(BaseModel):
+    username: str = Field(..., max_length=80, description="Complete name of the user")
+    password: str
+    email: Optional[EmailStr] = Field(
+        None, max_length=255, description="Email address of the user"
+    )
+    is_admin: bool = False  # FIXME: Später für Sicherheit natürlich entfernen ;-)
+
+
+class UserTokenPayload(BaseModel):
+    id: int
+    name: str
+    is_admin: bool = False
+
+
+##########################################[Authentication]##########################################
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
 
 ##############################################[Other]###############################################
 class Message(BaseModel):

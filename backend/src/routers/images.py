@@ -1,77 +1,77 @@
-from fastapi import APIRouter, Depends, UploadFile, HTTPException
-from fastapi.responses import FileResponse
-from database import get_db
-from sqlalchemy.orm import Session
 import shutil
 import uuid
 
+from fastapi import APIRouter, UploadFile
+from fastapi.responses import FileResponse
+from starlette import status
+
+from config import config
+from dependencies import DBDependency, UserDependency
 from models import Image
-from config import RECIPE_IMAGE_DIR
 from schemas import ImageUploadResponse, Message
+from utils.http_exceptions import BadRequest, InternalServerError, NotFound
+
+router = APIRouter(prefix="/images", tags=["Images"])
 
 
-router = APIRouter(
-    prefix="/images",
-    tags=["Images"]
+@router.post(
+    "", response_model=ImageUploadResponse, status_code=status.HTTP_201_CREATED
 )
-
-
-@router.post("", response_model=ImageUploadResponse)
-def upload_image(file: UploadFile, db: Session = Depends(get_db)):
+def upload_image(file: UploadFile, db: DBDependency, user: UserDependency):
     if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Only image files allowed")
+        raise BadRequest("Only image files allowed")
+
+    user_id = user.id
 
     ext = file.content_type.split("/")[-1]
     filename = f"{uuid.uuid4()}.{ext}"
-    file_path = RECIPE_IMAGE_DIR / filename
+    file_path = config.IMAGE_DIR_RECIPES / filename
 
     with open(file_path, "xb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    img = Image(
-        filename=filename,
-        file_path=str(file_path)
-    )
+    img = Image(filename=filename, file_path=str(file_path), uploaded_by=user_id)
     db.add(img)
     db.commit()
     db.refresh(img)
 
     return img
 
+
 @router.get("/filename/{filename}", response_class=FileResponse)
-def get_image_by_filename(filename: str, db: Session = Depends(get_db)):
+def get_image_by_filename(filename: str, db: DBDependency):
     img = db.query(Image).filter(Image.filename == filename).first()
 
     if not img:
-        raise HTTPException(status_code=404, detail="Image not found")
-    
+        raise NotFound("Image not found")
+
     return FileResponse(str(img.file_path))
+
 
 @router.get("/{image_id}", response_class=FileResponse)
-def get_image_by_id(image_id: int, db: Session = Depends(get_db)):
+def get_image_by_id(image_id: int, db: DBDependency):
     img = db.query(Image).filter(Image.id == image_id).first()
 
     if not img:
-        raise HTTPException(status_code=404, detail="Image not found")
-    
+        raise NotFound("Image not found")
+
     return FileResponse(str(img.file_path))
 
+
 @router.delete("/{image_id}", response_model=Message)
-def delete_image(image_id: int, db: Session = Depends(get_db)):
+def delete_image(image_id: int, db: DBDependency):
     img = db.query(Image).filter(Image.id == image_id).first()
 
     if not img:
-        raise HTTPException(status_code=404, detail="Image not found")
-    
-    # Delete the file from the filesystem
+        raise NotFound("Image not found")
+
     try:
-        file_path = RECIPE_IMAGE_DIR / img.filename
+        file_path = config.IMAGE_DIR_RECIPES / img.filename
         file_path.unlink()
     except Exception as e:
         print(f"Error deleting image file: {e}")
-        raise HTTPException(status_code=500, detail="Error deleting image file")
+        raise InternalServerError("Error deleting image file")
 
-    # Delete the database record
     db.delete(img)
     db.commit()
 
