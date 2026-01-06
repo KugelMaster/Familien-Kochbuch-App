@@ -1,29 +1,24 @@
-from fastapi import APIRouter, Depends, HTTPException
-from database import get_db
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException
 
-from schemas import Message, RecipeNoteCreate, RecipeNoteOut, RecipeNoteUpdate
+from database import db_dependency
 from models import Recipe, RecipeNote, User
+from schemas import Message, RecipeNoteCreate, RecipeNoteOut, RecipeNoteUpdate
 
-
-router = APIRouter(
-    prefix="/recipe-notes",
-    tags=["RecipeNotes"]
-)
+router = APIRouter(prefix="/recipe-notes", tags=["RecipeNotes"])
 
 
 @router.post("", response_model=RecipeNoteOut)
-def create_recipe_note(recipe_note: RecipeNoteCreate, db: Session = Depends(get_db)):
+def create_recipe_note(recipe_note: RecipeNoteCreate, db: db_dependency):
     if db.query(Recipe).filter(Recipe.id == recipe_note.recipe_id).first() is None:
         raise HTTPException(status_code=404, detail="Recipe not found")
-    
+
     if db.query(User).filter(User.id == recipe_note.user_id).first() is None:
         raise HTTPException(status_code=404, detail="User not found")
 
     db_recipe_note = RecipeNote(
         recipe_id=recipe_note.recipe_id,
         user_id=recipe_note.user_id,
-        content=recipe_note.content
+        content=recipe_note.content,
     )
 
     db.add(db_recipe_note)
@@ -32,22 +27,24 @@ def create_recipe_note(recipe_note: RecipeNoteCreate, db: Session = Depends(get_
 
     return db_recipe_note
 
+
 @router.get("/note/{note_id}", response_model=RecipeNoteOut)
-def get_recipe_note(note_id: int, db: Session = Depends(get_db)):
+def get_recipe_note(note_id: int, db: db_dependency):
     db_recipe_note = db.query(RecipeNote).filter(RecipeNote.id == note_id).first()
 
     if not db_recipe_note:
         raise HTTPException(status_code=404, detail="Recipe note not found")
-    
+
     return db_recipe_note
 
+
 @router.patch("/note/{note_id}", response_model=RecipeNoteOut)
-def edit_recipe_note(note_id: int, patch: RecipeNoteUpdate, db: Session = Depends(get_db)):
+def edit_recipe_note(note_id: int, patch: RecipeNoteUpdate, db: db_dependency):
     db_recipe_note = db.query(RecipeNote).filter(RecipeNote.id == note_id).first()
 
     if not db_recipe_note:
         raise HTTPException(status_code=404, detail="Recipe note not found")
-    
+
     setattr(db_recipe_note, "content", patch.content)
 
     db.commit()
@@ -55,34 +52,37 @@ def edit_recipe_note(note_id: int, patch: RecipeNoteUpdate, db: Session = Depend
 
     return db_recipe_note
 
+
 @router.delete("/note/{note_id}", response_model=Message)
-def delete_recipe_note(note_id: int, db: Session = Depends(get_db)):
+def delete_recipe_note(note_id: int, db: db_dependency):
     db_recipe_note = db.query(RecipeNote).filter(RecipeNote.id == note_id).first()
 
     if not db_recipe_note:
         raise HTTPException(status_code=404, detail="Recipe note not found")
-    
+
     db.delete(db_recipe_note)
     db.commit()
 
     return Message(detail="Recipe note deleted successfully")
 
+
 @router.get("/{recipe_id}", response_model=list[RecipeNoteOut])
-def get_notes_for_recipe(recipe_id: int, db: Session = Depends(get_db)):
+def get_notes_for_recipe(recipe_id: int, db: db_dependency):
     db_recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
     if not db_recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
-    
+
     return db.query(RecipeNote).filter(RecipeNote.recipe_id == recipe_id).all()
 
+
 @router.delete("/{recipe_id}", response_model=Message)
-def delete_all_notes_from_recipe(recipe_id: int, db: Session = Depends(get_db)):
+def delete_all_notes_from_recipe(recipe_id: int, db: db_dependency):
     db_recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
     if not db_recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
-    
+
     db.query(RecipeNote).filter(RecipeNote.recipe_id == recipe_id).delete()
     db.commit()
 

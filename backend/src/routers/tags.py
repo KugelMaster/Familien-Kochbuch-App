@@ -1,20 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
-from database import get_db
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException
 
-from schemas import Message, RecipeOutSimple, TagOut
+from database import db_dependency
 from models import Recipe, Tag
+from schemas import Message, RecipeOutSimple, TagOut
 from utils.statements import recipe_simple_statement
 
-
-router = APIRouter(
-    prefix="/tags",
-    tags=["Tags"]
-)
+router = APIRouter(prefix="/tags", tags=["Tags"])
 
 
 @router.post("", response_model=TagOut)
-def create_tag(tag_name: str, db: Session = Depends(get_db)):
+def create_tag(tag_name: str, db: db_dependency):
     if db.query(Tag).filter(Tag.name == tag_name).first():
         raise HTTPException(status_code=400, detail="Tag with this name already exists")
 
@@ -26,12 +21,14 @@ def create_tag(tag_name: str, db: Session = Depends(get_db)):
 
     return db_tag
 
+
 @router.get("", response_model=list[TagOut])
-def list_tags(db: Session = Depends(get_db)):
+def list_tags(db: db_dependency):
     return db.query(Tag).all()
 
+
 @router.get("/{tag_id}", response_model=TagOut)
-def get_tag(tag_id: int, db: Session = Depends(get_db)):
+def get_tag(tag_id: int, db: db_dependency):
     tag = db.query(Tag).filter(Tag.id == tag_id).first()
 
     if not tag:
@@ -39,8 +36,9 @@ def get_tag(tag_id: int, db: Session = Depends(get_db)):
 
     return tag
 
+
 @router.patch("/{tag_id}", response_model=TagOut)
-def rename_tag(tag_id: int, new_name: str, db: Session = Depends(get_db)):
+def rename_tag(tag_id: int, new_name: str, db: db_dependency):
     tag = db.query(Tag).filter(Tag.id == tag_id).first()
 
     if not tag:
@@ -52,8 +50,9 @@ def rename_tag(tag_id: int, new_name: str, db: Session = Depends(get_db)):
 
     return tag
 
+
 @router.delete("/{tag_id}", response_model=Message)
-def delete_tag(tag_id: int, db: Session = Depends(get_db)):
+def delete_tag(tag_id: int, db: db_dependency):
     tag = db.query(Tag).filter(Tag.id == tag_id).first()
 
     if not tag:
@@ -64,8 +63,9 @@ def delete_tag(tag_id: int, db: Session = Depends(get_db)):
 
     return Message(detail="Tag deleted successfully")
 
+
 @router.get("/{tag_id}/recipes", response_model=list[RecipeOutSimple])
-def get_recipes_by_tag(tag_id: int, db: Session = Depends(get_db)):
+def get_recipes_by_tag(tag_id: int, db: db_dependency):
     tag = db.query(Tag).filter(Tag.id == tag_id).first()
 
     if not tag:
