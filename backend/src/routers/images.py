@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
 from config import RECIPE_IMAGE_DIR
-from database import db_dependency
+from dependencies import db_dependency
 from models import Image
 from schemas import ImageUploadResponse, Message
 

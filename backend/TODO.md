@@ -1,14 +1,16 @@
 # Offene Aufgaben:
 - `String`-Typen in Datenbank Modellen eine fixe Länge geben
-- `user_dependency` erstellen und da verwenden, wo man Benutzer-ID braucht
-- Datenbankmodelle neu designen, sodass Type Checker die Types richtig erkennt
+- `user_dependency` verwenden, wo man Benutzer-ID braucht
 - Bilder upload planen (URL-Erstellung / ID?)
 - Backups für Bearbeitung / Löschung
 - Dokumentation übersichtlicher machen (OpenAPI)
+ -> starlette.status Codes
 
 # Aufgaben abgeschlossen:
-- `db_dependency` überall angewendet & Database wird jetzt in `database.py` initialisiert
-- Upgrade auf Sqlalchemy 2.0 Syntax
+- Benutzernamen sind einzigartig
+- Neue Hilfsmethode: check_exists
+- `db_dependency` verschoben in `dependencies.py`
+- Neue `user_dependency`
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11):

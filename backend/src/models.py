@@ -110,7 +110,7 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String)
+    name: Mapped[str] = mapped_column(String, unique=True)
     password_hash: Mapped[str] = mapped_column(String)
     email: Mapped[str | None] = mapped_column(String)
     avatar_id: Mapped[int | None] = mapped_column(ForeignKey("images.id"))

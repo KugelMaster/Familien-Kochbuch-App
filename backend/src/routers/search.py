@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from database import db_dependency
+from dependencies import db_dependency
 from models import Recipe
 from schemas import RecipeOutSimple
 from utils.statements import recipe_simple_statement

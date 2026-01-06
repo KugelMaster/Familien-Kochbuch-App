@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from database import db_dependency
+from dependencies import db_dependency
 from models import Recipe, RecipeNote, User
 from schemas import Message, RecipeNoteCreate, RecipeNoteOut, RecipeNoteUpdate
 

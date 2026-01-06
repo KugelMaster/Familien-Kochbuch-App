@@ -1,14 +1,10 @@
-from typing import Annotated, Any
+from fastapi import APIRouter
 
-from fastapi import APIRouter, Depends
-
-from utils.authentication import get_current_user
+from dependencies import user_dependency
 
 router = APIRouter(prefix="/test", tags=["Test"])
 
 
 @router.get("/protected")
-def get_protected_site(
-    user: Annotated[dict[str, Any], Depends(get_current_user)],
-):
+def get_protected_site(user: user_dependency):
     return {"user": user}

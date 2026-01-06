@@ -1,8 +1,6 @@
-from typing import cast
-
 from fastapi import APIRouter, HTTPException
 
-from database import db_dependency
+from dependencies import db_dependency
 from models import Rating, Recipe, User
 from schemas import Message, RatingAverageOut, RatingCreate, RatingOut, RatingUpdate
 
@@ -103,9 +101,7 @@ def get_average_rating(recipe_id: int, db: db_dependency):
     total_stars = sum(rating.stars for rating in ratings)
     average = total_stars / len(ratings)
 
-    return RatingAverageOut(
-        average_stars=round(cast(float, average), 2), total_ratings=len(ratings)
-    )
+    return RatingAverageOut(average_stars=round(average, 2), total_ratings=len(ratings))
 
 
 @router.delete("/{recipe_id}", response_model=Message)

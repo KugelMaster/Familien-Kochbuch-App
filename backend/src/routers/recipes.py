@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from database import db_dependency
+from dependencies import db_dependency
 from models import Image, Ingredient, Nutrition, Recipe, Tag
 from schemas import Message, RecipeCreate, RecipeOutSimple, RecipeResponse, RecipeUpdate
 from utils.statements import recipe_simple_statement
