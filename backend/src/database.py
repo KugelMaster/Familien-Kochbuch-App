@@ -3,13 +3,21 @@ from typing import Annotated
 
 from fastapi import Depends
 from sqlalchemy import create_engine, event
-from sqlalchemy.orm import Session, declarative_base, sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 from config import DATABASE_URL
+from models import Base
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-Base = declarative_base()
+
+
+def init_db():
+    """
+    This function initializes the database with every table declared in models.py.
+    It also binds the engine to there Base Model.
+    """
+    Base.metadata.create_all(bind=engine)
 
 
 def get_db():

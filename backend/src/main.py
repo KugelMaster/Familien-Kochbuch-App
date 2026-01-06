@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-from database import Base, engine
+from database import init_db
 from routers import auth, images, ratings, recipe_notes, recipes, search, tags, test
 from tests.test_user import main as test_user_main
 
@@ -44,7 +44,7 @@ app = FastAPI(
     openapi_tags=tags_metadata,
 )
 
-Base.metadata.create_all(bind=engine)
+init_db()
 
 app.include_router(recipes.router)
 app.include_router(recipe_notes.router)
