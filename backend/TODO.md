@@ -1,12 +1,16 @@
 # Offene Aufgaben:
+- Authentification implementieren!
 - Bilder upload planen (URL-Erstellung / ID?)
 - Backups für Bearbeitung / Löschung
 - Ingredients und Nutritions einzelnd editierbar machen
 - Dokumentation übersichtlicher machen (OpenAPI)
 
 # Aufgaben abgeschlossen:
-- recipe_simple_statement extrahiert für bessere Zugänglichkeit
-- Änderung: Anstatt time_prep wird nun time_total in RecipeSimple mitgesendet
+- Neue Module Installiert: python-jose und passlib
+- Konfiguration genauer gestaltet
+- `db_dependency` als Typ hinzugefügt (TODO: Überall austauschen)
+- Neuer Router: auth
+- Benutzer DB-Modell angepasst
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11):

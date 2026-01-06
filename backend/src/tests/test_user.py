@@ -7,11 +7,8 @@ def main() -> None:
 
     if db.query(User).filter(User.id == 1).first() is not None:
         return
-    
-    db_user = User(
-        id=1,
-        name="dev",
-    )
+
+    db_user = User(id=1, name="dev")
 
     db.add(db_user)
     db.commit()

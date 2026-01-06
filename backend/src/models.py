@@ -1,22 +1,38 @@
-from sqlalchemy import Column, Integer, Float, Numeric, String, Text, ForeignKey, DateTime, func
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    func,
+)
 from sqlalchemy.orm import relationship
+
 from database import Base
+
 
 class Recipe(Base):
     __tablename__ = "recipes"
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
-    image_id = Column(Integer, ForeignKey("images.id", ondelete="SET NULL"), nullable=True)
+    image_id = Column(
+        Integer, ForeignKey("images.id", ondelete="SET NULL"), nullable=True
+    )
     description = Column(Text, nullable=True)
-    time_prep = Column(Integer, nullable=True) # type: ignore
-    time_total = Column(Integer, nullable=True) # type: ignore
-    portions = Column(Float, nullable=True) # type: ignore
+    time_prep = Column(Integer, nullable=True)  # type: ignore
+    time_total = Column(Integer, nullable=True)  # type: ignore
+    portions = Column(Float, nullable=True)  # type: ignore
     recipe_uri = Column(String, nullable=True)
 
     ingredients = relationship("Ingredient", cascade="all, delete-orphan")
     nutritions = relationship("Nutrition", cascade="all, delete-orphan")
-    recipe_notes = relationship("RecipeNote", back_populates="recipe", cascade="all, delete-orphan")
+    recipe_notes = relationship(
+        "RecipeNote", back_populates="recipe", cascade="all, delete-orphan"
+    )
     ratings = relationship("Rating", cascade="all, delete-orphan")
     tags = relationship("Tag", secondary="recipe_tags", backref="recipes")
 
@@ -30,7 +46,7 @@ class Ingredient(Base):
     id = Column(Integer, primary_key=True, index=True)
     recipe_id = Column(Integer, ForeignKey("recipes.id"))
     name = Column(String, nullable=False)
-    amount = Column(Float, nullable=True) # type: ignore
+    amount = Column(Float, nullable=True)  # type: ignore
     unit = Column(String, nullable=True)
 
 
@@ -40,7 +56,7 @@ class Nutrition(Base):
     id = Column(Integer, primary_key=True, index=True)
     recipe_id = Column(Integer, ForeignKey("recipes.id"))
     name = Column(String, nullable=False)
-    amount = Column(Float, nullable=True) # type: ignore
+    amount = Column(Float, nullable=True)  # type: ignore
     unit = Column(String, nullable=True)
 
 
@@ -48,8 +64,12 @@ class RecipeNote(Base):
     __tablename__ = "recipe_notes"
 
     id = Column(Integer, primary_key=True, index=True)
-    recipe_id = Column(Integer, ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    recipe_id = Column(
+        Integer, ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False
+    )
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
     content = Column(Text, nullable=False)
 
     recipe = relationship("Recipe", back_populates="recipe_notes")
@@ -78,11 +98,19 @@ class Tag(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, nullable=False)
 
+
 class RecipeTag(Base):
     __tablename__ = "recipe_tags"
 
-    recipe_id = Column(Integer, ForeignKey("recipes.id", ondelete="CASCADE"), primary_key=True, index=True)
-    tag_id = Column(Integer, ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True, index=True)
+    recipe_id = Column(
+        Integer,
+        ForeignKey("recipes.id", ondelete="CASCADE"),
+        primary_key=True,
+        index=True,
+    )
+    tag_id = Column(
+        Integer, ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
 
 
 class User(Base):
@@ -90,21 +118,15 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    #TODO: 
-    
+    password_hash = Column(String, nullable=True)
+    email = Column(String, nullable=True)
+    avatar_id = Column(Integer, ForeignKey("images.id"), nullable=True)
+
     recipe_notes = relationship("RecipeNote", back_populates="user")
 
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
-"""
-class User(BaseModel):
-    id: UUID
-    name: str
-    #email: str
-    avatar_url: str
-    created_at: str
-    updated_at: str
-"""
+
 
 class Image(Base):
     __tablename__ = "images"
