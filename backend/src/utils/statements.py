@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy import ColumnElement, exists, func, select
 from sqlalchemy.orm import Session
 
@@ -18,5 +19,8 @@ recipe_simple_statement = (
 )
 
 
-def check_exists(session: Session, condition: ColumnElement[bool]) -> bool:
-    return bool(session.scalar(select(exists().where(condition))))
+def ensure_exists(
+    session: Session, condition: ColumnElement[bool], http_exception: HTTPException
+) -> None:
+    if not session.scalar(select(exists().where(condition))):
+        raise http_exception

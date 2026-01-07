@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm as OAuth2Form
 from starlette import status
 
@@ -8,17 +8,15 @@ from dependencies import db_dependency
 from models import User
 from schemas import Token, UserCreate
 from utils.authentication import authenticate_user, create_access_token, hash_password
-from utils.statements import check_exists
+from utils.http_exceptions import BadRequest
+from utils.statements import ensure_exists
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
 def create_user(user: UserCreate, db: db_dependency):
-    if check_exists(db, User.name == user.username):
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST, detail="Username already exists"
-        )
+    ensure_exists(db, User.name == user.username, BadRequest("Username already exists"))
 
     db_user = User(
         name=user.username,

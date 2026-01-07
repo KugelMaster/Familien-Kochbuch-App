@@ -7,10 +7,9 @@
  -> starlette.status Codes
 
 # Aufgaben abgeschlossen:
-- Benutzernamen sind einzigartig
-- Neue Hilfsmethode: check_exists
-- `db_dependency` verschoben in `dependencies.py`
-- Neue `user_dependency`
+- Custom HTTPExceptions um Lesbarkeit zu verbessern
+- Methode `check_exists` umbenannt zu `ensure_exists`, die einen Custom HTTPException wirft, wenn der gegebene Wert nicht existiert
+- Methode `ensure_exists` überall angewendet
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11):

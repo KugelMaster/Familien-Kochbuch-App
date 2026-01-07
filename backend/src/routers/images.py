@@ -1,21 +1,25 @@
 import shutil
 import uuid
 
-from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi import APIRouter, UploadFile
 from fastapi.responses import FileResponse
+from starlette import status
 
 from config import RECIPE_IMAGE_DIR
 from dependencies import db_dependency
 from models import Image
 from schemas import ImageUploadResponse, Message
+from utils.http_exceptions import BadRequest, InternalServerError, NotFound
 
 router = APIRouter(prefix="/images", tags=["Images"])
 
 
-@router.post("", response_model=ImageUploadResponse)
+@router.post(
+    "", response_model=ImageUploadResponse, status_code=status.HTTP_201_CREATED
+)
 def upload_image(file: UploadFile, db: db_dependency):
     if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Only image files allowed")
+        raise BadRequest("Only image files allowed")
 
     ext = file.content_type.split("/")[-1]
     filename = f"{uuid.uuid4()}.{ext}"
@@ -37,7 +41,7 @@ def get_image_by_filename(filename: str, db: db_dependency):
     img = db.query(Image).filter(Image.filename == filename).first()
 
     if not img:
-        raise HTTPException(status_code=404, detail="Image not found")
+        raise NotFound("Image not found")
 
     return FileResponse(str(img.file_path))
 
@@ -47,7 +51,7 @@ def get_image_by_id(image_id: int, db: db_dependency):
     img = db.query(Image).filter(Image.id == image_id).first()
 
     if not img:
-        raise HTTPException(status_code=404, detail="Image not found")
+        raise NotFound("Image not found")
 
     return FileResponse(str(img.file_path))
 
@@ -57,7 +61,7 @@ def delete_image(image_id: int, db: db_dependency):
     img = db.query(Image).filter(Image.id == image_id).first()
 
     if not img:
-        raise HTTPException(status_code=404, detail="Image not found")
+        raise NotFound("Image not found")
 
     # Delete the file from the filesystem
     try:
@@ -65,7 +69,7 @@ def delete_image(image_id: int, db: db_dependency):
         file_path.unlink()
     except Exception as e:
         print(f"Error deleting image file: {e}")
-        raise HTTPException(status_code=500, detail="Error deleting image file")
+        raise InternalServerError("Error deleting image file")
 
     # Delete the database record
     db.delete(img)

@@ -1,28 +1,26 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
+from starlette import status
 
 from dependencies import db_dependency
 from models import Rating, Recipe, User
 from schemas import Message, RatingAverageOut, RatingCreate, RatingOut, RatingUpdate
+from utils.http_exceptions import BadRequest, NotFound
+from utils.statements import ensure_exists
 
 router = APIRouter(prefix="/ratings", tags=["Ratings"])
 
 
-@router.post("", response_model=RatingOut)
+@router.post("", response_model=RatingOut, status_code=status.HTTP_201_CREATED)
 def create_rating(rating: RatingCreate, db: db_dependency):
     if (
         db.query(Rating)
         .filter(Rating.recipe_id == rating.recipe_id, Rating.user_id == rating.user_id)
         .first()
     ):
-        raise HTTPException(
-            status_code=400, detail="User has already rated this recipe"
-        )
+        raise BadRequest("User has already rated this recipe")
 
-    if db.query(Recipe).filter(Recipe.id == rating.recipe_id).first() is None:
-        raise HTTPException(status_code=404, detail="Recipe not found")
-
-    if db.query(User).filter(User.id == rating.user_id).first() is None:
-        raise HTTPException(status_code=404, detail="User not found")
+    ensure_exists(db, Recipe.id == rating.recipe_id, NotFound("Recipe not found"))
+    ensure_exists(db, User.id == rating.user_id, NotFound("User not found"))
 
     db_rating = Rating(
         recipe_id=rating.recipe_id,
@@ -43,7 +41,7 @@ def get_rating(rating_id: int, db: db_dependency):
     db_rating = db.query(Rating).filter(Rating.id == rating_id).first()
 
     if not db_rating:
-        raise HTTPException(status_code=404, detail="Rating not found")
+        raise NotFound("Rating not found")
 
     return db_rating
 
@@ -53,7 +51,7 @@ def edit_rating(rating_id: int, patch: RatingUpdate, db: db_dependency):
     db_rating = db.query(Rating).filter(Rating.id == rating_id).first()
 
     if not db_rating:
-        raise HTTPException(status_code=404, detail="Rating not found")
+        raise NotFound("Rating not found")
 
     is_comment_edited = "comment" in patch.model_dump(exclude_unset=True)
 
@@ -72,7 +70,7 @@ def delete_rating(rating_id: int, db: db_dependency):
     db_rating = db.query(Rating).filter(Rating.id == rating_id).first()
 
     if not db_rating:
-        raise HTTPException(status_code=404, detail="Rating not found")
+        raise NotFound("Rating not found")
 
     db.delete(db_rating)
     db.commit()
@@ -82,16 +80,14 @@ def delete_rating(rating_id: int, db: db_dependency):
 
 @router.get("/{recipe_id}", response_model=list[RatingOut])
 def list_ratings(recipe_id: int, db: db_dependency):
-    if db.query(Recipe).filter(Recipe.id == recipe_id).first() is None:
-        raise HTTPException(status_code=404, detail="Recipe not found")
+    ensure_exists(db, Recipe.id == recipe_id, NotFound("Recipe not found"))
 
     return db.query(Rating).filter(Rating.recipe_id == recipe_id).all()
 
 
 @router.get("/{recipe_id}/average", response_model=RatingAverageOut)
 def get_average_rating(recipe_id: int, db: db_dependency):
-    if db.query(Recipe).filter(Recipe.id == recipe_id).first() is None:
-        raise HTTPException(status_code=404, detail="Recipe not found")
+    ensure_exists(db, Recipe.id == recipe_id, NotFound("Recipe not found"))
 
     ratings = db.query(Rating).filter(Rating.recipe_id == recipe_id).all()
 
@@ -106,8 +102,7 @@ def get_average_rating(recipe_id: int, db: db_dependency):
 
 @router.delete("/{recipe_id}", response_model=Message)
 def delete_all_ratings_from_recipe(recipe_id: int, db: db_dependency):
-    if db.query(Recipe).filter(Recipe.id == recipe_id).first() is None:
-        raise HTTPException(status_code=404, detail="Recipe not found")
+    ensure_exists(db, Recipe.id == recipe_id, NotFound("Recipe not found"))
 
     db.query(Rating).filter(Rating.recipe_id == recipe_id).delete()
     db.commit()

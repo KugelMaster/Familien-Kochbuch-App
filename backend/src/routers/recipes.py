@@ -1,14 +1,16 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
+from starlette import status
 
 from dependencies import db_dependency
 from models import Image, Ingredient, Nutrition, Recipe, Tag
 from schemas import Message, RecipeCreate, RecipeOutSimple, RecipeResponse, RecipeUpdate
-from utils.statements import recipe_simple_statement
+from utils.http_exceptions import BadRequest, NotFound
+from utils.statements import ensure_exists, recipe_simple_statement
 
 router = APIRouter(prefix="/recipes", tags=["Recipes"])
 
 
-@router.post("", response_model=RecipeResponse)
+@router.post("", response_model=RecipeResponse, status_code=status.HTTP_201_CREATED)
 def create_recipe(recipe: RecipeCreate, db: db_dependency):
     # Check if all tags exist
     db_tags = []
@@ -16,13 +18,10 @@ def create_recipe(recipe: RecipeCreate, db: db_dependency):
         db_tags = db.query(Tag).filter(Tag.id.in_(tags)).all()
 
         if len(db_tags) != len(tags):
-            raise HTTPException(status_code=400, detail="One or more tags not found")
+            raise BadRequest("One or more tags not found")
 
     if recipe.image_id is not None:
-        img = db.query(Image).filter(Image.id == recipe.image_id).first()
-
-        if not img:
-            raise HTTPException(status_code=400, detail="Image not found")
+        ensure_exists(db, Image.id == recipe.image_id, BadRequest("Image not found"))
 
     if recipe.recipe_uri is not None and recipe.recipe_uri.strip() == "":
         recipe.recipe_uri = None
@@ -82,7 +81,7 @@ def get_recipe(recipe_id: int, db: db_dependency):
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
     if not recipe:
-        raise HTTPException(status_code=404, detail="Recipe not found")
+        raise NotFound("Recipe not found")
 
     return recipe
 
@@ -92,7 +91,7 @@ def update_recipe(recipe_id: int, patch: RecipeUpdate, db: db_dependency):
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
     if not recipe:
-        raise HTTPException(status_code=404, detail="Recipe not found")
+        raise NotFound("Recipe not found")
 
     patch_data = patch.model_dump(exclude_unset=True)
 
@@ -101,10 +100,7 @@ def update_recipe(recipe_id: int, patch: RecipeUpdate, db: db_dependency):
         image_id = patch_data.pop("image_id")
 
         if image_id is not None:
-            img = db.query(Image).filter(Image.id == image_id).first()
-
-            if not img:
-                raise HTTPException(status_code=400, detail="Image not found")
+            ensure_exists(db, Image.id == image_id, BadRequest("Image doesn't exist"))
 
         recipe.image_id = image_id
 
@@ -146,7 +142,7 @@ def update_recipe(recipe_id: int, patch: RecipeUpdate, db: db_dependency):
         new_tags = db.query(Tag).filter(Tag.id.in_(tag_ids)).all()
 
         if len(new_tags) != len(tag_ids):
-            raise HTTPException(status_code=400, detail="One or more tags not found")
+            raise BadRequest("One or more tags not found")
 
         recipe.tags = new_tags
 
@@ -165,7 +161,7 @@ def delete_recipe(recipe_id: int, db: db_dependency):
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
     if not recipe:
-        raise HTTPException(status_code=404, detail="Recipe not found")
+        raise NotFound("Recipe not found")
 
     db.delete(recipe)
     db.commit()

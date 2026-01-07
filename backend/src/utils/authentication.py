@@ -3,14 +3,14 @@ from typing import Annotated, Any
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError, VerifyMismatchError
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
-from starlette import status
 
 from config import JWT_ALGORITHM, JWT_SECRET_KEY
 from models import User
+from utils.http_exceptions import BadRequest, Unauthorized
 
 password_hasher = PasswordHasher()
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/auth/token")
@@ -26,24 +26,18 @@ def authenticate_user(username: str, password: str, db: Session) -> User:
     user = db.query(User).filter(User.name == username).first()
 
     if not user:
-        raise HTTPException(
-            status.HTTP_401_UNAUTHORIZED, detail="Username or password is wrong"
-        )
+        raise Unauthorized("Username or password is wrong")
 
     try:
         password_hasher.verify(user.password_hash, password)
 
         return user
     except VerifyMismatchError:
-        raise HTTPException(
-            status.HTTP_401_UNAUTHORIZED, detail="Username or password is wrong"
-        )
+        raise Unauthorized("Username or password is wrong")
     except VerificationError:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Verification failed")
+        raise Unauthorized("Verification failed")
     except InvalidHashError:
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST, detail="Hash could not be parsed"
-        )
+        raise BadRequest("Hash could not be parsed")
 
 
 def create_access_token(username: str, user_id: int) -> str:
@@ -58,12 +52,8 @@ def get_current_user(token: token_dependency) -> dict[str, Any]:
         username = payload.get("sub")
         user_id = payload.get("id")
         if username is None or user_id is None:
-            raise HTTPException(
-                status.HTTP_401_UNAUTHORIZED, detail="User unauthorized"
-            )
+            raise Unauthorized("User unauthorized")
 
         return {"username": username, "id": user_id}
     except JWTError:
-        raise HTTPException(
-            status.HTTP_401_UNAUTHORIZED, detail="Signature or claims invalid"
-        )
+        raise Unauthorized("Signature or claims invalid")
