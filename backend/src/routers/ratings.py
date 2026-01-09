@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from starlette import status
 
-from dependencies import db_dependency
+from dependencies import DBDependency
 from models import Rating, Recipe, User
 from schemas import Message, RatingAverageOut, RatingCreate, RatingOut, RatingUpdate
 from utils.http_exceptions import BadRequest, NotFound
@@ -11,7 +11,7 @@ router = APIRouter(prefix="/ratings", tags=["Ratings"])
 
 
 @router.post("", response_model=RatingOut, status_code=status.HTTP_201_CREATED)
-def create_rating(rating: RatingCreate, db: db_dependency):
+def create_rating(rating: RatingCreate, db: DBDependency):
     if (
         db.query(Rating)
         .filter(Rating.recipe_id == rating.recipe_id, Rating.user_id == rating.user_id)
@@ -37,7 +37,7 @@ def create_rating(rating: RatingCreate, db: db_dependency):
 
 
 @router.get("/rating/{rating_id}", response_model=RatingOut)
-def get_rating(rating_id: int, db: db_dependency):
+def get_rating(rating_id: int, db: DBDependency):
     db_rating = db.query(Rating).filter(Rating.id == rating_id).first()
 
     if not db_rating:
@@ -47,7 +47,7 @@ def get_rating(rating_id: int, db: db_dependency):
 
 
 @router.patch("/rating/{rating_id}", response_model=RatingOut)
-def edit_rating(rating_id: int, patch: RatingUpdate, db: db_dependency):
+def edit_rating(rating_id: int, patch: RatingUpdate, db: DBDependency):
     db_rating = db.query(Rating).filter(Rating.id == rating_id).first()
 
     if not db_rating:
@@ -66,7 +66,7 @@ def edit_rating(rating_id: int, patch: RatingUpdate, db: db_dependency):
 
 
 @router.delete("/rating/{rating_id}", response_model=Message)
-def delete_rating(rating_id: int, db: db_dependency):
+def delete_rating(rating_id: int, db: DBDependency):
     db_rating = db.query(Rating).filter(Rating.id == rating_id).first()
 
     if not db_rating:
@@ -79,14 +79,14 @@ def delete_rating(rating_id: int, db: db_dependency):
 
 
 @router.get("/{recipe_id}", response_model=list[RatingOut])
-def list_ratings(recipe_id: int, db: db_dependency):
+def list_ratings(recipe_id: int, db: DBDependency):
     ensure_exists(db, Recipe.id == recipe_id, NotFound("Recipe not found"))
 
     return db.query(Rating).filter(Rating.recipe_id == recipe_id).all()
 
 
 @router.get("/{recipe_id}/average", response_model=RatingAverageOut)
-def get_average_rating(recipe_id: int, db: db_dependency):
+def get_average_rating(recipe_id: int, db: DBDependency):
     ensure_exists(db, Recipe.id == recipe_id, NotFound("Recipe not found"))
 
     ratings = db.query(Rating).filter(Rating.recipe_id == recipe_id).all()
@@ -101,7 +101,7 @@ def get_average_rating(recipe_id: int, db: db_dependency):
 
 
 @router.delete("/{recipe_id}", response_model=Message)
-def delete_all_ratings_from_recipe(recipe_id: int, db: db_dependency):
+def delete_all_ratings_from_recipe(recipe_id: int, db: DBDependency):
     ensure_exists(db, Recipe.id == recipe_id, NotFound("Recipe not found"))
 
     db.query(Rating).filter(Rating.recipe_id == recipe_id).delete()

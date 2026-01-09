@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 ###############################################[Tags]###############################################
@@ -178,7 +178,7 @@ class RecipeOutSimple(BaseModel):
 ##############################################[Images]##############################################
 class ImageUploadResponse(BaseModel):
     id: int
-    filename: str
+    filename: str = Field(..., max_length=255, description="Filename without path")
 
     class Config:
         from_attributes = True
@@ -186,9 +186,11 @@ class ImageUploadResponse(BaseModel):
 
 ##############################################[Users]###############################################
 class UserCreate(BaseModel):
-    username: str
+    username: str = Field(..., max_length=80, description="Complete name of the user")
     password: str
-    email: Optional[str] = None
+    email: Optional[EmailStr] = Field(
+        None, max_length=255, description="Email address of the user"
+    )
 
 
 ##########################################[Authentication]##########################################

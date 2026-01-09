@@ -1,10 +1,10 @@
 from fastapi import APIRouter
 
-from dependencies import user_dependency
+from dependencies import UserDependency
 
 router = APIRouter(prefix="/test", tags=["Test"])
 
 
 @router.get("/protected")
-def get_protected_site(user: user_dependency):
+def get_protected_site(user: UserDependency):
     return {"user": user}

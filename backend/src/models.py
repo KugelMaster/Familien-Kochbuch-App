@@ -110,9 +110,9 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String, unique=True)
-    password_hash: Mapped[str] = mapped_column(String)
-    email: Mapped[str | None] = mapped_column(String)
+    name: Mapped[str] = mapped_column(String(80), unique=True)
+    password_hash: Mapped[str] = mapped_column(String(255))  # Vllt. reicht auch 100?
+    email: Mapped[str | None] = mapped_column(String(255))
     avatar_id: Mapped[int | None] = mapped_column(ForeignKey("images.id"))
 
     recipe_notes: Mapped[list["RecipeNote"]] = relationship(back_populates="user")
@@ -125,8 +125,8 @@ class Image(Base):
     __tablename__ = "images"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    filename: Mapped[str] = mapped_column(String)
-    file_path: Mapped[str] = mapped_column(String)
+    filename: Mapped[str] = mapped_column(String(255))
+    file_path: Mapped[str] = mapped_column(String(1024))
     uploaded_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())

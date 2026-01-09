@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse
 from starlette import status
 
 from config import RECIPE_IMAGE_DIR
-from dependencies import db_dependency
+from dependencies import DBDependency
 from models import Image
 from schemas import ImageUploadResponse, Message
 from utils.http_exceptions import BadRequest, InternalServerError, NotFound
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/images", tags=["Images"])
 @router.post(
     "", response_model=ImageUploadResponse, status_code=status.HTTP_201_CREATED
 )
-def upload_image(file: UploadFile, db: db_dependency):
+def upload_image(file: UploadFile, db: DBDependency):
     if not file.content_type or not file.content_type.startswith("image/"):
         raise BadRequest("Only image files allowed")
 
@@ -37,7 +37,7 @@ def upload_image(file: UploadFile, db: db_dependency):
 
 
 @router.get("/filename/{filename}", response_class=FileResponse)
-def get_image_by_filename(filename: str, db: db_dependency):
+def get_image_by_filename(filename: str, db: DBDependency):
     img = db.query(Image).filter(Image.filename == filename).first()
 
     if not img:
@@ -47,7 +47,7 @@ def get_image_by_filename(filename: str, db: db_dependency):
 
 
 @router.get("/{image_id}", response_class=FileResponse)
-def get_image_by_id(image_id: int, db: db_dependency):
+def get_image_by_id(image_id: int, db: DBDependency):
     img = db.query(Image).filter(Image.id == image_id).first()
 
     if not img:
@@ -57,7 +57,7 @@ def get_image_by_id(image_id: int, db: db_dependency):
 
 
 @router.delete("/{image_id}", response_model=Message)
-def delete_image(image_id: int, db: db_dependency):
+def delete_image(image_id: int, db: DBDependency):
     img = db.query(Image).filter(Image.id == image_id).first()
 
     if not img:

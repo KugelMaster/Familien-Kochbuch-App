@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from starlette import status
 
-from dependencies import db_dependency
+from dependencies import DBDependency
 from models import Image, Ingredient, Nutrition, Recipe, Tag
 from schemas import Message, RecipeCreate, RecipeOutSimple, RecipeResponse, RecipeUpdate
 from utils.http_exceptions import BadRequest, NotFound
@@ -11,7 +11,7 @@ router = APIRouter(prefix="/recipes", tags=["Recipes"])
 
 
 @router.post("", response_model=RecipeResponse, status_code=status.HTTP_201_CREATED)
-def create_recipe(recipe: RecipeCreate, db: db_dependency):
+def create_recipe(recipe: RecipeCreate, db: DBDependency):
     # Check if all tags exist
     db_tags = []
     if (tags := recipe.tags) is not None:
@@ -67,17 +67,17 @@ def create_recipe(recipe: RecipeCreate, db: db_dependency):
 
 
 @router.get("", response_model=list[RecipeResponse])
-def list_recipes(db: db_dependency):
+def list_recipes(db: DBDependency):
     return db.query(Recipe).order_by(Recipe.id).all()
 
 
 @router.get("/simple", response_model=list[RecipeOutSimple])
-def list_recipes_simple(db: db_dependency):
+def list_recipes_simple(db: DBDependency):
     return db.execute(recipe_simple_statement).all()
 
 
 @router.get("/{recipe_id}", response_model=RecipeResponse)
-def get_recipe(recipe_id: int, db: db_dependency):
+def get_recipe(recipe_id: int, db: DBDependency):
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
     if not recipe:
@@ -87,7 +87,7 @@ def get_recipe(recipe_id: int, db: db_dependency):
 
 
 @router.patch("/{recipe_id}", response_model=RecipeResponse)
-def update_recipe(recipe_id: int, patch: RecipeUpdate, db: db_dependency):
+def update_recipe(recipe_id: int, patch: RecipeUpdate, db: DBDependency):
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
     if not recipe:
@@ -157,7 +157,7 @@ def update_recipe(recipe_id: int, patch: RecipeUpdate, db: db_dependency):
 
 
 @router.delete("/{recipe_id}", response_model=Message)
-def delete_recipe(recipe_id: int, db: db_dependency):
+def delete_recipe(recipe_id: int, db: DBDependency):
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
     if not recipe:

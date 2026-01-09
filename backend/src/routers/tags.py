@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from dependencies import db_dependency
+from dependencies import DBDependency
 from models import Recipe, Tag
 from schemas import Message, RecipeOutSimple, TagOut
 from utils.http_exceptions import BadRequest, NotFound
@@ -10,7 +10,7 @@ router = APIRouter(prefix="/tags", tags=["Tags"])
 
 
 @router.post("", response_model=TagOut)
-def create_tag(tag_name: str, db: db_dependency):
+def create_tag(tag_name: str, db: DBDependency):
     ensure_exists(
         db, Tag.name == tag_name, BadRequest("Tag with this name already exists")
     )
@@ -25,12 +25,12 @@ def create_tag(tag_name: str, db: db_dependency):
 
 
 @router.get("", response_model=list[TagOut])
-def list_tags(db: db_dependency):
+def list_tags(db: DBDependency):
     return db.query(Tag).all()
 
 
 @router.get("/{tag_id}", response_model=TagOut)
-def get_tag(tag_id: int, db: db_dependency):
+def get_tag(tag_id: int, db: DBDependency):
     tag = db.query(Tag).filter(Tag.id == tag_id).first()
 
     if not tag:
@@ -40,7 +40,7 @@ def get_tag(tag_id: int, db: db_dependency):
 
 
 @router.patch("/{tag_id}", response_model=TagOut)
-def rename_tag(tag_id: int, new_name: str, db: db_dependency):
+def rename_tag(tag_id: int, new_name: str, db: DBDependency):
     tag = db.query(Tag).filter(Tag.id == tag_id).first()
 
     if not tag:
@@ -54,7 +54,7 @@ def rename_tag(tag_id: int, new_name: str, db: db_dependency):
 
 
 @router.delete("/{tag_id}", response_model=Message)
-def delete_tag(tag_id: int, db: db_dependency):
+def delete_tag(tag_id: int, db: DBDependency):
     tag = db.query(Tag).filter(Tag.id == tag_id).first()
 
     if not tag:
@@ -67,7 +67,7 @@ def delete_tag(tag_id: int, db: db_dependency):
 
 
 @router.get("/{tag_id}/recipes", response_model=list[RecipeOutSimple])
-def get_recipes_by_tag(tag_id: int, db: db_dependency):
+def get_recipes_by_tag(tag_id: int, db: DBDependency):
     ensure_exists(db, Tag.id == tag_id, NotFound("Tag not found"))
 
     stmt = recipe_simple_statement.where(Recipe.tags.any(Tag.id == tag_id))

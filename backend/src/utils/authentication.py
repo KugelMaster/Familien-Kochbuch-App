@@ -15,8 +15,6 @@ from utils.http_exceptions import BadRequest, Unauthorized
 password_hasher = PasswordHasher()
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
-token_dependency = Annotated[str, Depends(oauth2_bearer)]
-
 
 def hash_password(password: str) -> str:
     return password_hasher.hash(password)
@@ -46,7 +44,7 @@ def create_access_token(username: str, user_id: int) -> str:
     return jwt.encode(claims, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 
-def get_current_user(token: token_dependency) -> dict[str, Any]:
+def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]) -> dict[str, Any]:
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
         username = payload.get("sub")
@@ -57,3 +55,10 @@ def get_current_user(token: token_dependency) -> dict[str, Any]:
         return {"username": username, "id": user_id}
     except JWTError:
         raise Unauthorized("Signature or claims invalid")
+
+
+# def get_optional_user(token: Annotated[Optional[str], Depends(oauth2_bearer)] = None):
+#     if token is None:
+#         return
+
+#     return get_current_user(token)
