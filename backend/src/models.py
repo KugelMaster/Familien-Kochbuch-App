@@ -76,7 +76,7 @@ class Rating(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"))
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     stars: Mapped[float] = mapped_column(
         Numeric(precision=2, scale=1, asdecimal=False),
         CheckConstraint("stars >= 0 AND stars <= 5.0"),
@@ -113,7 +113,10 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(80), unique=True)
     password_hash: Mapped[str] = mapped_column(String(255))  # Vllt. reicht auch 100?
     email: Mapped[str | None] = mapped_column(String(255))
-    avatar_id: Mapped[int | None] = mapped_column(ForeignKey("images.id"))
+    avatar_id: Mapped[int | None] = mapped_column(
+        ForeignKey("images.id", ondelete="SET NULL")
+    )
+    is_admin: Mapped[bool] = mapped_column(default=False)
 
     recipe_notes: Mapped[list["RecipeNote"]] = relationship(back_populates="user")
 
@@ -127,6 +130,8 @@ class Image(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     filename: Mapped[str] = mapped_column(String(255))
     file_path: Mapped[str] = mapped_column(String(1024))
-    uploaded_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    uploaded_by: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NUll")
+    )
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())

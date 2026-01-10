@@ -26,6 +26,11 @@ class Unauthorized(ServiceException):
     DETAIL = "Unauthorized"
 
 
+class Forbidden(ServiceException):
+    STATUS_CODE = status.HTTP_403_FORBIDDEN
+    DETAIL = "Forbidden"
+
+
 class NotFound(ServiceException):
     STATUS_CODE = status.HTTP_404_NOT_FOUND
     DETAIL = "Not found"

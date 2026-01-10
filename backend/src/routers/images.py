@@ -5,8 +5,8 @@ from fastapi import APIRouter, UploadFile
 from fastapi.responses import FileResponse
 from starlette import status
 
-from config import RECIPE_IMAGE_DIR
-from dependencies import DBDependency
+from config import config
+from dependencies import DBDependency, UserDependency
 from models import Image
 from schemas import ImageUploadResponse, Message
 from utils.http_exceptions import BadRequest, InternalServerError, NotFound
@@ -17,18 +17,20 @@ router = APIRouter(prefix="/images", tags=["Images"])
 @router.post(
     "", response_model=ImageUploadResponse, status_code=status.HTTP_201_CREATED
 )
-def upload_image(file: UploadFile, db: DBDependency):
+def upload_image(file: UploadFile, db: DBDependency, user: UserDependency):
     if not file.content_type or not file.content_type.startswith("image/"):
         raise BadRequest("Only image files allowed")
 
+    user_id = user.id
+
     ext = file.content_type.split("/")[-1]
     filename = f"{uuid.uuid4()}.{ext}"
-    file_path = RECIPE_IMAGE_DIR / filename
+    file_path = config.IMAGE_DIR_RECIPES / filename
 
     with open(file_path, "xb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    img = Image(filename=filename, file_path=str(file_path))
+    img = Image(filename=filename, file_path=str(file_path), uploaded_by=user_id)
     db.add(img)
     db.commit()
     db.refresh(img)
@@ -63,15 +65,13 @@ def delete_image(image_id: int, db: DBDependency):
     if not img:
         raise NotFound("Image not found")
 
-    # Delete the file from the filesystem
     try:
-        file_path = RECIPE_IMAGE_DIR / img.filename
+        file_path = config.IMAGE_DIR_RECIPES / img.filename
         file_path.unlink()
     except Exception as e:
         print(f"Error deleting image file: {e}")
         raise InternalServerError("Error deleting image file")
 
-    # Delete the database record
     db.delete(img)
     db.commit()
 

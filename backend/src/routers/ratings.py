@@ -1,30 +1,29 @@
 from fastapi import APIRouter
 from starlette import status
 
-from dependencies import DBDependency
-from models import Rating, Recipe, User
+from dependencies import DBDependency, UserDependency
+from models import Rating, Recipe
 from schemas import Message, RatingAverageOut, RatingCreate, RatingOut, RatingUpdate
-from utils.http_exceptions import BadRequest, NotFound
+from utils.http_exceptions import BadRequest, Forbidden, NotFound
 from utils.statements import ensure_exists
 
 router = APIRouter(prefix="/ratings", tags=["Ratings"])
 
 
 @router.post("", response_model=RatingOut, status_code=status.HTTP_201_CREATED)
-def create_rating(rating: RatingCreate, db: DBDependency):
+def create_rating(rating: RatingCreate, db: DBDependency, user: UserDependency):
     if (
         db.query(Rating)
-        .filter(Rating.recipe_id == rating.recipe_id, Rating.user_id == rating.user_id)
+        .filter(Rating.recipe_id == rating.recipe_id, Rating.user_id == user.id)
         .first()
     ):
         raise BadRequest("User has already rated this recipe")
 
     ensure_exists(db, Recipe.id == rating.recipe_id, NotFound("Recipe not found"))
-    ensure_exists(db, User.id == rating.user_id, NotFound("User not found"))
 
     db_rating = Rating(
         recipe_id=rating.recipe_id,
-        user_id=rating.user_id,
+        user_id=user.id,
         stars=rating.stars,
         comment=rating.comment,
     )
@@ -47,11 +46,16 @@ def get_rating(rating_id: int, db: DBDependency):
 
 
 @router.patch("/rating/{rating_id}", response_model=RatingOut)
-def edit_rating(rating_id: int, patch: RatingUpdate, db: DBDependency):
+def edit_rating(
+    rating_id: int, patch: RatingUpdate, db: DBDependency, user: UserDependency
+):
     db_rating = db.query(Rating).filter(Rating.id == rating_id).first()
 
     if not db_rating:
         raise NotFound("Rating not found")
+
+    if db_rating.user_id != user.id and not user.is_admin:
+        raise Forbidden("Forbidden: You do not have permission to edit this rating.")
 
     is_comment_edited = "comment" in patch.model_dump(exclude_unset=True)
 
@@ -66,11 +70,14 @@ def edit_rating(rating_id: int, patch: RatingUpdate, db: DBDependency):
 
 
 @router.delete("/rating/{rating_id}", response_model=Message)
-def delete_rating(rating_id: int, db: DBDependency):
+def delete_rating(rating_id: int, db: DBDependency, user: UserDependency):
     db_rating = db.query(Rating).filter(Rating.id == rating_id).first()
 
     if not db_rating:
         raise NotFound("Rating not found")
+
+    if db_rating.user_id != user.id and not user.is_admin:
+        raise Forbidden("Forbidden: You do not have permissions to delete this rating.")
 
     db.delete(db_rating)
     db.commit()
@@ -101,8 +108,15 @@ def get_average_rating(recipe_id: int, db: DBDependency):
 
 
 @router.delete("/{recipe_id}", response_model=Message)
-def delete_all_ratings_from_recipe(recipe_id: int, db: DBDependency):
+def delete_all_ratings_from_recipe(
+    recipe_id: int, db: DBDependency, user: UserDependency
+):
     ensure_exists(db, Recipe.id == recipe_id, NotFound("Recipe not found"))
+
+    if not user.is_admin:
+        raise Forbidden(
+            "Forbidden: You do not have permissions to delete all ratings from this recipe."
+        )
 
     db.query(Rating).filter(Rating.recipe_id == recipe_id).delete()
     db.commit()

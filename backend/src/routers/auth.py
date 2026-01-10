@@ -22,6 +22,7 @@ def create_user(user: UserCreate, db: DBDependency):
         name=user.username,
         password_hash=hash_password(user.password),
         email=user.email,
+        is_admin=user.is_admin,
     )
 
     db.add(db_user)
@@ -31,6 +32,6 @@ def create_user(user: UserCreate, db: DBDependency):
 @router.post("/token", response_model=Token)
 def login_for_access_token(data: Annotated[OAuth2Form, Depends()], db: DBDependency):
     user = authenticate_user(data.username, data.password, db)
-    token = create_access_token(user.name, user.id)
+    token = create_access_token(user.name, user.id, user.is_admin)
 
     return {"access_token": token, "token_type": "bearer"}

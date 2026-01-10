@@ -31,7 +31,6 @@ class NutritionCreate(BaseModel):
 ###########################################[RecipeNotes]############################################
 class RecipeNoteCreate(BaseModel):
     recipe_id: int
-    user_id: int
     content: str
 
 
@@ -52,7 +51,6 @@ class RecipeNoteUpdate(BaseModel):
 #############################################[Ratings]##############################################
 class RatingCreate(BaseModel):
     recipe_id: int
-    user_id: int
     stars: float = Field(
         ge=0, le=5, description="Rating in Stars from 0 to 5 in 0,5 increments"
     )
@@ -191,6 +189,13 @@ class UserCreate(BaseModel):
     email: Optional[EmailStr] = Field(
         None, max_length=255, description="Email address of the user"
     )
+    is_admin: bool = False  # FIXME: Später für Sicherheit natürlich entfernen ;-)
+
+
+class UserTokenPayload(BaseModel):
+    id: int
+    name: str
+    is_admin: bool = False
 
 
 ##########################################[Authentication]##########################################

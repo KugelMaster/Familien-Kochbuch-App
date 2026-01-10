@@ -5,5 +5,8 @@ __pycache__/
 .venv
 .vscode
 
+*.env
+!*-example.env
+
 UninstallSitePackages.ps1
 drs.ps1

@@ -8,8 +8,9 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from config import JWT_ALGORITHM, JWT_SECRET_KEY
+from config import config
 from models import User
+from schemas import UserTokenPayload
 from utils.http_exceptions import BadRequest, Unauthorized
 
 password_hasher = PasswordHasher()
@@ -38,21 +39,29 @@ def authenticate_user(username: str, password: str, db: Session) -> User:
         raise BadRequest("Hash could not be parsed")
 
 
-def create_access_token(username: str, user_id: int) -> str:
+def create_access_token(username: str, user_id: int, is_admin: bool) -> str:
     issued_at = datetime.now(timezone.utc)
-    claims: dict[str, Any] = {"sub": username, "id": user_id, "iat": issued_at}
-    return jwt.encode(claims, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+    claims: dict[str, Any] = {
+        "sub": username,
+        "id": user_id,
+        "is_admin": is_admin,
+        "iat": issued_at,
+    }
+    return jwt.encode(claims, config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
 
 
-def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]) -> dict[str, Any]:
+def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]) -> UserTokenPayload:
     try:
-        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        payload = jwt.decode(
+            token, config.JWT_SECRET_KEY, algorithms=[config.JWT_ALGORITHM]
+        )
         username = payload.get("sub")
         user_id = payload.get("id")
+        is_admin = payload.get("is_admin", False)
         if username is None or user_id is None:
             raise Unauthorized("User unauthorized")
 
-        return {"username": username, "id": user_id}
+        return UserTokenPayload(id=user_id, name=username, is_admin=is_admin)
     except JWTError:
         raise Unauthorized("Signature or claims invalid")
 
