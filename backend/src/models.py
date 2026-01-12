@@ -3,6 +3,8 @@ from datetime import datetime
 from sqlalchemy import CheckConstraint, ForeignKey, Numeric, String, Text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
+from schemas import ImageTag, Role
+
 
 class Base(DeclarativeBase):
     pass
@@ -116,7 +118,7 @@ class User(Base):
     avatar_id: Mapped[int | None] = mapped_column(
         ForeignKey("images.id", ondelete="SET NULL")
     )
-    is_admin: Mapped[bool] = mapped_column(default=False)
+    role: Mapped[Role] = mapped_column(default=Role.user)
 
     recipe_notes: Mapped[list["RecipeNote"]] = relationship(back_populates="user")
 
@@ -130,6 +132,7 @@ class Image(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     filename: Mapped[str] = mapped_column(String(255))
     file_path: Mapped[str] = mapped_column(String(1024))
+    tag: Mapped[ImageTag] = mapped_column()
     uploaded_by: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NUll")
     )

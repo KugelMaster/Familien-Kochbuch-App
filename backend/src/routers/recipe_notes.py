@@ -18,7 +18,7 @@ def create_recipe_note(
 
     db_recipe_note = RecipeNote(
         recipe_id=recipe_note.recipe_id,
-        user_id=user.id,
+        user_id=user.user_id,
         content=recipe_note.content,
     )
 
@@ -48,7 +48,7 @@ def edit_recipe_note(
     if not db_recipe_note:
         raise NotFound("Recipe note not found")
 
-    if db_recipe_note.user_id != user.id and not user.is_admin:
+    if db_recipe_note.user_id != user.user_id and not user.is_admin:
         raise Forbidden(
             "Forbidden: You do not have permissions to edit this recipe note."
         )
@@ -68,7 +68,7 @@ def delete_recipe_note(note_id: int, db: DBDependency, user: UserDependency):
     if not db_recipe_note:
         raise NotFound("Recipe note not found")
 
-    if db_recipe_note.user_id != user.id and not user.is_admin:
+    if db_recipe_note.user_id != user.user_id and not user.is_admin:
         raise Forbidden(
             "Forbidden: You do not have permissions to delete this recipe note."
         )

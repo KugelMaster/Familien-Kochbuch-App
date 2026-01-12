@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/features/presentation/widgets/delete_prompt.dart';
+import 'package:frontend/features/presentation/shared/prompts.dart';
 import 'package:frontend/features/providers/recipe_providers.dart';
 
-class AnimatedAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget {
+class RecipeAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget {
   final ScrollController scrollController;
   final int recipeId;
   final String title;
@@ -11,7 +11,7 @@ class AnimatedAppBar extends ConsumerStatefulWidget implements PreferredSizeWidg
 
   final void Function(bool) onClose;
 
-  const AnimatedAppBar({
+  const RecipeAppBar({
     super.key,
     required this.scrollController,
     required this.recipeId,
@@ -24,10 +24,10 @@ class AnimatedAppBar extends ConsumerStatefulWidget implements PreferredSizeWidg
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _AnimatedAppBarState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _RecipeAppBarState();
 }
 
-class _AnimatedAppBarState extends ConsumerState<AnimatedAppBar> {
+class _RecipeAppBarState extends ConsumerState<RecipeAppBar> {
   bool scrolled = false;
 
   @override
@@ -46,7 +46,7 @@ class _AnimatedAppBarState extends ConsumerState<AnimatedAppBar> {
   }
 
   void _onDeletePressed() async {
-    final confirmed = await DeletePrompt.open(
+    final confirmed = await Prompts.openDeleteDialog(
       context: context,
       title: "Rezept löschen",
       content: 'Willst du das Rezept "${widget.title}" wirklich unwiderruflich löschen?',

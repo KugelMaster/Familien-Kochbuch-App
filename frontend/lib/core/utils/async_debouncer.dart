@@ -29,7 +29,10 @@ class AsyncDebouncer<T> {
 
   void dispose() {
     _timer?.cancel();
-    _completer?.completeError(const Debounced());
+
+    if (_completer != null && !_completer!.isCompleted) {
+      _completer?.completeError(const Debounced());
+    }
   }
 }
 

@@ -25,7 +25,6 @@ Map<String, dynamic> _$RatingToJson(Rating instance) => <String, dynamic>{
 };
 
 RatingCreate _$RatingCreateFromJson(Map<String, dynamic> json) => RatingCreate(
-  userId: (json['user_id'] as num).toInt(),
   recipeId: (json['recipe_id'] as num).toInt(),
   stars: (json['stars'] as num).toDouble(),
   comment: json['comment'] as String?,
@@ -34,7 +33,6 @@ RatingCreate _$RatingCreateFromJson(Map<String, dynamic> json) => RatingCreate(
 Map<String, dynamic> _$RatingCreateToJson(RatingCreate instance) =>
     <String, dynamic>{
       'recipe_id': instance.recipeId,
-      'user_id': instance.userId,
       'stars': instance.stars,
       'comment': instance.comment,
     };

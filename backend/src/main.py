@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
 from database import init_db
-from routers import auth, images, ratings, recipe_notes, recipes, search, tags, test
+from routers import *
 from tests.test_user import main as test_user_main
 
 tags_metadata = [
@@ -32,15 +32,19 @@ tags_metadata = [
     },
     {
         "name": "Authentication",
-        "description": "User registration and authentication.",
+        "description": "Authentication critical operations.",
     },
-    {"name": "Test", "description": "A route for testing purposes."},
+    {
+        "name": "Users",
+        "description": "Operations with users.",
+    },
+    {"name": "Test", "description": "Routes for testing purposes."},
 ]
 
 app = FastAPI(
     title="Family Cookbook API",
     description="Backend API for the Family Cookbook App",
-    version="0.1.1",
+    version="0.1.3",
     openapi_tags=tags_metadata,
 )
 
@@ -53,6 +57,7 @@ app.include_router(images.router)
 app.include_router(tags.router)
 app.include_router(search.router)
 app.include_router(auth.router)
+app.include_router(users.router)
 app.include_router(test.router)
 
 

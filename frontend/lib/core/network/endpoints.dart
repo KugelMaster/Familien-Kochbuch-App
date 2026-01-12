@@ -1,4 +1,13 @@
 class Endpoints {
+  static String auth = "/auth";
+  static String me = "$auth/me";
+  static String getToken = "$auth/token";
+  static String changePassword = "$me/password";
+
+  static String users = "/users";
+  static String signup = "$users/signup";
+  static String user(int userId) => "$users/$userId";
+
   static String recipes = "/recipes";
   static String recipesSimple = "$recipes/simple";
   static String recipe(int recipeId) => "$recipes/$recipeId";

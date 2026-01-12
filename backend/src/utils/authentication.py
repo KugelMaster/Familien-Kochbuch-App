@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Annotated, Any
+from typing import Annotated, Any, Optional
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError, VerifyMismatchError
@@ -10,11 +10,13 @@ from sqlalchemy.orm import Session
 
 from config import config
 from models import User
-from schemas import UserTokenPayload
+from schemas import Role, TokenData
 from utils.http_exceptions import BadRequest, Unauthorized
+from utils.optional_oauth2_bearer import OptionalOAuth2PasswordBearer
 
 password_hasher = PasswordHasher()
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/auth/token")
+optional_oauth2_bearer = OptionalOAuth2PasswordBearer(tokenUrl="/auth/token")
 
 
 def hash_password(password: str) -> str:
@@ -39,35 +41,35 @@ def authenticate_user(username: str, password: str, db: Session) -> User:
         raise BadRequest("Hash could not be parsed")
 
 
-def create_access_token(username: str, user_id: int, is_admin: bool) -> str:
+def create_access_token(user_id: int, role: Role) -> str:
     issued_at = datetime.now(timezone.utc)
     claims: dict[str, Any] = {
-        "sub": username,
-        "id": user_id,
-        "is_admin": is_admin,
+        "sub": str(user_id),
+        "role": role.name,
         "iat": issued_at,
     }
     return jwt.encode(claims, config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
 
 
-def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]) -> UserTokenPayload:
+def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]) -> TokenData:
     try:
         payload = jwt.decode(
             token, config.JWT_SECRET_KEY, algorithms=[config.JWT_ALGORITHM]
         )
-        username = payload.get("sub")
-        user_id = payload.get("id")
-        is_admin = payload.get("is_admin", False)
-        if username is None or user_id is None:
+        user_id = payload.get("sub")
+        role = payload.get("role")
+        if user_id is None or role is None:
             raise Unauthorized("User unauthorized")
 
-        return UserTokenPayload(id=user_id, name=username, is_admin=is_admin)
+        return TokenData(user_id=int(user_id), role=role)
     except JWTError:
         raise Unauthorized("Signature or claims invalid")
 
 
-# def get_optional_user(token: Annotated[Optional[str], Depends(oauth2_bearer)] = None):
-#     if token is None:
-#         return
+def get_optional_user(
+    token: Annotated[Optional[str], Depends(optional_oauth2_bearer)] = None,
+):
+    if token is None:
+        return
 
-#     return get_current_user(token)
+    return get_current_user(token)

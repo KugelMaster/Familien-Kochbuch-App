@@ -1,7 +1,7 @@
 # Aufgaben (sortiert nach Priorität)
+1. ApiClient und Services richtig für Fehler konfigurieren
 1. RecipeEditPage Image Hero bearbeiten Funktion sichtbarer machen
 1. Tag Verwaltungs Seite
-1. Benutzer Verwaltung (add, edit, delete)
 1. RecipeOverviewPage Design:
     - Tags Farbe
     - Reviews nicht klickbar
@@ -11,9 +11,11 @@
     - Gradient zu groß
     - Transition AppBar schlecht
 1. API-Calls reduzieren
-1. HTTP-Fehler handeln
 
 # Weitere Aufgaben (noch keine Priorität):
+- Registieren Seite schließt sich wenn man von Login Seite kommt
+- Fehler, wenn Benutzer Namen wählt den es schon gibt
+- Löschen-Knopf in Suchleiste erscheint auch verspätet (mit Debounce)
 - Rezept Suche mit Filter (z.B. Tags)
 - RatingsDialog schöner gestalten
 - CircularProgressIndicator bei Rezept laden korrigieren
@@ -27,9 +29,19 @@
 - Offline-Modus (gecached Rezepte verwenden)
 - Testen, ob man Links für Koch Apps wie bspw. Cookido einfügen kann
 - Websocket; Wenn zwei Nutzer gleichzeitig ein Rezept bearbeiten, werden die Daten zwischen Server und Client gewechselt
+- Für mehr Benutzer Sicherheit: Passwort und Benutzername (oder generell sensible Daten) in einem gesichertem Browser Fenster abfragen (z.B. flutter_appauth)
 
 # Aufgaben abgeschlossen:
-- MainShell Refactor
+- Login Page + RegisterPage
+- Settings Page
+-> Users can be created, edited and deleted
+- Renaming a lot of things
+- Different user roles (Admin role has an extra badge)
+- Data shown: Name, Email, Profile pictures
+- Helpful Widgets: AsyncImageWidget, ImagePickerSheet
+- User Service
+- A lot of bugfixes
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`
+- App bauen: `flutter build apk --dart-define=BASE_URL=http://192.168.xx.xx:8000`

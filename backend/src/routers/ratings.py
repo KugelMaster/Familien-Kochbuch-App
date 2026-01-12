@@ -14,7 +14,7 @@ router = APIRouter(prefix="/ratings", tags=["Ratings"])
 def create_rating(rating: RatingCreate, db: DBDependency, user: UserDependency):
     if (
         db.query(Rating)
-        .filter(Rating.recipe_id == rating.recipe_id, Rating.user_id == user.id)
+        .filter(Rating.recipe_id == rating.recipe_id, Rating.user_id == user.user_id)
         .first()
     ):
         raise BadRequest("User has already rated this recipe")
@@ -23,7 +23,7 @@ def create_rating(rating: RatingCreate, db: DBDependency, user: UserDependency):
 
     db_rating = Rating(
         recipe_id=rating.recipe_id,
-        user_id=user.id,
+        user_id=user.user_id,
         stars=rating.stars,
         comment=rating.comment,
     )
@@ -54,7 +54,7 @@ def edit_rating(
     if not db_rating:
         raise NotFound("Rating not found")
 
-    if db_rating.user_id != user.id and not user.is_admin:
+    if db_rating.user_id != user.user_id and not user.is_admin:
         raise Forbidden("Forbidden: You do not have permission to edit this rating.")
 
     is_comment_edited = "comment" in patch.model_dump(exclude_unset=True)
@@ -76,7 +76,7 @@ def delete_rating(rating_id: int, db: DBDependency, user: UserDependency):
     if not db_rating:
         raise NotFound("Rating not found")
 
-    if db_rating.user_id != user.id and not user.is_admin:
+    if db_rating.user_id != user.user_id and not user.is_admin:
         raise Forbidden("Forbidden: You do not have permissions to delete this rating.")
 
     db.delete(db_rating)

@@ -26,13 +26,11 @@ Map<String, dynamic> _$RecipeNoteToJson(RecipeNote instance) =>
 RecipeNoteCreate _$RecipeNoteCreateFromJson(Map<String, dynamic> json) =>
     RecipeNoteCreate(
       recipeId: (json['recipe_id'] as num).toInt(),
-      userId: (json['user_id'] as num).toInt(),
       content: json['content'] as String,
     );
 
 Map<String, dynamic> _$RecipeNoteCreateToJson(RecipeNoteCreate instance) =>
     <String, dynamic>{
       'recipe_id': instance.recipeId,
-      'user_id': instance.userId,
       'content': instance.content,
     };

@@ -8,5 +8,5 @@ __pycache__/
 *.env
 !*-example.env
 
-UninstallSitePackages.ps1
-drs.ps1
+# My own helper scripts; not relevant for the project :-)
+*.ps1

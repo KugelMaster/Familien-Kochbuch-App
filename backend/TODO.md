@@ -1,14 +1,25 @@
 # Offene Aufgaben:
+- Benutzerdefinierte Fehlermeldungen, z.B.:
+```json
+{
+  "status": "error",
+  "code": "WRONG_PASSWORD",
+  "message": "Das eingegebene aktuelle Passwort ist nicht korrekt."
+}
+```
+- Profil Bilder hinzufügen (mit IDs)
 - Bilder upload planen (URL-Erstellung / ID?)
 - Backups für Bearbeitung / Löschung
 - Dokumentation übersichtlicher machen (OpenAPI)
  -> starlette.status Codes
 
 # Aufgaben abgeschlossen:
-- Fremdschlüssel bei Löschung aktualisiert
-- `user_dependency` verwenden, wo man Benutzer-ID braucht
-- Berechtigung-System (User, Admin)
-- Umstieg auf .env Dateien mit Standart Werten in Settings zum Testen
+- Optional user authentication
+- Using new pydantic syntax
+- Users can change their profile data
+- Users can change their password
+- Tagging images (currently useless)
+- Made the "routers" folder a python package
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11): \
