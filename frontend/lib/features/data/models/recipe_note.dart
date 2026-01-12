@@ -32,12 +32,10 @@ class RecipeNote {
 @JsonSerializable(fieldRename: FieldRename.snake)
 class RecipeNoteCreate {
   int recipeId;
-  int userId;
   String content;
 
   RecipeNoteCreate({
     required this.recipeId,
-    required this.userId,
     required this.content,
   });
 

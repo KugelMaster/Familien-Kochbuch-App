@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/core/network/api_client_provider.dart';
+import 'package:frontend/core/auth/auth_providers.dart';
 import 'package:frontend/core/utils/async_value_handler.dart';
 import 'package:frontend/features/data/models/recipe_note.dart';
 import 'package:frontend/features/providers/recipe_note_providers.dart';
@@ -16,7 +16,7 @@ class RecipeNotesOverviewWidget extends ConsumerStatefulWidget {
 
 class _RecipeNotesOWState extends ConsumerState<RecipeNotesOverviewWidget> {
   final _controller = TextEditingController();
-  late final currentUserId = ref.watch(currentUserIdProvider);
+  late final int? userId = ref.watch(authProvider).userId;
 
   @override
   void dispose() {
@@ -50,7 +50,7 @@ class _RecipeNotesOWState extends ConsumerState<RecipeNotesOverviewWidget> {
       notes.map(
         (note) => _RecipeNoteTile(
           note: note,
-          isOwnNote: note.userId == currentUserId,
+          isOwnNote: note.userId == userId,
           onDelete: () => ref
               .read(recipeNoteRepositoryProvider.notifier)
               .deleteRecipeNote(note.recipeId, note.id),
@@ -69,11 +69,7 @@ class _RecipeNotesOWState extends ConsumerState<RecipeNotesOverviewWidget> {
       final text = _controller.text.trim();
       if (text.isEmpty) return;
 
-      final note = RecipeNoteCreate(
-        recipeId: widget.recipeId,
-        userId: currentUserId,
-        content: text,
-      );
+      final note = RecipeNoteCreate(recipeId: widget.recipeId, content: text);
 
       ref.read(recipeNoteRepositoryProvider.notifier).createRecipeNote(note);
       _controller.clear();

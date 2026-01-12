@@ -33,12 +33,10 @@ class Rating {
 @JsonSerializable(fieldRename: FieldRename.snake)
 class RatingCreate {
   int recipeId;
-  int userId;
   double stars;
   String? comment;
 
   RatingCreate({
-    required this.userId,
     required this.recipeId,
     required this.stars,
     this.comment,

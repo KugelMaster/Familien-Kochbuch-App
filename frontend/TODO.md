@@ -1,7 +1,7 @@
 # Aufgaben (sortiert nach Priorität)
+1. Benutzer Verwaltung (Registrierung, Bearbeitung, Löschung)
 1. RecipeEditPage Image Hero bearbeiten Funktion sichtbarer machen
 1. Tag Verwaltungs Seite
-1. Benutzer Verwaltung (add, edit, delete)
 1. RecipeOverviewPage Design:
     - Tags Farbe
     - Reviews nicht klickbar
@@ -27,9 +27,11 @@
 - Offline-Modus (gecached Rezepte verwenden)
 - Testen, ob man Links für Koch Apps wie bspw. Cookido einfügen kann
 - Websocket; Wenn zwei Nutzer gleichzeitig ein Rezept bearbeiten, werden die Daten zwischen Server und Client gewechselt
+- Für mehr Benutzer Sicherheit: Passwort und Benutzername (oder generell sensible Daten) in einem gesichertem Browser Fenster abfragen (z.B. flutter_appauth)
 
 # Aufgaben abgeschlossen:
-- MainShell Refactor
+- Package Upgrade
+- Login Feature fertiggestellt
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

@@ -4,14 +4,14 @@ import 'package:frontend/features/presentation/pages/planer_page.dart';
 import 'package:frontend/features/presentation/pages/my_recipes_page.dart';
 import 'package:frontend/features/presentation/pages/settings_page.dart';
 
-class MainShell extends StatefulWidget {
-  const MainShell({super.key});
+class CookingApp extends StatefulWidget {
+  const CookingApp({super.key});
 
   @override
-  State<MainShell> createState() => _MainShellState();
+  State<CookingApp> createState() => _CookingAppState();
 }
 
-class _MainShellState extends State<MainShell> {
+class _CookingAppState extends State<CookingApp> {
   final PageController _controller = PageController();
 
   final List<Widget> pages = [

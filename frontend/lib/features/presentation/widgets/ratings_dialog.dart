@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/auth/auth_providers.dart';
 import 'package:frontend/core/utils/async_value_handler.dart';
 import 'package:frontend/core/utils/undo_snack_bar.dart';
 import 'package:frontend/features/data/models/rating.dart';
@@ -8,12 +9,10 @@ import 'package:frontend/features/providers/rating_providers.dart';
 
 class RatingsDialog extends ConsumerStatefulWidget {
   final int recipeId;
-  final int currentUserId;
 
   const RatingsDialog({
     super.key,
     required this.recipeId,
-    required this.currentUserId,
   });
 
   @override
@@ -21,6 +20,8 @@ class RatingsDialog extends ConsumerStatefulWidget {
 }
 
 class _RatingsDialogState extends ConsumerState<RatingsDialog> {
+  late final int? userId = ref.watch(authProvider).userId;
+
   void _openCreateDialog() => showDialog(
     context: context,
     builder: (_) => RatingEditDialog(
@@ -29,7 +30,6 @@ class _RatingsDialogState extends ConsumerState<RatingsDialog> {
             .read(ratingRepositoryProvider.notifier)
             .createRating(
               RatingCreate(
-                userId: widget.currentUserId,
                 recipeId: widget.recipeId,
                 stars: stars,
                 comment: comment,
@@ -123,7 +123,7 @@ class _RatingsDialogState extends ConsumerState<RatingsDialog> {
                   ],
                 ),
 
-                if (!ratings.any((r) => r.userId == widget.currentUserId))
+                if (!ratings.any((r) => r.userId == userId))
                   Align(
                     alignment: Alignment.centerLeft,
                     child: TextButton.icon(
@@ -154,7 +154,7 @@ class _RatingsDialogState extends ConsumerState<RatingsDialog> {
   }
 
   Widget _ratingListTile(Rating rating) {
-    bool isOwnRating = rating.userId == widget.currentUserId;
+    bool isOwnRating = rating.userId == userId;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
