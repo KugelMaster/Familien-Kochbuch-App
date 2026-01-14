@@ -70,6 +70,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               },
               child: const Text("Noch kein Account? Registiere dich hier"),
             ),
+            TextButton(
+              onPressed: () {
+                ref.read(authProvider.notifier).continueAsGuest();
+              },
+              child: const Text("Ohne Login fortfahren"),
+            ),
           ],
         ),
       ),
@@ -82,9 +88,14 @@ class RegisterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () => Navigator.of(context).pop(),
-      child: const Text("Schließen"),
+    return Scaffold(
+      appBar: AppBar(title: const Text("Registrieren")),
+      body: Center(
+        child: TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text("Schließen"),
+        ),
+      ),
     );
   }
 }

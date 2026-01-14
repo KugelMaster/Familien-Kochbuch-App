@@ -94,9 +94,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
   @override
   Widget build(BuildContext context) {
-    AsyncValue<List<RecipeSimple>> recipesAsync = ref.watch(
-      recipeSimpleListProvider,
-    );
+    final recipesAsync = ref.watch(recipeSimpleListProvider);
 
     return Scaffold(
       appBar: AppBar(

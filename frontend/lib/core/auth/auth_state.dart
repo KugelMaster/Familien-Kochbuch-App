@@ -2,15 +2,12 @@ import 'dart:convert';
 
 enum AuthStatus {
   unknown, // E.g. app starting
+  guest, // Use the app without an account
   unauthenticated,
   authenticated,
 }
 
-enum AuthFailure {
-  invalidCredentials,
-  sessionExpired,
-  networkError,
-}
+enum AuthFailure { invalidCredentials, sessionExpired, networkError }
 
 class AuthState {
   final String? token;
@@ -56,4 +53,6 @@ class AuthState {
       throw FormatException("Invalid payload");
     }
   }
+
+  factory AuthState.guest() => const AuthState(status: AuthStatus.guest);
 }

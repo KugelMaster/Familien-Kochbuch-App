@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse
 from starlette import status
 
 from config import config
-from dependencies import DBDependency, UserDependency
+from dependencies import DBDependency, OptionalUserDep
 from models import Image
 from schemas import ImageUploadResponse, Message
 from utils.http_exceptions import BadRequest, InternalServerError, NotFound
@@ -17,11 +17,11 @@ router = APIRouter(prefix="/images", tags=["Images"])
 @router.post(
     "", response_model=ImageUploadResponse, status_code=status.HTTP_201_CREATED
 )
-def upload_image(file: UploadFile, db: DBDependency, user: UserDependency):
+def upload_image(file: UploadFile, db: DBDependency, user: OptionalUserDep):
     if not file.content_type or not file.content_type.startswith("image/"):
         raise BadRequest("Only image files allowed")
 
-    user_id = user.id
+    user_id = None if user is None else user.id
 
     ext = file.content_type.split("/")[-1]
     filename = f"{uuid.uuid4()}.{ext}"

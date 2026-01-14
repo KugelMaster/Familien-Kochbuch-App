@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm as OAuth2Form
 from starlette import status
 
-from dependencies import DBDependency
+from dependencies import DBDependency, UserDependency
 from models import User
 from schemas import Token, UserCreate
 from utils.authentication import authenticate_user, create_access_token, hash_password
@@ -27,6 +27,11 @@ def create_user(user: UserCreate, db: DBDependency):
 
     db.add(db_user)
     db.commit()
+
+
+@router.post("/validate")
+def validate_token(user: UserDependency):
+    return user
 
 
 @router.post("/token", response_model=Token)

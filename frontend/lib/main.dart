@@ -18,6 +18,8 @@ class AppRoot extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.read(authProvider.notifier).init();
+
     return MaterialApp(
       title: 'Familien Kochbuch',
       theme: ThemeData(
@@ -48,11 +50,14 @@ class AppRoot extends ConsumerWidget {
           }),
         ),
       ),
-      home: _home(ref),
+      home: _HomeWidget(),
     );
   }
+}
 
-  Widget _home(WidgetRef ref) {
+class _HomeWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authProvider);
 
     switch (auth.status) {
@@ -60,6 +65,7 @@ class AppRoot extends ConsumerWidget {
         return const SplashScreen();
       case AuthStatus.unauthenticated:
         return const LoginPage();
+      case AuthStatus.guest:
       case AuthStatus.authenticated:
         return const CookingApp();
     }

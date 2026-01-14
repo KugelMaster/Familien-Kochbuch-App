@@ -4,7 +4,7 @@ import 'package:frontend/core/utils/async_value_handler.dart';
 import 'package:frontend/core/utils/recipe_diff.dart';
 import 'package:frontend/core/utils/undo_snack_bar.dart';
 import 'package:frontend/features/presentation/pages/recipe_edit_page.dart';
-import 'package:frontend/features/presentation/widgets/animated_app_bar.dart';
+import 'package:frontend/features/presentation/widgets/recipe_app_bar.dart';
 import 'package:frontend/features/data/models/recipe.dart';
 import 'package:frontend/features/presentation/widgets/overview_page/image_overview_widget.dart';
 import 'package:frontend/features/presentation/widgets/overview_page/info_chips_overview_widget.dart';
@@ -106,7 +106,7 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
       asyncValue: recipeAsync,
       onData: (recipe) => Scaffold(
         extendBodyBehindAppBar: true,
-        appBar: AnimatedAppBar(
+        appBar: RecipeAppBar(
           scrollController: _scrollController,
           recipeId: widget.recipeId,
           title: recipeAsync.value?.title ?? widget.title ?? "<Name unbekannt>",

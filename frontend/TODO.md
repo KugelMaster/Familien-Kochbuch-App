@@ -30,8 +30,11 @@
 - Für mehr Benutzer Sicherheit: Passwort und Benutzername (oder generell sensible Daten) in einem gesichertem Browser Fenster abfragen (z.B. flutter_appauth)
 
 # Aufgaben abgeschlossen:
-- Package Upgrade
-- Login Feature fertiggestellt
+- Bugfix: AsyncDebouncer Fehler, wenn sich die Seite schließt nachdem der Timer abgelaufen ist
+- Umbenennung: DeletePrompt.open() auf Prompts.openDeletePrompt(), damit weitere hinzugefügt werden können
+- Umbenennung: AnimatedAppBar zu RecipeAppBar
+- Einstellungs-Seite Prototyp erstellt
+- App Benutzung ohne Login erlaubt (Gast-Modus)
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

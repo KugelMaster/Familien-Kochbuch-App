@@ -4,16 +4,13 @@ import 'package:frontend/core/auth/auth_providers.dart';
 import 'package:frontend/core/utils/async_value_handler.dart';
 import 'package:frontend/core/utils/undo_snack_bar.dart';
 import 'package:frontend/features/data/models/rating.dart';
-import 'package:frontend/features/presentation/widgets/delete_prompt.dart';
+import 'package:frontend/features/presentation/widgets/prompts.dart';
 import 'package:frontend/features/providers/rating_providers.dart';
 
 class RatingsDialog extends ConsumerStatefulWidget {
   final int recipeId;
 
-  const RatingsDialog({
-    super.key,
-    required this.recipeId,
-  });
+  const RatingsDialog({super.key, required this.recipeId});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _RatingsDialogState();
@@ -22,26 +19,33 @@ class RatingsDialog extends ConsumerStatefulWidget {
 class _RatingsDialogState extends ConsumerState<RatingsDialog> {
   late final int? userId = ref.watch(authProvider).userId;
 
-  void _openCreateDialog() => showDialog(
-    context: context,
-    builder: (_) => RatingEditDialog(
-      onSave: (stars, comment) {
-        ref
-            .read(ratingRepositoryProvider.notifier)
-            .createRating(
-              RatingCreate(
-                recipeId: widget.recipeId,
-                stars: stars,
-                comment: comment,
-              ),
-            );
+  void _openCreateDialog() {
+    if (userId == null) {
+      Prompts.openLoginRequiredDialog(context);
+      return;
+    }
 
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Bewertung erstellt")));
-      },
-    ),
-  );
+    showDialog(
+      context: context,
+      builder: (_) => RatingEditDialog(
+        onSave: (stars, comment) {
+          ref
+              .read(ratingRepositoryProvider.notifier)
+              .createRating(
+                RatingCreate(
+                  recipeId: widget.recipeId,
+                  stars: stars,
+                  comment: comment,
+                ),
+              );
+
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Bewertung erstellt")));
+        },
+      ),
+    );
+  }
 
   void _openEditDialog(Rating rating) => showDialog(
     context: context,
@@ -70,7 +74,7 @@ class _RatingsDialogState extends ConsumerState<RatingsDialog> {
   );
 
   Future<void> _confirmDelete(Rating rating) async {
-    final confirmed = await DeletePrompt.open(
+    final confirmed = await Prompts.openDeleteDialog(
       context: context,
       title: "Bewertung löschen?",
       content: "Diese Aktion kann nicht rückgängig gemacht werden.",
@@ -154,7 +158,7 @@ class _RatingsDialogState extends ConsumerState<RatingsDialog> {
   }
 
   Widget _ratingListTile(Rating rating) {
-    bool isOwnRating = rating.userId == userId;
+    bool isOwnRating = userId != null && rating.userId == userId;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -5,10 +5,8 @@
  -> starlette.status Codes
 
 # Aufgaben abgeschlossen:
-- Fremdschlüssel bei Löschung aktualisiert
-- `user_dependency` verwenden, wo man Benutzer-ID braucht
-- Berechtigung-System (User, Admin)
-- Umstieg auf .env Dateien mit Standart Werten in Settings zum Testen
+- Tokens können von außen validiert werden
+- Optionale Benutzer Anmeldung macht doch Sinn
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11): \

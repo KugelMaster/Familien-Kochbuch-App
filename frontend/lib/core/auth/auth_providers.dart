@@ -16,7 +16,6 @@ final authProvider = NotifierProvider<AuthNotifier, AuthState>(
 
 class AuthNotifier extends Notifier<AuthState> {
   late final _authService = ref.read(authServiceProvider);
-
   late final _storage = ref.watch(secureStorageProvider);
 
   @override
@@ -33,12 +32,11 @@ class AuthNotifier extends Notifier<AuthState> {
       ref.read(apiClientProvider).setToken(token);
       await _storage.write(key: "access_token", value: token);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        state = AuthState.loggedOut(AuthFailure.invalidCredentials);
-      } else {
-        print(e.response?.data);
-        state = AuthState.loggedOut(AuthFailure.networkError);
-      }
+      state = AuthState.loggedOut(
+        e.response?.statusCode == 401
+            ? AuthFailure.invalidCredentials
+            : AuthFailure.networkError,
+      );
     }
   }
 
@@ -62,5 +60,9 @@ class AuthNotifier extends Notifier<AuthState> {
         await _storage.delete(key: "access_token");
       }
     }
+  }
+
+  void continueAsGuest() {
+    state = AuthState.guest();
   }
 }

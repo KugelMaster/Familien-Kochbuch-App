@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Annotated, Any
+from typing import Annotated, Any, Optional
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError, VerifyMismatchError
@@ -12,9 +12,11 @@ from config import config
 from models import User
 from schemas import UserTokenPayload
 from utils.http_exceptions import BadRequest, Unauthorized
+from utils.optional_oauth2_bearer import OptionalOAuth2PasswordBearer
 
 password_hasher = PasswordHasher()
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/auth/token")
+optional_oauth2_bearer = OptionalOAuth2PasswordBearer(tokenUrl="/auth/token")
 
 
 def hash_password(password: str) -> str:
@@ -66,8 +68,10 @@ def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]) -> UserToken
         raise Unauthorized("Signature or claims invalid")
 
 
-# def get_optional_user(token: Annotated[Optional[str], Depends(oauth2_bearer)] = None):
-#     if token is None:
-#         return
+def get_optional_user(
+    token: Annotated[Optional[str], Depends(optional_oauth2_bearer)] = None,
+):
+    if token is None:
+        return
 
-#     return get_current_user(token)
+    return get_current_user(token)
