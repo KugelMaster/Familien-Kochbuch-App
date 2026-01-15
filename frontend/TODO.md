@@ -1,4 +1,5 @@
 # Aufgaben (sortiert nach Priorität)
+1. Profil-Seite programmieren
 1. Benutzer Verwaltung (Registrierung, Bearbeitung, Löschung)
 1. RecipeEditPage Image Hero bearbeiten Funktion sichtbarer machen
 1. Tag Verwaltungs Seite
@@ -30,11 +31,9 @@
 - Für mehr Benutzer Sicherheit: Passwort und Benutzername (oder generell sensible Daten) in einem gesichertem Browser Fenster abfragen (z.B. flutter_appauth)
 
 # Aufgaben abgeschlossen:
-- Bugfix: AsyncDebouncer Fehler, wenn sich die Seite schließt nachdem der Timer abgelaufen ist
-- Umbenennung: DeletePrompt.open() auf Prompts.openDeletePrompt(), damit weitere hinzugefügt werden können
-- Umbenennung: AnimatedAppBar zu RecipeAppBar
-- Einstellungs-Seite Prototyp erstellt
-- App Benutzung ohne Login erlaubt (Gast-Modus)
+- Einstellungs-Seite Aussehen verbessert
+- Admin Status sichtbar + Navigation zu Profil-Seite (TODO Seite)
+- Profil Bild ID hinzugefügt (auch TODO in Backend)
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

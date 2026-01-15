@@ -16,6 +16,7 @@ class AuthState {
 
   final int? userId;
   final String? username;
+  final int? pfpId;
   final bool? isAdmin;
 
   const AuthState({
@@ -24,6 +25,7 @@ class AuthState {
     this.failure,
     this.userId,
     this.username,
+    this.pfpId,
     this.isAdmin,
   });
 

@@ -66,6 +66,6 @@ Durch den Befehl `flutter build apk --dart-define=BASE_URL=http://192.168.xx.xx:
 
 ## Easteregg
 
-<img src="./Felix PFP.jpg" alt="Meine Katze heißt Felix :-)" width="200">
+<img src="./frontend/assets/images/Felix PFP.jpg" alt="Meine Katze heißt Felix :-)" width="200">
 <p>Developed by Felix Software™</p>
-<small>Die Firma gibt es nicht in echt 😉</small>
+<sub>Die Firma gibt es nicht in echt 😉</sub>

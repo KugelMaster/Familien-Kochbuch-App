@@ -1,12 +1,12 @@
 # Offene Aufgaben:
+- Profil Bilder hinzufügen (mit IDs)
 - Bilder upload planen (URL-Erstellung / ID?)
 - Backups für Bearbeitung / Löschung
 - Dokumentation übersichtlicher machen (OpenAPI)
  -> starlette.status Codes
 
 # Aufgaben abgeschlossen:
-- Tokens können von außen validiert werden
-- Optionale Benutzer Anmeldung macht doch Sinn
+- In Pydantic Schemen wird nun ConfigDict zur Konfiguration verwendet, da alte Variante veraltet war
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11): \

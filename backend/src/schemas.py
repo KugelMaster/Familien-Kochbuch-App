@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Optional
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 ###############################################[Tags]###############################################
@@ -116,9 +116,8 @@ class RecipeCreate(BaseModel):
     recipe_uri: Optional[str] = None
 
     ingredients: Optional[list[IngredientCreate]] = None
-    nutritions: Optional[list[NutritionCreate]] = (
-        None  # TODO: Vllt. später automatisch aus Zutaten berechnen?
-    )
+    # TODO: Vllt. später automatisch aus Zutaten berechnen?
+    nutritions: Optional[list[NutritionCreate]] = None
 
 
 class RecipeResponse(BaseModel):
@@ -140,8 +139,7 @@ class RecipeResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RecipeUpdate(BaseModel):
@@ -157,8 +155,7 @@ class RecipeUpdate(BaseModel):
     ingredients: Optional[list[IngredientCreate]] = None
     nutritions: Optional[list[NutritionCreate]] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RecipeOutSimple(BaseModel):
@@ -169,8 +166,7 @@ class RecipeOutSimple(BaseModel):
     rating: float = Field(ge=0, le=5)
     total_ratings: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 ##############################################[Images]##############################################
@@ -178,8 +174,7 @@ class ImageUploadResponse(BaseModel):
     id: int
     filename: str = Field(..., max_length=255, description="Filename without path")
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 ##############################################[Users]###############################################
