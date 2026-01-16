@@ -25,9 +25,10 @@ class AuthNotifier extends Notifier<AuthState> {
 
   Future<void> login(String username, String password) async {
     try {
-      String token = await _authService.getToken(username, password);
+      final token = await _authService.getToken(username, password);
+      final userInfo = await _authService.getUserInfo(token);
 
-      state = AuthState.fromToken(token);
+      state = AuthState.fromTokenWithData(token, userInfo);
 
       ref.read(apiClientProvider).setToken(token);
       await _storage.write(key: "access_token", value: token);
@@ -50,12 +51,12 @@ class AuthNotifier extends Notifier<AuthState> {
     final token = await _storage.read(key: "access_token");
 
     if (token != null) {
-      final isValid = await _authService.validateToken(token);
-
-      if (isValid) {
-        state = AuthState.fromToken(token);
+      try {
+        final userInfo = await _authService.getUserInfo(token);
+        state = AuthState.fromTokenWithData(token, userInfo);
         ref.read(apiClientProvider).setToken(token);
-      } else {
+
+      } on DioException {
         state = AuthState.loggedOut(AuthFailure.sessionExpired);
         await _storage.delete(key: "access_token");
       }

@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
@@ -177,6 +178,12 @@ class ImageUploadResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+###########################################[Permissions]############################################
+class Role(Enum):
+    user = "user"
+    admin = "admin"
+
+
 ##############################################[Users]###############################################
 class UserCreate(BaseModel):
     username: str = Field(..., max_length=80, description="Complete name of the user")
@@ -184,19 +191,31 @@ class UserCreate(BaseModel):
     email: Optional[EmailStr] = Field(
         None, max_length=255, description="Email address of the user"
     )
-    is_admin: bool = False  # FIXME: Später für Sicherheit natürlich entfernen ;-)
+    role: Role = Role.user  # FIXME: Später für Sicherheit natürlich entfernen ;-)
 
 
-class UserTokenPayload(BaseModel):
+class UserOut(BaseModel):
     id: int
     name: str
-    is_admin: bool = False
+    email: Optional[EmailStr] = None
+    avatar_id: Optional[int] = None
+    role: Role
+
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 ##########################################[Authentication]##########################################
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+class TokenData(BaseModel):
+    user_id: int
+    role: Role
 
 
 ##############################################[Other]###############################################

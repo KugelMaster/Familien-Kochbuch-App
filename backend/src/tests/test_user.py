@@ -1,5 +1,6 @@
 from database import SessionLocal
 from models import User
+from schemas import Role
 from utils.authentication import hash_password
 
 
@@ -10,7 +11,11 @@ def main() -> None:
         return
 
     db_user = User(
-        id=1, name="dev", password_hash=hash_password("dev123"), is_admin=True
+        id=1,
+        name="dev",
+        password_hash=hash_password("dev123"),
+        email="dev@dev.com",
+        role=Role.admin,
     )
 
     db.add(db_user)

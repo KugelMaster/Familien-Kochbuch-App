@@ -31,9 +31,7 @@
 - Für mehr Benutzer Sicherheit: Passwort und Benutzername (oder generell sensible Daten) in einem gesichertem Browser Fenster abfragen (z.B. flutter_appauth)
 
 # Aufgaben abgeschlossen:
-- Einstellungs-Seite Aussehen verbessert
-- Admin Status sichtbar + Navigation zu Profil-Seite (TODO Seite)
-- Profil Bild ID hinzugefügt (auch TODO in Backend)
+- Authentifizierung Überarbeitung mit neuem "User" Modell
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

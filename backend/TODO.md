@@ -6,7 +6,9 @@
  -> starlette.status Codes
 
 # Aufgaben abgeschlossen:
-- In Pydantic Schemen wird nun ConfigDict zur Konfiguration verwendet, da alte Variante veraltet war
+- Benutzer Modell nutzt nun Rolen anstatt "is_admin"
+- Neue Schemen für Benutzer Daten und Token Daten
+- Route "/auth/me" für Benutzer-Infos & Token Validierung
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11): \

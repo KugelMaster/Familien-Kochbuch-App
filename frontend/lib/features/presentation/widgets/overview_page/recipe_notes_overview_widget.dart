@@ -17,7 +17,7 @@ class RecipeNotesOverviewWidget extends ConsumerStatefulWidget {
 
 class _RecipeNotesOWState extends ConsumerState<RecipeNotesOverviewWidget> {
   final _controller = TextEditingController();
-  late final int? userId = ref.watch(authProvider).userId;
+  late final int? userId = ref.watch(authProvider.select((v) => v.user?.id));
 
   @override
   void dispose() {

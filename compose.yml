@@ -22,6 +22,17 @@ services:
     depends_on:
       - db
 
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./backend/src
+          target: /app
+          ignore:
+            - venv/
+            - __pycache__/
+        - action: rebuild
+          path: ./backend/requirements.txt
+
 volumes:
   pgdata:
   apidata:

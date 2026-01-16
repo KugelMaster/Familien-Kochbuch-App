@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/endpoints.dart';
-import 'package:frontend/core/utils/logger.dart';
+import 'package:frontend/features/data/models/user.dart';
 
 class AuthService {
   final ApiClient _client;
@@ -23,19 +23,13 @@ class AuthService {
     }
   }
 
-  Future<bool> validateToken(String token) async {
+  Future<User> getUserInfo(String token) async {
     final response = await _client.dio.post(
-      Endpoints.validateToken,
+      Endpoints.userInfo,
       options: Options(headers: {"Authorization": "Bearer $token"}),
     );
 
-    if (response.statusCode == 200) return true;
-    if (response.statusCode == 401) return false;
-
-    logger.d(
-      "Could not validate token: ${response.statusCode} ${response.statusMessage}",
-    );
-    return false;
+    return User.fromJson(response.data);
   }
 
   Future<String> getToken(String username, String password) async {

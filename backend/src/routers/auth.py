@@ -6,7 +6,7 @@ from starlette import status
 
 from dependencies import DBDependency, UserDependency
 from models import User
-from schemas import Token, UserCreate
+from schemas import Token, UserCreate, UserOut
 from utils.authentication import authenticate_user, create_access_token, hash_password
 from utils.http_exceptions import BadRequest
 
@@ -22,21 +22,23 @@ def create_user(user: UserCreate, db: DBDependency):
         name=user.username,
         password_hash=hash_password(user.password),
         email=user.email,
-        is_admin=user.is_admin,
+        role=user.role,
     )
 
     db.add(db_user)
     db.commit()
 
 
-@router.post("/validate")
-def validate_token(user: UserDependency):
-    return user
+@router.post("/me", response_model=UserOut)
+def get_user_info(user: UserDependency, db: DBDependency):
+    db_user = db.query(User).filter(User.id == user.user_id).first()
+
+    return db_user
 
 
 @router.post("/token", response_model=Token)
 def login_for_access_token(data: Annotated[OAuth2Form, Depends()], db: DBDependency):
     user = authenticate_user(data.username, data.password, db)
-    token = create_access_token(user.name, user.id, user.is_admin)
+    token = create_access_token(user.id, user.role)
 
     return {"access_token": token, "token_type": "bearer"}

@@ -17,7 +17,7 @@ class RatingsDialog extends ConsumerStatefulWidget {
 }
 
 class _RatingsDialogState extends ConsumerState<RatingsDialog> {
-  late final int? userId = ref.watch(authProvider).userId;
+  late final int? userId = ref.watch(authProvider.select((v) => v.user?.id));
 
   void _openCreateDialog() {
     if (userId == null) {
