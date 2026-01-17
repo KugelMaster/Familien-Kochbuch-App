@@ -7,7 +7,7 @@ from utils.authentication import hash_password
 def main() -> None:
     db = SessionLocal()
 
-    if db.query(User).filter(User.name == "dev").first() is not None:
+    if db.query(User).filter(User.id == 1).first() is not None:
         return
 
     db_user = User(

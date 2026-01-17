@@ -6,9 +6,7 @@
  -> starlette.status Codes
 
 # Aufgaben abgeschlossen:
-- Benutzer Modell nutzt nun Rolen anstatt "is_admin"
-- Neue Schemen für Benutzer Daten und Token Daten
-- Route "/auth/me" für Benutzer-Infos & Token Validierung
+- Benutzer können ihre Daten ändern (Modell + API-Route)
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11): \

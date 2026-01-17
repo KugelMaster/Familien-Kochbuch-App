@@ -24,7 +24,7 @@ class AuthState {
       AuthState(status: AuthStatus.unauthenticated, failure: failure);
 
   factory AuthState.fromTokenWithData(String token, User info) =>
-      AuthState(status: AuthStatus.authenticated, user: info);
+      AuthState(token: token, status: AuthStatus.authenticated, user: info);
 
   factory AuthState.guest() => const AuthState(status: AuthStatus.guest);
 }

@@ -56,9 +56,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             const SizedBox(height: 16),
 
             ElevatedButton(
-              onPressed: () {
-                notifier.login(_userController.text, _passController.text);
-              },
+              onPressed: () =>
+                  notifier.login(_userController.text, _passController.text),
               child: const Text("Login"),
             ),
 
@@ -71,9 +70,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               child: const Text("Noch kein Account? Registiere dich hier"),
             ),
             TextButton(
-              onPressed: () {
-                ref.read(authProvider.notifier).continueAsGuest();
-              },
+              onPressed: () => notifier.continueAsGuest(),
               child: const Text("Ohne Login fortfahren"),
             ),
           ],

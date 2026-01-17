@@ -26,7 +26,7 @@ case "$1" in
         echo "Opening Docker Desktop..."
         powershell.exe -Command "docker desktop start"
         echo "Starting containers in new terminal..."
-        powershell.exe -Command "Start-Process powershell -ArgumentList 'docker compose up -d --build'"
+        powershell.exe -Command "Start-Process powershell -ArgumentList 'docker compose up --build --watch'"
         echo "Finished setup."
         ;;
     test-cmd)

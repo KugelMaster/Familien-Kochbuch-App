@@ -5,7 +5,7 @@ part 'user.g.dart';
 @JsonSerializable(fieldRename: FieldRename.snake)
 class User {
   int id;
-  String? name;
+  String name;
   String? email;
   int? avatarId;
   String role;
@@ -17,7 +17,9 @@ class User {
 
   User({
     required this.id,
-    this.name,
+    required this.name,
+    this.email,
+    this.avatarId,
     required this.role,
     this.createdAt,
     this.updatedAt,
@@ -26,4 +28,20 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserToJson(this);
+}
+
+@JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
+class UserPatch {
+  String? username;
+  String? password;
+  String? email;
+  int? avatarId;
+  String? role;
+
+  UserPatch({this.username, this.password, this.email, this.avatarId, this.role});
+
+  factory UserPatch.fromJson(Map<String, dynamic> json) =>
+      _$UserPatchFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserPatchToJson(this);
 }

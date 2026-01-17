@@ -2,12 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/auth/auth_providers.dart';
 import 'package:frontend/features/data/models/user.dart';
+import 'package:frontend/features/presentation/pages/profile_page.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
-  void onClickProfile() {
-    print("Clicked profile card!");
+  void onClickProfile(BuildContext context, User? user) {
+    if (user == null) {
+      print("user ist null!");
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ProfilePage()),
+    );
   }
 
   @override
@@ -23,7 +32,7 @@ class SettingsPage extends ConsumerWidget {
           children: [
             _ProfileCard(
               user: auth.user,
-              onClickProfile: onClickProfile,
+              onClickProfile: () => onClickProfile(context, auth.user),
             ),
             const Divider(),
             _ActionsSection(onLogout: notifier.logout),
@@ -39,10 +48,7 @@ class _ProfileCard extends StatelessWidget {
 
   final VoidCallback onClickProfile;
 
-  const _ProfileCard({
-    required this.user,
-    required this.onClickProfile,
-  });
+  const _ProfileCard({required this.user, required this.onClickProfile});
 
   @override
   Widget build(BuildContext context) {

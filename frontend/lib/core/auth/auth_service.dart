@@ -23,10 +23,10 @@ class AuthService {
     }
   }
 
-  Future<User> getUserInfo(String token) async {
+  Future<User> getUserInfo() async {
     final response = await _client.dio.post(
       Endpoints.userInfo,
-      options: Options(headers: {"Authorization": "Bearer $token"}),
+      //options: Options(headers: {"Authorization": "Bearer $token"}),
     );
 
     return User.fromJson(response.data);
@@ -52,5 +52,15 @@ class AuthService {
     );
 
     return response.data["access_token"];
+  }
+
+  Future<User> updateUserInfo(UserPatch patch) async {
+    final response = await _client.dio.patch(
+      Endpoints.userInfo,
+      data: patch.toJson(),
+      //options: Options(headers: {"Authorization": "Bearer $token"}),
+    );
+
+    return User.fromJson(response.data);
   }
 }

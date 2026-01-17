@@ -1,5 +1,6 @@
 # Aufgaben (sortiert nach Priorität)
-1. Profil-Seite programmieren
+1. Profil Seite: Passwort ändern und Profilbild ändern
+1. Bild-Auswahl Menü programmieren (Gallerie, selber aufnehmen, etc.)
 1. Benutzer Verwaltung (Registrierung, Bearbeitung, Löschung)
 1. RecipeEditPage Image Hero bearbeiten Funktion sichtbarer machen
 1. Tag Verwaltungs Seite
@@ -31,7 +32,7 @@
 - Für mehr Benutzer Sicherheit: Passwort und Benutzername (oder generell sensible Daten) in einem gesichertem Browser Fenster abfragen (z.B. flutter_appauth)
 
 # Aufgaben abgeschlossen:
-- Authentifizierung Überarbeitung mit neuem "User" Modell
+- Profil Seite mit Name und Email
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

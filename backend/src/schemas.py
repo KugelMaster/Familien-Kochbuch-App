@@ -194,6 +194,17 @@ class UserCreate(BaseModel):
     role: Role = Role.user  # FIXME: Später für Sicherheit natürlich entfernen ;-)
 
 
+class UserUpdate(BaseModel):
+    username: Optional[str] = Field(
+        None, max_length=80, description="Complete name of the user"
+    )
+    password: Optional[str] = None
+    email: Optional[EmailStr] = Field(
+        None, max_length=255, description="Email address of the user"
+    )
+    role: Optional[Role] = None  # FIXME: Später für Sicherheit natürlich entfernen ;-)
+
+
 class UserOut(BaseModel):
     id: int
     name: str

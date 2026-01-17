@@ -4,6 +4,7 @@ import 'package:frontend/core/auth/auth_service.dart';
 import 'package:frontend/core/auth/auth_state.dart';
 import 'package:frontend/core/auth/secure_storage.dart';
 import 'package:frontend/core/network/api_client_provider.dart';
+import 'package:frontend/features/data/models/user.dart';
 
 final authServiceProvider = Provider((ref) {
   final client = ref.watch(apiClientProvider);
@@ -23,14 +24,29 @@ class AuthNotifier extends Notifier<AuthState> {
     return AuthState.loggedOut();
   }
 
+  Future<void> init() async {
+    final token = await _storage.read(key: "access_token");
+
+    if (token != null) {
+      try {
+        ref.read(apiClientProvider).setToken(token);
+        final userInfo = await _authService.getUserInfo();
+        state = AuthState.fromTokenWithData(token, userInfo);
+      } on DioException {
+        state = AuthState.loggedOut(AuthFailure.sessionExpired);
+        await _storage.delete(key: "access_token");
+      }
+    }
+  }
+
   Future<void> login(String username, String password) async {
     try {
       final token = await _authService.getToken(username, password);
-      final userInfo = await _authService.getUserInfo(token);
+      ref.read(apiClientProvider).setToken(token);
 
+      final userInfo = await _authService.getUserInfo();
       state = AuthState.fromTokenWithData(token, userInfo);
 
-      ref.read(apiClientProvider).setToken(token);
       await _storage.write(key: "access_token", value: token);
     } on DioException catch (e) {
       state = AuthState.loggedOut(
@@ -41,29 +57,36 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
+  void continueAsGuest() {
+    state = AuthState.guest();
+  }
+
   Future<void> logout() async {
     state = AuthState.loggedOut();
     ref.read(apiClientProvider).clearToken();
     await _storage.delete(key: "access_token");
   }
 
-  Future<void> init() async {
-    final token = await _storage.read(key: "access_token");
-
-    if (token != null) {
-      try {
-        final userInfo = await _authService.getUserInfo(token);
-        state = AuthState.fromTokenWithData(token, userInfo);
-        ref.read(apiClientProvider).setToken(token);
-
-      } on DioException {
-        state = AuthState.loggedOut(AuthFailure.sessionExpired);
-        await _storage.delete(key: "access_token");
-      }
+  Future<void> updateProfile({
+    String? name,
+    String? email,
+    String? password,
+    int? avatarId,
+  }) async {
+    if (state.token == null) {
+      logout();
+      return;
     }
-  }
 
-  void continueAsGuest() {
-    state = AuthState.guest();
+    final updated = await _authService.updateUserInfo(
+      UserPatch(
+        username: name,
+        email: email,
+        password: password,
+        avatarId: avatarId,
+      ),
+    );
+
+    state = AuthState.fromTokenWithData(state.token!, updated);
   }
 }
