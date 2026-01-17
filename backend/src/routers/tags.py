@@ -11,9 +11,8 @@ router = APIRouter(prefix="/tags", tags=["Tags"])
 
 @router.post("", response_model=TagOut)
 def create_tag(tag_name: str, db: DBDependency):
-    ensure_exists(
-        db, Tag.name == tag_name, BadRequest("Tag with this name already exists")
-    )
+    if db.query(Tag).filter(Tag.name == tag_name).first():
+        raise BadRequest("Tag with this name already exists")
 
     db_tag = Tag(name=tag_name)
 

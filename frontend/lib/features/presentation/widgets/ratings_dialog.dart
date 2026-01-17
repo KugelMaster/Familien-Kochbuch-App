@@ -4,7 +4,7 @@ import 'package:frontend/core/auth/auth_providers.dart';
 import 'package:frontend/core/utils/async_value_handler.dart';
 import 'package:frontend/core/utils/undo_snack_bar.dart';
 import 'package:frontend/features/data/models/rating.dart';
-import 'package:frontend/features/presentation/widgets/prompts.dart';
+import 'package:frontend/features/presentation/shared/prompts.dart';
 import 'package:frontend/features/providers/rating_providers.dart';
 
 class RatingsDialog extends ConsumerStatefulWidget {

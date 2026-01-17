@@ -57,10 +57,6 @@ class AuthService {
       data: patch.toJson(),
     );
 
-    if (response.statusCode == 500) {
-      print(response.data);
-    }
-
     return User.fromJson(response.data);
   }
 

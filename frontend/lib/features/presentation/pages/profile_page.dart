@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/auth/auth_providers.dart';
-import 'package:frontend/features/presentation/widgets/image_picker_sheet.dart';
+import 'package:frontend/features/presentation/shared/async_image_widget.dart';
+import 'package:frontend/features/presentation/shared/image_picker_sheet.dart';
 import 'package:frontend/features/providers/image_providers.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
@@ -97,7 +98,6 @@ class _AvatarBox extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authProvider);
-    final imageAsync = ref.watch(imageProvider(auth.user?.avatarId));
 
     return Center(
       child: GestureDetector(
@@ -114,16 +114,18 @@ class _AvatarBox extends ConsumerWidget {
         },
         child: Stack(
           children: [
-            imageAsync.when(
-              data: (image) => image != null
-                  ? CircleAvatar(
-                      radius: 128,
-                      backgroundImage: FileImage(File(image.path)),
-                      backgroundColor: Colors.grey.shade200,
-                    )
-                  : _buildPlaceholder(),
-              loading: _buildPlaceholder,
-              error: (_, _) => _buildPlaceholder(),
+            AsyncImageWidget(
+              imageId: auth.user?.avatarId,
+              placeholder: CircleAvatar(
+                radius: 128,
+                backgroundColor: Colors.grey.shade200,
+                child: const Icon(Icons.person),
+              ),
+              onData: (image) => CircleAvatar(
+                radius: 128,
+                backgroundImage: FileImage(File(image.path)),
+                backgroundColor: Colors.grey.shade200,
+              ),
             ),
             Positioned(
               bottom: 0,
@@ -143,12 +145,6 @@ class _AvatarBox extends ConsumerWidget {
       ),
     );
   }
-
-  Widget _buildPlaceholder() => CircleAvatar(
-    radius: 128,
-    backgroundColor: Colors.grey.shade200,
-    child: const Icon(Icons.person),
-  );
 }
 
 class _ChangePasswordDialog extends ConsumerStatefulWidget {

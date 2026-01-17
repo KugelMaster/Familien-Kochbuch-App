@@ -44,7 +44,7 @@ class ImageService {
     }
 
     final dir = await getTemporaryDirectory();
-    final file = File("${dir.path}/image.jpg");
+    final file = File("${dir.path}/image_$imageId.jpg");
 
     await file.writeAsBytes(bytes);
 

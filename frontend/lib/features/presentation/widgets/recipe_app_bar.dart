@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/features/presentation/widgets/prompts.dart';
+import 'package:frontend/features/presentation/shared/prompts.dart';
 import 'package:frontend/features/providers/recipe_providers.dart';
 
 class RecipeAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget {

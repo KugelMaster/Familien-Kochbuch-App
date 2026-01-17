@@ -5,8 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/auth/auth_providers.dart';
 import 'package:frontend/features/data/models/user.dart';
 import 'package:frontend/features/presentation/pages/profile_page.dart';
-import 'package:frontend/features/providers/image_providers.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:frontend/features/presentation/shared/async_image_widget.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -23,7 +22,6 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authProvider);
-    final imageAsync = ref.watch(imageProvider(auth.user?.avatarId));
 
     return Scaffold(
       appBar: AppBar(title: const Text("Einstellungen")),
@@ -33,7 +31,6 @@ class SettingsPage extends ConsumerWidget {
           children: [
             _ProfileCard(
               user: auth.user,
-              pfpAsync: imageAsync,
               onClickProfile: () => onClickProfile(context, auth.user),
             ),
             const Divider(),
@@ -47,15 +44,10 @@ class SettingsPage extends ConsumerWidget {
 
 class _ProfileCard extends StatelessWidget {
   final User? user;
-  final AsyncValue<XFile?> pfpAsync;
 
   final VoidCallback onClickProfile;
 
-  const _ProfileCard({
-    required this.user,
-    required this.pfpAsync,
-    required this.onClickProfile,
-  });
+  const _ProfileCard({required this.user, required this.onClickProfile});
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +62,11 @@ class _ProfileCard extends StatelessWidget {
           child: user != null
               ? _content()
               : ListTile(
-                  leading: _buildPlaceholder(),
+                  leading: CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.grey.shade200,
+                    child: const Icon(Icons.person),
+                  ),
                   title: const Text("Nicht eingeloggt"),
                   subtitle: const Text("Melde dich an, um dein Konto zu sehen"),
                 ),
@@ -81,16 +77,18 @@ class _ProfileCard extends StatelessWidget {
 
   Widget _content() {
     return ListTile(
-      leading: pfpAsync.when(
-        data: (image) => image != null
-            ? CircleAvatar(
-                radius: 30,
-                backgroundImage: FileImage(File(image.path)),
-                backgroundColor: Colors.grey.shade200,
-              )
-            : _buildPlaceholder(),
-        loading: _buildPlaceholder,
-        error: (_, _) => _buildPlaceholder(),
+      leading: AsyncImageWidget(
+        imageId: user?.avatarId,
+        placeholder: CircleAvatar(
+          radius: 30,
+          backgroundColor: Colors.grey.shade200,
+          child: const Icon(Icons.person),
+        ),
+        onData: (image) => CircleAvatar(
+          radius: 30,
+          backgroundImage: FileImage(File(image.path)),
+          backgroundColor: Colors.grey.shade200,
+        ),
       ),
       title: Row(
         children: [
@@ -124,12 +122,6 @@ class _ProfileCard extends StatelessWidget {
       trailing: const Icon(Icons.chevron_right),
     );
   }
-
-  Widget _buildPlaceholder() => CircleAvatar(
-    radius: 30,
-    backgroundColor: Colors.grey.shade200,
-    child: const Icon(Icons.person),
-  );
 }
 
 class _ActionsSection extends StatelessWidget {

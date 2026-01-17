@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/utils/logger.dart';
 import 'package:image_picker/image_picker.dart';
 
-Future<XFile?> pickUserImage(BuildContext context) {
-  return showModalBottomSheet<XFile>(
-    context: context,
-    showDragHandle: true,
-    builder: (context) => const _ImagePickerSheet(),
-  );
+Future<XFile?> pickUserImage(BuildContext context) async {
+  try {
+    return await showModalBottomSheet<XFile>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => const _ImagePickerSheet(),
+    );
+  } catch (e, st) {
+    logger.e("Error when picking image: $e\n$st");
+    return null;
+  }
 }
 
 class _ImagePickerSheet extends StatelessWidget {

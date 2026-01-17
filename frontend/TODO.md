@@ -1,5 +1,6 @@
 # Aufgaben (sortiert nach Priorität)
 1. Benutzer Verwaltung (Registrierung, Löschung)
+1. ApiClient und Services richtig für Fehler konfigurieren
 1. RecipeEditPage Image Hero bearbeiten Funktion sichtbarer machen
 1. Tag Verwaltungs Seite
 1. RecipeOverviewPage Design:
@@ -11,9 +12,9 @@
     - Gradient zu groß
     - Transition AppBar schlecht
 1. API-Calls reduzieren
-1. HTTP-Fehler handeln
 
 # Weitere Aufgaben (noch keine Priorität):
+- Löschen-Knopf in Suchleiste erscheint auch verspätet (mit Debounce)
 - Rezept Suche mit Filter (z.B. Tags)
 - RatingsDialog schöner gestalten
 - CircularProgressIndicator bei Rezept laden korrigieren
@@ -30,10 +31,11 @@
 - Für mehr Benutzer Sicherheit: Passwort und Benutzername (oder generell sensible Daten) in einem gesichertem Browser Fenster abfragen (z.B. flutter_appauth)
 
 # Aufgaben abgeschlossen:
-- Bugfix: Token wurde immer gelöscht, wenn 401 kam
-- Benutzer kann nun sein Passwort ändern
-- Bild-Auswahl Menü (Gallerie, Kamera; einfach erweiterbar!)
-- Profil-Bilder
+- Bugfix: Tags wurden gelöscht, wenn Rezept geupdated wurde
+- Bugfix: Bilder Daten wurden in die selbe Datei geschrieben
+- Neues Widget "AsyncImageWidget" überall angewendet und dafür "RecipeImage" gelöscht
+- Dateien "async_image_widget.dart", "image_picker_sheet.dart" und "prompts.dart" in "shared" Ordner verschoben
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`
+- App bauen: `flutter build apk --dart-define=BASE_URL=http://192.168.xx.xx:8000`

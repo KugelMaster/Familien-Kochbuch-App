@@ -68,16 +68,8 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     );
   }
 
-  Future<void> onTakePhoto() async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 85,
-    );
-
-    if (image != null) {
-      updateRecipe(RecipePatch(image: image));
-    }
+  void updateImage(XFile image) {
+    updateRecipe(RecipePatch(image: image));
   }
 
   Future<void> openEditView(Recipe oldRecipe) async {
@@ -130,7 +122,7 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     children: [
       ImageOverviewWidget(
         imageId: recipe.imageId,
-        takePhoto: onTakePhoto,
+        updateImage: updateImage,
         screenHeight: MediaQuery.of(context).size.height,
       ),
       const SizedBox(height: 8),

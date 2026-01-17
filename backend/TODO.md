@@ -14,8 +14,7 @@
  -> starlette.status Codes
 
 # Aufgaben abgeschlossen:
-- Benutzer können ihr Passwort ändern
-- Bilder müssen nun Kategorien haben ("avatar" oder "recipe")
+- Bugfix: Neue Tags wurden nicht akzeptiert, da sie schon "existieren"
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11): \
