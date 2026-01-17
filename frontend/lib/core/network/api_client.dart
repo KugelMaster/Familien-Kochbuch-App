@@ -22,12 +22,13 @@ class ApiClient {
           }
           handler.next(options);
         },
-        onError: (error, handler) {
-          if (error.response?.statusCode == 401) {
-            clearToken();
-          }
-          handler.next(error);
-        },
+        // FIXME: Not sure if this is safe to delete
+        //onError: (error, handler) {
+        //  if (error.response?.statusCode == 401) {
+        //    clearToken();
+        //  }
+        //  handler.next(error);
+        //},
       ),
     );
   }

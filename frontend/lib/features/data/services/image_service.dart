@@ -12,9 +12,9 @@ class ImageService {
 
   ImageService(this._client);
 
-  Future<int> uploadImage(XFile image) async {
+  Future<int> uploadImage(XFile image, String tag) async {
     final file = await MultipartFile.fromFile(image.path, filename: image.name);
-    final formData = FormData.fromMap({"file": file});
+    final formData = FormData.fromMap({"file": file, "tag": tag});
 
     final response = await _client.dio.post<Map>(
       Endpoints.images,

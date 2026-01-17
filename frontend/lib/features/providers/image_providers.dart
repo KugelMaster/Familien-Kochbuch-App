@@ -31,8 +31,8 @@ class ImageRepositoryNotifier extends Notifier<Map<int, XFile>> {
     return fetched;
   }
 
-  Future<int> uploadImage(XFile image) async {
-    final imageId = await _imageService.uploadImage(image);
+  Future<int> uploadImage(XFile image, String tag) async {
+    final imageId = await _imageService.uploadImage(image, tag);
 
     state = {...state, imageId: image};
 

@@ -70,7 +70,6 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> updateProfile({
     String? name,
     String? email,
-    String? password,
     int? avatarId,
   }) async {
     if (state.token == null) {
@@ -79,14 +78,19 @@ class AuthNotifier extends Notifier<AuthState> {
     }
 
     final updated = await _authService.updateUserInfo(
-      UserPatch(
-        username: name,
-        email: email,
-        password: password,
-        avatarId: avatarId,
-      ),
+      UserPatch(username: name, email: email, avatarId: avatarId),
     );
 
     state = AuthState.fromTokenWithData(state.token!, updated);
+  }
+
+  Future<bool> updatePassword(String currentPassword, String newPassword) async {
+    try {
+      await _authService.updatePassword(currentPassword, newPassword);
+      return true;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) return false;
+      rethrow;
+    }
   }
 }

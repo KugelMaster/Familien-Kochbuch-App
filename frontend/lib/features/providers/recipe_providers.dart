@@ -76,7 +76,7 @@ class RecipeRepositoryNotifier extends Notifier<Map<int, Recipe>> {
 
   Future<int> createRecipe(Recipe recipe) async {
     if (recipe.image != null) {
-      recipe.imageId = await _imageRepo.uploadImage(recipe.image!);
+      recipe.imageId = await _imageRepo.uploadImage(recipe.image!, "recipe");
     }
 
     final (id, created) = await _recipeService.createRecipe(recipe);
@@ -90,7 +90,7 @@ class RecipeRepositoryNotifier extends Notifier<Map<int, Recipe>> {
     final image = patch.image ?? state[recipeId]?.image;
 
     if (patch.image != null) {
-      patch.imageId = await _imageRepo.uploadImage(patch.image!);
+      patch.imageId = await _imageRepo.uploadImage(patch.image!, "recipe");
     }
 
     final updated = await _recipeService.updateRecipe(recipeId, patch);

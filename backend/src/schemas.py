@@ -9,6 +9,8 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 class TagCreate(BaseModel):
     name: str
 
+    model_config = ConfigDict(extra="forbid")
+
 
 class TagOut(BaseModel):
     id: int
@@ -21,6 +23,8 @@ class IngredientCreate(BaseModel):
     amount: Optional[float] = None
     unit: Optional[str] = None
 
+    model_config = ConfigDict(extra="forbid")
+
 
 ############################################[Nutritions]############################################
 class NutritionCreate(BaseModel):
@@ -28,11 +32,15 @@ class NutritionCreate(BaseModel):
     amount: Optional[float] = None
     unit: Optional[str] = None
 
+    model_config = ConfigDict(extra="forbid")
+
 
 ###########################################[RecipeNotes]############################################
 class RecipeNoteCreate(BaseModel):
     recipe_id: int
     content: str
+
+    model_config = ConfigDict(extra="forbid")
 
 
 class RecipeNoteOut(BaseModel):
@@ -47,6 +55,8 @@ class RecipeNoteOut(BaseModel):
 
 class RecipeNoteUpdate(BaseModel):
     content: str
+
+    model_config = ConfigDict(extra="forbid")
 
 
 #############################################[Ratings]##############################################
@@ -66,6 +76,8 @@ class RatingCreate(BaseModel):
         if v * 2 % 1 != 0:
             raise ValueError("Stars must be in 0.5 increments")
         return v
+
+    model_config = ConfigDict(extra="forbid")
 
 
 class RatingOut(BaseModel):
@@ -104,6 +116,8 @@ class RatingUpdate(BaseModel):
             raise ValueError("Stars must be in 0.5 increments")
         return v
 
+    model_config = ConfigDict(extra="forbid")
+
 
 #############################################[Recipes]##############################################
 class RecipeCreate(BaseModel):
@@ -119,6 +133,8 @@ class RecipeCreate(BaseModel):
     ingredients: Optional[list[IngredientCreate]] = None
     # TODO: Vllt. später automatisch aus Zutaten berechnen?
     nutritions: Optional[list[NutritionCreate]] = None
+
+    model_config = ConfigDict(extra="forbid")
 
 
 class RecipeResponse(BaseModel):
@@ -156,7 +172,7 @@ class RecipeUpdate(BaseModel):
     ingredients: Optional[list[IngredientCreate]] = None
     nutritions: Optional[list[NutritionCreate]] = None
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
 
 
 class RecipeOutSimple(BaseModel):
@@ -171,15 +187,22 @@ class RecipeOutSimple(BaseModel):
 
 
 ##############################################[Images]##############################################
+class ImageTag(str, Enum):
+    avatar = "avatar"
+    recipe = "recipe"
+
+
 class ImageUploadResponse(BaseModel):
     id: int
     filename: str = Field(..., max_length=255, description="Filename without path")
+    tag: ImageTag
+    uploaded_by: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)
 
 
 ###########################################[Permissions]############################################
-class Role(Enum):
+class Role(str, Enum):
     user = "user"
     admin = "admin"
 
@@ -193,16 +216,27 @@ class UserCreate(BaseModel):
     )
     role: Role = Role.user  # FIXME: Später für Sicherheit natürlich entfernen ;-)
 
+    model_config = ConfigDict(extra="forbid")
+
 
 class UserUpdate(BaseModel):
     username: Optional[str] = Field(
         None, max_length=80, description="Complete name of the user"
     )
-    password: Optional[str] = None
     email: Optional[EmailStr] = Field(
         None, max_length=255, description="Email address of the user"
     )
+    avatar_id: Optional[int] = None
     role: Optional[Role] = None  # FIXME: Später für Sicherheit natürlich entfernen ;-)
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class UserPasswordUpdate(BaseModel):
+    current_password: str
+    new_password: str
+
+    model_config = ConfigDict(extra="forbid")
 
 
 class UserOut(BaseModel):

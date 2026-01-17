@@ -24,10 +24,7 @@ class AuthService {
   }
 
   Future<User> getUserInfo() async {
-    final response = await _client.dio.post(
-      Endpoints.userInfo,
-      //options: Options(headers: {"Authorization": "Bearer $token"}),
-    );
+    final response = await _client.dio.post(Endpoints.userInfo);
 
     return User.fromJson(response.data);
   }
@@ -58,9 +55,19 @@ class AuthService {
     final response = await _client.dio.patch(
       Endpoints.userInfo,
       data: patch.toJson(),
-      //options: Options(headers: {"Authorization": "Bearer $token"}),
     );
 
+    if (response.statusCode == 500) {
+      print(response.data);
+    }
+
     return User.fromJson(response.data);
+  }
+
+  Future<void> updatePassword(String currentPassword, String newPassword) async {
+    await _client.dio.patch(
+      Endpoints.changePassword,
+      data: {"current_password": currentPassword, "new_password": newPassword},
+    );
   }
 }

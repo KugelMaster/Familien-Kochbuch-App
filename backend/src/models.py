@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import CheckConstraint, ForeignKey, Numeric, String, Text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from schemas import Role
+from schemas import ImageTag, Role
 
 
 class Base(DeclarativeBase):
@@ -132,6 +132,7 @@ class Image(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     filename: Mapped[str] = mapped_column(String(255))
     file_path: Mapped[str] = mapped_column(String(1024))
+    tag: Mapped[ImageTag] = mapped_column()
     uploaded_by: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NUll")
     )

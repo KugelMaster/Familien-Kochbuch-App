@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/auth/auth_providers.dart';
+import 'package:frontend/features/presentation/widgets/image_picker_sheet.dart';
+import 'package:frontend/features/providers/image_providers.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -40,7 +44,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _avatarBox(),
+            _AvatarBox(),
             const SizedBox(height: 32),
 
             TextField(
@@ -58,10 +62,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
             ElevatedButton(
               onPressed: () {
-                ref.read(authProvider.notifier).updateProfile(
-                  name: nameCtrl.text,
-                  email: emailCtrl.text,
-                );
+                ref
+                    .read(authProvider.notifier)
+                    .updateProfile(name: nameCtrl.text, email: emailCtrl.text);
               },
               child: const Text("Änderungen speichern"),
             ),
@@ -74,8 +77,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
             OutlinedButton(
               onPressed: () {
-                // TODO: Passwort ändern
-                // ref.read(authProvider.notifier).changePassword(...)
+                showDialog(
+                  context: context,
+                  builder: (_) => const _ChangePasswordDialog(),
+                );
               },
               child: const Text("Passwort ändern"),
             ),
@@ -84,19 +89,41 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       ),
     );
   }
+}
 
-  Widget _avatarBox() {
+class _AvatarBox extends ConsumerWidget {
+  const _AvatarBox();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.watch(authProvider);
+    final imageAsync = ref.watch(imageProvider(auth.user?.avatarId));
+
     return Center(
       child: GestureDetector(
-        onTap: () {
-          print("Profile Pic clicked!");
+        onTap: () async {
+          final image = await pickUserImage(context);
+
+          if (image == null) return;
+
+          final id = await ref
+              .read(imageRepositoryProvider.notifier)
+              .uploadImage(image, "avatar");
+
+          ref.read(authProvider.notifier).updateProfile(avatarId: id);
         },
         child: Stack(
           children: [
-            CircleAvatar(
-              radius: 128,
-              backgroundImage: AssetImage("assets/images/Felix PFP.jpg"),
-              backgroundColor: Colors.grey.shade200,
+            imageAsync.when(
+              data: (image) => image != null
+                  ? CircleAvatar(
+                      radius: 128,
+                      backgroundImage: FileImage(File(image.path)),
+                      backgroundColor: Colors.grey.shade200,
+                    )
+                  : _buildPlaceholder(),
+              loading: _buildPlaceholder,
+              error: (_, _) => _buildPlaceholder(),
             ),
             Positioned(
               bottom: 0,
@@ -108,12 +135,138 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white),
                 ),
-                child: const Icon(Icons.camera_alt_outlined, size: 40,),
+                child: const Icon(Icons.camera_alt_outlined, size: 40),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildPlaceholder() => CircleAvatar(
+    radius: 128,
+    backgroundColor: Colors.grey.shade200,
+    child: const Icon(Icons.person),
+  );
+}
+
+class _ChangePasswordDialog extends ConsumerStatefulWidget {
+  const _ChangePasswordDialog();
+
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _ChangePasswordDialogState();
+}
+
+class _ChangePasswordDialogState extends ConsumerState<_ChangePasswordDialog> {
+  final currentPasswordCtrl = TextEditingController();
+  final passwordCtrl = TextEditingController();
+  final confirmCtrl = TextEditingController();
+
+  bool obscureCurrentPassword = true;
+  bool obscurePassword = true;
+
+  bool currentPasswordCorrect = true;
+  bool get passwordsMatch =>
+      passwordCtrl.text.isNotEmpty && passwordCtrl.text == confirmCtrl.text;
+
+  @override
+  void dispose() {
+    currentPasswordCtrl.dispose();
+    passwordCtrl.dispose();
+    confirmCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Passwort ändern"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: currentPasswordCtrl,
+            obscureText: obscureCurrentPassword,
+            decoration: InputDecoration(
+              labelText: "Aktuelles Passwort",
+              errorText: currentPasswordCorrect
+                  ? null
+                  : "Das Passwort ist falsch",
+              suffixIcon: IconButton(
+                icon: Icon(
+                  obscureCurrentPassword
+                      ? Icons.visibility
+                      : Icons.visibility_off,
+                ),
+                onPressed: () {
+                  setState(
+                    () => obscureCurrentPassword = !obscureCurrentPassword,
+                  );
+                },
+              ),
+            ),
+            onChanged: (_) {
+              setState(() {});
+            },
+          ),
+          TextField(
+            controller: passwordCtrl,
+            obscureText: obscurePassword,
+            decoration: InputDecoration(
+              labelText: "Neues Passwort",
+              suffixIcon: IconButton(
+                icon: Icon(
+                  obscurePassword ? Icons.visibility : Icons.visibility_off,
+                ),
+                onPressed: () {
+                  setState(() => obscurePassword = !obscurePassword);
+                },
+              ),
+            ),
+            onChanged: (_) {
+              setState(() {});
+            },
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: confirmCtrl,
+            obscureText: true,
+            decoration: InputDecoration(
+              labelText: "Passwort bestätigen",
+              errorText: confirmCtrl.text.isEmpty || passwordsMatch
+                  ? null
+                  : "Passwörter stimmen nicht überein",
+            ),
+            onChanged: (_) {
+              setState(() {});
+            },
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Abbrechen"),
+        ),
+        FilledButton(
+          onPressed: () async {
+            if (!passwordsMatch) return;
+
+            final correct = await ref
+                .read(authProvider.notifier)
+                .updatePassword(currentPasswordCtrl.text, passwordCtrl.text);
+
+            setState(() => currentPasswordCorrect = correct);
+
+            if (correct && context.mounted) {
+              Navigator.pop(context);
+            }
+          },
+          child: const Text("Speichern"),
+        ),
+      ],
     );
   }
 }

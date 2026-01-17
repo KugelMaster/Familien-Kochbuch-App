@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/auth/auth_providers.dart';
 import 'package:frontend/features/data/models/user.dart';
 import 'package:frontend/features/presentation/pages/profile_page.dart';
+import 'package:frontend/features/providers/image_providers.dart';
+import 'package:image_picker/image_picker.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -13,16 +17,13 @@ class SettingsPage extends ConsumerWidget {
       return;
     }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => ProfilePage()),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (_) => ProfilePage()));
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authProvider);
-    final notifier = ref.read(authProvider.notifier);
+    final imageAsync = ref.watch(imageProvider(auth.user?.avatarId));
 
     return Scaffold(
       appBar: AppBar(title: const Text("Einstellungen")),
@@ -32,10 +33,11 @@ class SettingsPage extends ConsumerWidget {
           children: [
             _ProfileCard(
               user: auth.user,
+              pfpAsync: imageAsync,
               onClickProfile: () => onClickProfile(context, auth.user),
             ),
             const Divider(),
-            _ActionsSection(onLogout: notifier.logout),
+            _ActionsSection(onLogout: ref.read(authProvider.notifier).logout),
           ],
         ),
       ),
@@ -45,17 +47,18 @@ class SettingsPage extends ConsumerWidget {
 
 class _ProfileCard extends StatelessWidget {
   final User? user;
+  final AsyncValue<XFile?> pfpAsync;
 
   final VoidCallback onClickProfile;
 
-  const _ProfileCard({required this.user, required this.onClickProfile});
+  const _ProfileCard({
+    required this.user,
+    required this.pfpAsync,
+    required this.onClickProfile,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final username = user?.name ?? "<Benutzername>";
-    final email = user?.email ?? "<Email-Adresse>";
-    final role = user?.role;
-
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -65,56 +68,9 @@ class _ProfileCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           child: user != null
-              ? ListTile(
-                  leading: CircleAvatar(
-                    radius: 30,
-                    // TODO: Use avatar picture
-                    backgroundImage: AssetImage("assets/images/Felix PFP.jpg"),
-                    backgroundColor: Colors.grey[200],
-                  ),
-                  title: Row(
-                    children: [
-                      Text(
-                        username,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-
-                      // Admin Badge
-                      if (role == "admin")
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.blueAccent.withValues(alpha: 0.1),
-                            border: Border.all(color: Colors.blueAccent),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            'Admin',
-                            style: TextStyle(
-                              color: Colors.blueAccent,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  subtitle: Text(email),
-                  trailing: const Icon(Icons.chevron_right),
-                )
+              ? _content()
               : ListTile(
-                  leading: CircleAvatar(
-                    radius: 30,
-                    backgroundColor: Colors.grey[200],
-                    child: const Icon(Icons.person),
-                  ),
+                  leading: _buildPlaceholder(),
                   title: const Text("Nicht eingeloggt"),
                   subtitle: const Text("Melde dich an, um dein Konto zu sehen"),
                 ),
@@ -122,6 +78,58 @@ class _ProfileCard extends StatelessWidget {
       ),
     );
   }
+
+  Widget _content() {
+    return ListTile(
+      leading: pfpAsync.when(
+        data: (image) => image != null
+            ? CircleAvatar(
+                radius: 30,
+                backgroundImage: FileImage(File(image.path)),
+                backgroundColor: Colors.grey.shade200,
+              )
+            : _buildPlaceholder(),
+        loading: _buildPlaceholder,
+        error: (_, _) => _buildPlaceholder(),
+      ),
+      title: Row(
+        children: [
+          Text(
+            user!.name,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+          const SizedBox(width: 8),
+
+          // Admin Badge
+          if (user!.role == "admin")
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.blueAccent.withValues(alpha: 0.1),
+                border: Border.all(color: Colors.blueAccent),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text(
+                'Admin',
+                style: TextStyle(
+                  color: Colors.blueAccent,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+        ],
+      ),
+      subtitle: Text(user!.email ?? ""),
+      trailing: const Icon(Icons.chevron_right),
+    );
+  }
+
+  Widget _buildPlaceholder() => CircleAvatar(
+    radius: 30,
+    backgroundColor: Colors.grey.shade200,
+    child: const Icon(Icons.person),
+  );
 }
 
 class _ActionsSection extends StatelessWidget {

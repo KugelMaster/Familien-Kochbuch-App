@@ -6,7 +6,7 @@ from starlette import status
 
 from dependencies import DBDependency, UserDependency
 from models import User
-from schemas import Token, UserCreate, UserOut, UserUpdate
+from schemas import Token, UserCreate, UserOut, UserPasswordUpdate, UserUpdate
 from utils.authentication import authenticate_user, create_access_token, hash_password
 from utils.http_exceptions import BadRequest
 
@@ -47,24 +47,42 @@ def update_user_profile(
     if not db_user:
         raise BadRequest("User not found")
 
-    if updated_user.username and updated_user.username != db_user.name:
-        if db.query(User).where(User.name == updated_user.username).first():
+    patch = updated_user.model_dump(exclude_unset=True)
+    username = patch.pop("username", None)
+
+    if username and username != db_user.name:
+        if db.query(User).where(User.name == username).first():
             raise BadRequest("Username already exists")
-        db_user.name = updated_user.username
+        db_user.name = username
 
-    if updated_user.password:
-        db_user.password_hash = hash_password(updated_user.password)
-
-    if updated_user.email:
-        db_user.email = updated_user.email
-
-    if updated_user.role:
-        db_user.role = updated_user.role
+    for key, value in patch.items():
+        setattr(db_user, key, value)
 
     db.commit()
     db.refresh(db_user)
 
     return db_user
+
+
+@router.patch("/me/password", status_code=status.HTTP_204_NO_CONTENT)
+def change_user_password(
+    passwords: UserPasswordUpdate,
+    user: UserDependency,
+    db: DBDependency,
+):
+    db_user = db.query(User).filter(User.id == user.user_id).first()
+
+    if not db_user:
+        raise BadRequest("User not found")
+
+    if not passwords.new_password:
+        raise BadRequest("New password must be provided")
+
+    authenticate_user(db_user.name, passwords.current_password, db)
+
+    db_user.password_hash = hash_password(passwords.new_password)
+
+    db.commit()
 
 
 @router.post("/token", response_model=Token)

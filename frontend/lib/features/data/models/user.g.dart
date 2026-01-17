@@ -30,7 +30,6 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
 
 UserPatch _$UserPatchFromJson(Map<String, dynamic> json) => UserPatch(
   username: json['username'] as String?,
-  password: json['password'] as String?,
   email: json['email'] as String?,
   avatarId: (json['avatar_id'] as num?)?.toInt(),
   role: json['role'] as String?,
@@ -38,7 +37,6 @@ UserPatch _$UserPatchFromJson(Map<String, dynamic> json) => UserPatch(
 
 Map<String, dynamic> _$UserPatchToJson(UserPatch instance) => <String, dynamic>{
   'username': ?instance.username,
-  'password': ?instance.password,
   'email': ?instance.email,
   'avatar_id': ?instance.avatarId,
   'role': ?instance.role,

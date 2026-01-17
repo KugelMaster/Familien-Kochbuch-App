@@ -33,12 +33,11 @@ class User {
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
 class UserPatch {
   String? username;
-  String? password;
   String? email;
   int? avatarId;
   String? role;
 
-  UserPatch({this.username, this.password, this.email, this.avatarId, this.role});
+  UserPatch({this.username, this.email, this.avatarId, this.role});
 
   factory UserPatch.fromJson(Map<String, dynamic> json) =>
       _$UserPatchFromJson(json);
