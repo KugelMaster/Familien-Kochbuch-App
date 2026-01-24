@@ -1,65 +1,69 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/core/utils/async_value_handler.dart';
-import 'package:frontend/features/providers/image_providers.dart';
+import 'package:frontend/features/presentation/shared/async_image_widget.dart';
+import 'package:frontend/features/presentation/shared/image_picker_sheet.dart';
 import 'package:image_picker/image_picker.dart';
 
-class ImageOverviewWidget extends ConsumerWidget {
+class ImageOverviewWidget extends StatelessWidget {
   final int? imageId;
-  final Future<void> Function() takePhoto;
+  final void Function(XFile image) updateImage;
   final double screenHeight;
 
   const ImageOverviewWidget({
     super.key,
     required this.imageId,
-    required this.takePhoto,
+    required this.updateImage,
     required this.screenHeight,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final imageAsync = ref.watch(imageProvider(imageId));
-
-    return AsyncValueHandler(asyncValue: imageAsync, onData: _buildImageWidget);
-  }
-
-  Widget _buildImageWidget(XFile? image) => SizedBox(
-    height: screenHeight * 0.6,
-    width: double.infinity,
-    child: Stack(
-      fit: StackFit.expand,
-      children: [
-        ClipRRect(
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(16),
-            bottomRight: Radius.circular(16),
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: screenHeight * 0.6,
+      width: double.infinity,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(16),
+              bottomRight: Radius.circular(16),
+            ),
+            child: AsyncImageWidget(
+              imageId: imageId,
+              placeholder: _filler(context),
+              onData: (image) =>
+                  Image.file(File(image.path), fit: BoxFit.cover),
+            ),
           ),
-          child: image == null
-              ? _filler()
-              : Image.file(File(image.path), fit: BoxFit.cover),
-        ),
-        Positioned(
-          left: 0,
-          right: 0,
-          height: 160,
-          child: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-                colors: [Colors.transparent, Colors.black54],
+          Positioned(
+            left: 0,
+            right: 0,
+            height: 160,
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [Colors.transparent, Colors.black54],
+                ),
               ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 
-  Widget _filler() => InkWell(
-    onTap: takePhoto,
+  Widget _filler(BuildContext context) => InkWell(
+    onTap: () async {
+      final picked = await pickUserImage(context);
+
+      if (picked == null) return;
+
+      updateImage(picked);
+    },
     child: Container(
       color: Colors.grey.shade200,
       child: Column(

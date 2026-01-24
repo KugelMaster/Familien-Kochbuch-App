@@ -3,10 +3,7 @@ services:
     image: postgres:16
     container_name: cookbook_db
     restart: always
-    environment:
-      POSTGRES_USER: cookbook
-      POSTGRES_PASSWORD: mysecretpassword
-      POSTGRES_DB: cookbook
+    env_file: ./backend/postgres.env # Hier postgres-example.env verwenden!
     ports:
       - "5432:5432"
     volumes:
@@ -15,12 +12,26 @@ services:
     build: ./backend
     container_name: fastapi
     restart: always
+    env_file: ./backend/fastapi.env
+    environment:
+      - DB_DOMAIN=db
     ports:
       - "8000:8000"
     volumes:
       - apidata:/var/family-cookbook-api/images/recipes
     depends_on:
       - db
+
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./backend/src
+          target: /app
+          ignore:
+            - venv/
+            - __pycache__/
+        - action: rebuild
+          path: ./backend/requirements.txt
 
 volumes:
   pgdata:

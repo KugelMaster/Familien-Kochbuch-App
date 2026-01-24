@@ -1,47 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/auth/auth_providers.dart';
 import 'package:frontend/core/utils/async_value_handler.dart';
 import 'package:frontend/core/utils/undo_snack_bar.dart';
 import 'package:frontend/features/data/models/rating.dart';
-import 'package:frontend/features/presentation/widgets/delete_prompt.dart';
+import 'package:frontend/features/presentation/shared/async_avatar_widget.dart';
+import 'package:frontend/features/presentation/shared/prompts.dart';
 import 'package:frontend/features/providers/rating_providers.dart';
 
 class RatingsDialog extends ConsumerStatefulWidget {
   final int recipeId;
-  final int currentUserId;
 
-  const RatingsDialog({
-    super.key,
-    required this.recipeId,
-    required this.currentUserId,
-  });
+  const RatingsDialog({super.key, required this.recipeId});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _RatingsDialogState();
 }
 
 class _RatingsDialogState extends ConsumerState<RatingsDialog> {
-  void _openCreateDialog() => showDialog(
-    context: context,
-    builder: (_) => RatingEditDialog(
-      onSave: (stars, comment) {
-        ref
-            .read(ratingRepositoryProvider.notifier)
-            .createRating(
-              RatingCreate(
-                userId: widget.currentUserId,
-                recipeId: widget.recipeId,
-                stars: stars,
-                comment: comment,
-              ),
-            );
+  late final auth = ref.watch(authProvider);
 
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Bewertung erstellt")));
-      },
-    ),
-  );
+  void _openCreateDialog() {
+    if (!auth.isAuthenticated) {
+      Prompts.openLoginRequiredDialog(context);
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (_) => RatingEditDialog(
+        onSave: (stars, comment) {
+          ref
+              .read(ratingRepositoryProvider.notifier)
+              .createRating(
+                RatingCreate(
+                  recipeId: widget.recipeId,
+                  stars: stars,
+                  comment: comment,
+                ),
+              );
+
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Bewertung erstellt")));
+        },
+      ),
+    );
+  }
 
   void _openEditDialog(Rating rating) => showDialog(
     context: context,
@@ -70,7 +75,7 @@ class _RatingsDialogState extends ConsumerState<RatingsDialog> {
   );
 
   Future<void> _confirmDelete(Rating rating) async {
-    final confirmed = await DeletePrompt.open(
+    final confirmed = await Prompts.openDeleteDialog(
       context: context,
       title: "Bewertung löschen?",
       content: "Diese Aktion kann nicht rückgängig gemacht werden.",
@@ -97,76 +102,78 @@ class _RatingsDialogState extends ConsumerState<RatingsDialog> {
 
     return AsyncValueHandler(
       asyncValue: ratingsAsync,
-      onData: (ratings) => Dialog(
-        insetPadding: const EdgeInsets.all(24),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 500),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    const Text(
-                      "Bewertungen",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
+      onData: (ratings) {
+        final hasAlreadyRated =
+            auth.isAuthenticated &&
+            ratings.any((r) => r.userId == auth.user!.id);
 
-                if (!ratings.any((r) => r.userId == widget.currentUserId))
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton.icon(
-                      onPressed: _openCreateDialog,
-                      icon: const Icon(Icons.add),
-                      label: const Text("Bewertung hinzufügen"),
-                    ),
+        return Dialog(
+          insetPadding: const EdgeInsets.all(24),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500, maxHeight: 500),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      const Text(
+                        "Bewertungen",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
                   ),
 
-                const SizedBox(height: 8),
+                  if (!hasAlreadyRated)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: _openCreateDialog,
+                        icon: const Icon(Icons.add),
+                        label: const Text("Bewertung hinzufügen"),
+                      ),
+                    ),
 
-                Expanded(
-                  child: ratings.isEmpty
-                      ? const Center(child: Text("Noch keine Bewertungen"))
-                      : ListView.separated(
-                          itemCount: ratings.length,
-                          separatorBuilder: (_, _) => const Divider(height: 24),
-                          itemBuilder: (context, index) =>
-                              _ratingListTile(ratings[index]),
-                        ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+
+                  Expanded(
+                    child: ratings.isEmpty
+                        ? const Center(child: Text("Noch keine Bewertungen"))
+                        : ListView.separated(
+                            itemCount: ratings.length,
+                            separatorBuilder: (_, _) =>
+                                const Divider(height: 24),
+                            itemBuilder: (context, index) =>
+                                _ratingListTile(ratings[index]),
+                          ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   Widget _ratingListTile(Rating rating) {
-    bool isOwnRating = rating.userId == widget.currentUserId;
+    bool isOwnRating = auth.isAuthenticated && rating.userId == auth.user!.id;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CircleAvatar(
-          radius: 20,
-          child: Text(
-            // TODO: Profilbild hier
-            rating.userId.toString(),
-            style: const TextStyle(fontSize: 10),
-          ),
-        ),
+        AsyncAvatarWidget(userId: rating.userId),
 
         const SizedBox(width: 12),
 

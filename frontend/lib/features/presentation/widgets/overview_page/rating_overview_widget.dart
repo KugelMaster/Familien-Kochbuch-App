@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/core/network/api_client_provider.dart';
 import 'package:frontend/core/utils/async_value_handler.dart';
 import 'package:frontend/features/presentation/widgets/ratings_dialog.dart';
 import 'package:frontend/features/providers/rating_providers.dart';
@@ -13,7 +12,6 @@ class RatingOverviewWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final avgStarsAsync = ref.watch(ratingAvgStarsProvider(recipeId));
-    final currentUserId = ref.watch(currentUserIdProvider);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -26,10 +24,7 @@ class RatingOverviewWidget extends ConsumerWidget {
             onTap: () => showDialog(
               context: context,
               barrierDismissible: true,
-              builder: (_) => RatingsDialog(
-                recipeId: recipeId,
-                currentUserId: currentUserId,
-              ),
+              builder: (_) => RatingsDialog(recipeId: recipeId),
             ),
             child: Row(
               children: [

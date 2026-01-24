@@ -4,7 +4,7 @@ import 'package:frontend/core/utils/async_value_handler.dart';
 import 'package:frontend/core/utils/recipe_diff.dart';
 import 'package:frontend/core/utils/undo_snack_bar.dart';
 import 'package:frontend/features/presentation/pages/recipe_edit_page.dart';
-import 'package:frontend/features/presentation/widgets/animated_app_bar.dart';
+import 'package:frontend/features/presentation/widgets/recipe_app_bar.dart';
 import 'package:frontend/features/data/models/recipe.dart';
 import 'package:frontend/features/presentation/widgets/overview_page/image_overview_widget.dart';
 import 'package:frontend/features/presentation/widgets/overview_page/info_chips_overview_widget.dart';
@@ -68,16 +68,8 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     );
   }
 
-  Future<void> onTakePhoto() async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 85,
-    );
-
-    if (image != null) {
-      updateRecipe(RecipePatch(image: image));
-    }
+  void updateImage(XFile image) {
+    updateRecipe(RecipePatch(image: image));
   }
 
   Future<void> openEditView(Recipe oldRecipe) async {
@@ -106,7 +98,7 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
       asyncValue: recipeAsync,
       onData: (recipe) => Scaffold(
         extendBodyBehindAppBar: true,
-        appBar: AnimatedAppBar(
+        appBar: RecipeAppBar(
           scrollController: _scrollController,
           recipeId: widget.recipeId,
           title: recipeAsync.value?.title ?? widget.title ?? "<Name unbekannt>",
@@ -130,7 +122,7 @@ class _RecipeOverviewPageState extends ConsumerState<RecipeOverviewPage> {
     children: [
       ImageOverviewWidget(
         imageId: recipe.imageId,
-        takePhoto: onTakePhoto,
+        updateImage: updateImage,
         screenHeight: MediaQuery.of(context).size.height,
       ),
       const SizedBox(height: 8),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/core/network/api_client_provider.dart';
+import 'package:frontend/core/auth/auth_providers.dart';
 import 'package:frontend/core/utils/async_value_handler.dart';
 import 'package:frontend/features/data/models/recipe_note.dart';
+import 'package:frontend/features/presentation/shared/prompts.dart';
 import 'package:frontend/features/providers/recipe_note_providers.dart';
 
 class RecipeNotesOverviewWidget extends ConsumerStatefulWidget {
@@ -16,7 +17,7 @@ class RecipeNotesOverviewWidget extends ConsumerStatefulWidget {
 
 class _RecipeNotesOWState extends ConsumerState<RecipeNotesOverviewWidget> {
   final _controller = TextEditingController();
-  late final currentUserId = ref.watch(currentUserIdProvider);
+  late final int? userId = ref.watch(authProvider.select((v) => v.user?.id));
 
   @override
   void dispose() {
@@ -50,7 +51,7 @@ class _RecipeNotesOWState extends ConsumerState<RecipeNotesOverviewWidget> {
       notes.map(
         (note) => _RecipeNoteTile(
           note: note,
-          isOwnNote: note.userId == currentUserId,
+          isOwnNote: userId != null && note.userId == userId,
           onDelete: () => ref
               .read(recipeNoteRepositoryProvider.notifier)
               .deleteRecipeNote(note.recipeId, note.id),
@@ -63,22 +64,54 @@ class _RecipeNotesOWState extends ConsumerState<RecipeNotesOverviewWidget> {
         ),
       );
 
-  _NewNoteInput _newNoteInput() => _NewNoteInput(
-    controller: _controller,
-    onSubmit: () {
-      final text = _controller.text.trim();
-      if (text.isEmpty) return;
+  Widget _newNoteInput() {
+    bool enabled = userId != null;
 
-      final note = RecipeNoteCreate(
-        recipeId: widget.recipeId,
-        userId: currentUserId,
-        content: text,
-      );
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        if (!enabled) {
+          Prompts.openLoginRequiredDialog(context);
+        }
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: _controller,
+            enabled: enabled,
+            maxLines: null,
+            decoration: const InputDecoration(
+              hintText: "Neue Notiz hinzufügen...",
+              border: OutlineInputBorder(),
+            ),
+          ),
 
-      ref.read(recipeNoteRepositoryProvider.notifier).createRecipeNote(note);
-      _controller.clear();
-    },
-  );
+          const SizedBox(height: 8),
+
+          ElevatedButton(
+            onPressed: enabled
+                ? () {
+                    final text = _controller.text.trim();
+                    if (text.isEmpty) return;
+
+                    final note = RecipeNoteCreate(
+                      recipeId: widget.recipeId,
+                      content: text,
+                    );
+
+                    ref
+                        .read(recipeNoteRepositoryProvider.notifier)
+                        .createRecipeNote(note);
+                    _controller.clear();
+                  }
+                : null,
+            child: const Text("Hinzufügen"),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _RecipeNoteTile extends StatelessWidget {
@@ -199,28 +232,4 @@ class _RecipeNoteTile extends StatelessWidget {
       onEdit(newText.trim());
     }
   }
-}
-
-class _NewNoteInput extends StatelessWidget {
-  final TextEditingController controller;
-  final VoidCallback onSubmit;
-
-  const _NewNoteInput({required this.controller, required this.onSubmit});
-
-  @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      TextField(
-        controller: controller,
-        maxLines: null,
-        decoration: const InputDecoration(
-          hintText: "Neue Notiz hinzufügen...",
-          border: OutlineInputBorder(),
-        ),
-      ),
-      const SizedBox(height: 8),
-      ElevatedButton(onPressed: onSubmit, child: const Text("Hinzufügen")),
-    ],
-  );
 }

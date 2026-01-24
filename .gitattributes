@@ -1,0 +1,7 @@
+* text=auto
+
+*.sh text eol=lf
+
+generated_plugin_registrant.cc text eol=lf
+generated_plugins.cmake text eol=lf
+GeneratedPluginRegistrant.swift text eol=lf

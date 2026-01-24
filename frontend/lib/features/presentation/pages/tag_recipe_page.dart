@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/utils/async_value_handler.dart';
@@ -5,7 +7,7 @@ import 'package:frontend/core/utils/format.dart';
 import 'package:frontend/features/data/models/recipe.dart';
 import 'package:frontend/features/data/models/tag.dart';
 import 'package:frontend/features/presentation/pages/recipe_overview_page.dart';
-import 'package:frontend/features/presentation/widgets/recipe_image.dart';
+import 'package:frontend/features/presentation/shared/async_image_widget.dart';
 import 'package:frontend/features/providers/recipe_providers.dart';
 
 class TagRecipePage extends ConsumerWidget {
@@ -71,7 +73,28 @@ class _RecipeCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: RecipeImage(imageId: recipe.imageId)),
+            Expanded(
+              child: AsyncImageWidget(
+                imageId: recipe.imageId,
+                placeholder: Container(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.restaurant,
+                    size: 48,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                onData: (image) => Hero(
+                  tag: "recipe-image-${recipe.imageId}",
+                  child: Image.file(
+                    File(image.path),
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(

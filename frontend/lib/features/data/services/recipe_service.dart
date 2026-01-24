@@ -10,17 +10,31 @@ class RecipeService {
   RecipeService(this._client);
 
   Future<List<Recipe>> getAll() async {
-    final response = await _client.dio.get(Endpoints.recipes);
-    final data = response.data as List;
+    final response = await _client.dio.get<List<dynamic>>(Endpoints.recipes);
 
-    return data.map((json) => Recipe.fromJson(json)).toList();
+    if (response.data == null) {
+      logger.e(
+        "Get all recipe failed: ${response.statusCode} ${response.statusMessage}",
+      );
+      throw Exception("Failed to load all recipes");
+    }
+
+    return response.data!.map((json) => Recipe.fromJson(json)).toList();
   }
 
   Future<List<RecipeSimple>> getAllSimple() async {
-    final response = await _client.dio.get(Endpoints.recipesSimple);
-    final data = response.data as List;
+    final response = await _client.dio.get<List<dynamic>>(
+      Endpoints.recipesSimple,
+    );
 
-    return data.map((json) => RecipeSimple.fromJson(json)).toList();
+    if (response.data == null) {
+      logger.e(
+        "Get recipes simple failed: ${response.statusCode} ${response.statusMessage}",
+      );
+      throw Exception("Failed to load recipes simple");
+    }
+
+    return response.data!.map((json) => RecipeSimple.fromJson(json)).toList();
   }
 
   Future<Recipe> getById(int recipeId) async {
@@ -29,7 +43,7 @@ class RecipeService {
     );
 
     if (response.data == null) {
-      logger.d(
+      logger.e(
         "Get recipe by ID failed: ${response.statusCode} ${response.statusMessage}",
       );
       throw Exception("Failed to load recipe");
@@ -46,7 +60,7 @@ class RecipeService {
     );
 
     if (response.data == null) {
-      logger.d(
+      logger.e(
         "Creating recipe failed: ${response.statusCode} ${response.statusMessage}",
       );
       throw Exception("Failed to create recipe");
@@ -63,7 +77,7 @@ class RecipeService {
     );
 
     if (response.data == null) {
-      logger.d(
+      logger.e(
         "Update recipe failed: ${response.statusCode} ${response.statusMessage}",
       );
       throw Exception("Failed to update recipe");
@@ -76,7 +90,7 @@ class RecipeService {
     final response = await _client.dio.delete(Endpoints.recipe(recipeId));
 
     if (response.statusCode != 200) {
-      logger.d(
+      logger.e(
         "Deleting recipe failed: ${response.statusCode} ${response.statusMessage}",
       );
       throw Exception("Failed to delete recipe");
@@ -88,19 +102,17 @@ class RecipeService {
     int maxResults = 10,
     int? userId,
   }) async {
-    final response = await _client.dio.get(
+    final response = await _client.dio.get<List<dynamic>>(
       Endpoints.searchRecipes(query, maxResults, userId),
     );
 
     if (response.statusCode != 200) {
-      logger.d(
+      logger.e(
         "Searching recipes failed: ${response.statusCode} ${response.statusMessage}",
       );
       throw Exception("Failed to search recipes");
     }
 
-    final data = response.data as List;
-
-    return data.map((json) => RecipeSimple.fromJson(json)).toList();
+    return response.data!.map((json) => RecipeSimple.fromJson(json)).toList();
   }
 }

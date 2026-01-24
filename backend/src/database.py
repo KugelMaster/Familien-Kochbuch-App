@@ -1,17 +1,24 @@
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from datetime import datetime, timezone
 
-DATABASE_URL = "postgresql://cookbook:mysecretpassword@db:5432/cookbook"
+from sqlalchemy import create_engine, event
+from sqlalchemy.orm import Session, sessionmaker
 
-engine = create_engine(DATABASE_URL)
+from config import config
+from models import Base
+
+engine = create_engine(config.DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-Base = declarative_base()
+
+
+def init_db():
+    """
+    This function initializes the database with every table declared in models.py.
+    It also binds the engine to there Base Model.
+    """
+    Base.metadata.create_all(bind=engine)
+
 
 def get_db():
-    """
-    Provides a database session. Intended to be used as a FastAPI dependency.
-    """
     db = SessionLocal()
     try:
         yield db
@@ -19,9 +26,8 @@ def get_db():
         db.close()
 
 
-
 @event.listens_for(Session, "before_flush")
-def _update_timestamp_on_relationship_change(session: Session, flush_context, instances): # type: ignore
+def _update_timestamp_on_relationship_change(session: Session, flush_context, instances):  # type: ignore
     """
     Automatically updates the 'updated_at' timestamp of parent records
     when related child records are added, modified, or deleted.

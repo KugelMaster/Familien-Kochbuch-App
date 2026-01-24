@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/auth/auth_providers.dart';
+import 'package:frontend/core/auth/auth_state.dart';
+import 'package:frontend/features/presentation/pages/login_page.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-import 'main_shell.dart';
+import 'cooking_app.dart';
 
 void main() async {
   await initializeDateFormatting("de-DE");
 
-  runApp(const ProviderScope(child: CookingApp()));
+  runApp(const ProviderScope(child: AppRoot()));
 }
 
-class CookingApp extends StatelessWidget {
-  const CookingApp({super.key});
+class AppRoot extends ConsumerWidget {
+  const AppRoot({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.read(authProvider.notifier).init();
+
     return MaterialApp(
       title: 'Familien Kochbuch',
       theme: ThemeData(
@@ -45,7 +50,36 @@ class CookingApp extends StatelessWidget {
           }),
         ),
       ),
-      home: const MainShell(),
+      home: _HomeWidget(),
+    );
+  }
+}
+
+class _HomeWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.watch(authProvider);
+
+    switch (auth.status) {
+      case AuthStatus.unknown:
+        return const SplashScreen();
+      case AuthStatus.unauthenticated:
+        return const LoginPage(closeOnLogin: false);
+      case AuthStatus.guest:
+      case AuthStatus.authenticated:
+        return const CookingApp();
+    }
+  }
+}
+
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () => Navigator.of(context).pop(),
+      child: const Text("Schließen"),
     );
   }
 }

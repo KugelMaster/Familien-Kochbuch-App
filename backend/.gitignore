@@ -5,5 +5,8 @@ __pycache__/
 .venv
 .vscode
 
-UninstallSitePackages.ps1
-drs.ps1
+*.env
+!*-example.env
+
+# My own helper scripts; not relevant for the project :-)
+*.ps1

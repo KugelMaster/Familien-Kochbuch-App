@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/utils/format.dart';
-import 'package:frontend/core/utils/logger.dart';
 import 'package:frontend/features/data/models/ingredient.dart';
 import 'package:frontend/features/data/models/nutrition.dart';
 import 'package:frontend/features/data/models/recipe.dart';
+import 'package:frontend/features/presentation/shared/image_picker_sheet.dart';
 import 'package:frontend/features/providers/image_providers.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -24,7 +24,6 @@ class RecipeEditPage extends ConsumerStatefulWidget {
 class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
   final _formKey = GlobalKey<FormState>();
 
-  final picker = ImagePicker();
   XFile? image;
   int? imageId;
 
@@ -150,7 +149,16 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
           );
 
     return GestureDetector(
-      onTap: _pickImage,
+      onTap: () async {
+        final picked = await pickUserImage(context);
+
+        if (picked != null) {
+          setState(() {
+            image = picked;
+            imageId = null;
+          });
+        }
+      },
       child: Hero(
         tag: "recipe-image-$imageId",
         child: Column(
@@ -433,21 +441,6 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
     ),
   );
 
-  Future<void> _pickImage() async {
-    try {
-      final picked = await picker.pickImage(source: ImageSource.camera);
-      if (picked != null) {
-        setState(() {
-          image = picked;
-          imageId = null;
-        });
-      }
-    } catch (e) {
-      logger.e("Error when picking image", error: e);
-      return;
-    }
-  }
-
   void _save() {
     if (!_formKey.currentState!.validate()) return;
 
@@ -477,6 +470,7 @@ class _RecipeEditPage extends ConsumerState<RecipeEditPage> {
 
     final recipe = Recipe(
       title: titleCtrl.text,
+      tags: widget.recipe?.tags ?? [],
       imageId: imageId,
       description: descCtrl.text,
       timePrep: int.tryParse(timePrepCtrl.text),
