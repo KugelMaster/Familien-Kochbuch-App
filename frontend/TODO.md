@@ -32,15 +32,7 @@
 - Für mehr Benutzer Sicherheit: Passwort und Benutzername (oder generell sensible Daten) in einem gesichertem Browser Fenster abfragen (z.B. flutter_appauth)
 
 # Aufgaben abgeschlossen:
-- Login Page + RegisterPage
-- Settings Page
--> Users can be created, edited and deleted
-- Renaming a lot of things
-- Different user roles (Admin role has an extra badge)
-- Data shown: Name, Email, Profile pictures
-- Helpful Widgets: AsyncImageWidget, ImagePickerSheet
-- User Service
-- A lot of bugfixes
+- Prototyp, um die "baseUrl" von "ApiClient" zu ändern
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

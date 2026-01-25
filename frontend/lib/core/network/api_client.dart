@@ -12,6 +12,9 @@ class ApiClient {
     ),
   );
 
+  String get baseUrl => dio.options.baseUrl;
+  set baseUrl(String value) => dio.options.baseUrl = value;
+
   String? _accessToken;
 
   ApiClient() {

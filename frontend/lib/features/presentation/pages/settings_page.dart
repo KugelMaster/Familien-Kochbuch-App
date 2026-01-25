@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/auth/auth_providers.dart';
+import 'package:frontend/core/network/api_client_provider.dart';
 import 'package:frontend/features/data/models/user.dart';
 import 'package:frontend/features/presentation/pages/login_page.dart';
 import 'package:frontend/features/presentation/pages/profile_page.dart';
@@ -34,6 +35,8 @@ class SettingsPage extends ConsumerWidget {
               user: auth.user,
               onClickProfile: () => onClickProfile(context, auth.user),
             ),
+            const Divider(),
+            _ApiClientActions(),
             const Divider(),
             _ActionsSection(
               isLoggedIn: auth.isAuthenticated,
@@ -123,6 +126,69 @@ class _ProfileCard extends StatelessWidget {
       ),
       subtitle: Text(user!.email ?? ""),
       trailing: const Icon(Icons.chevron_right),
+    );
+  }
+}
+
+class _ApiClientActions extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _ApiClientActionsState();
+}
+
+class _ApiClientActionsState extends ConsumerState<_ApiClientActions> {
+  late final controller = TextEditingController(
+    text: ref.read(apiClientProvider).baseUrl,
+  );
+  String? _errorText;
+
+  bool _isValidUrl(String value) {
+    final uri = Uri.tryParse(value);
+    return uri != null && uri.hasScheme && uri.host.isNotEmpty;
+  }
+
+  void _onChanged(String value) {
+    setState(() => _errorText = _isValidUrl(value) ? null : "Ungültige URL");
+  }
+
+  void _save() {
+    if (_errorText != null) return;
+
+    ref.read(apiClientProvider).baseUrl = controller.text.trim();
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("Gespeichert")));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("API Base URL", style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          onChanged: _onChanged,
+          keyboardType: TextInputType.url,
+          decoration: InputDecoration(
+            hintText: "https://api.example.com",
+            errorText: _errorText,
+            prefixIcon: const Icon(Icons.link),
+            border: const OutlineInputBorder(),
+            isDense: true,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Align(
+          alignment: Alignment.centerRight,
+          child: FilledButton(
+            onPressed: _errorText == null ? _save : null,
+            child: const Text("Speichern"),
+          ),
+        ),
+      ],
     );
   }
 }
