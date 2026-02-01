@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/endpoints.dart';
-import 'package:frontend/core/utils/logger.dart';
 import 'package:frontend/features/data/models/recipe_note.dart';
 
 class RecipeNoteService {
@@ -12,10 +11,7 @@ class RecipeNoteService {
   Future<RecipeNote> getById(int noteId) async {
     final response = await _client.dio.get(Endpoints.recipeNote(noteId));
 
-    if (response.data == null) {
-      logger.d(
-        "Fetching recipe note failed: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 200) {
       throw Exception("Failed to fetch recipe note");
     }
 
@@ -25,10 +21,7 @@ class RecipeNoteService {
   Future<List<RecipeNote>> getByRecipeId(int recipeId) async {
     final response = await _client.dio.get(Endpoints.recipeNotesRecipe(recipeId));
 
-    if (response.data == null) {
-      logger.d(
-        "Fetching recipe notes failed: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 200) {
       throw Exception("Failed to fetch recipe notes");
     }
 
@@ -44,10 +37,7 @@ class RecipeNoteService {
       options: Options(contentType: Headers.jsonContentType),
     );
 
-    if (response.data == null) {
-      logger.d(
-        "Create recipe note failed: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 201) {
       throw Exception("Failed to create recipe note");
     }
 
@@ -61,10 +51,7 @@ class RecipeNoteService {
       options: Options(contentType: Headers.jsonContentType),
     );
 
-    if (response.data == null) {
-      logger.d(
-        "Updateing recipe note failed: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 200) {
       throw Exception("Failed to update recipe note");
     }
 
@@ -75,9 +62,6 @@ class RecipeNoteService {
     final response = await _client.dio.delete(Endpoints.recipeNote(noteId));
 
     if (response.statusCode != 200) {
-      logger.d(
-        "Deleting recipe note failed: ${response.statusCode} ${response.statusMessage}",
-      );
       throw Exception("Failed to delete recipe note");
     }
   }

@@ -16,8 +16,12 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
+  final _formKey = GlobalKey<FormState>();
+
   late TextEditingController _nameController;
   late TextEditingController _emailController;
+
+  String? _nameError;
 
   @override
   void initState() {
@@ -33,6 +37,33 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     _nameController.dispose();
     _emailController.dispose();
     super.dispose();
+  }
+
+  Future<void> _updateUserInfo() async {
+    _nameError = null;
+
+    if (!_formKey.currentState!.validate()) return;
+
+    final username = _nameController.text.trim();
+    final email = _emailController.text.trim();
+
+    final errorCode = await ref
+        .read(authProvider.notifier)
+        .updateProfile(name: username, email: email);
+
+    if (errorCode == "USERNAME_EXISTS") {
+      _nameError = "Dieser Name existiert bereits!";
+      _formKey.currentState!.validate();
+    } else if (errorCode != null) {
+      _nameError = "Unbekannter Fehler: $errorCode";
+      _formKey.currentState!.validate();
+    } else {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Änderungen übernommen")));
+    }
   }
 
   Future<void> _deleteAccount() async {
@@ -64,28 +95,46 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             _AvatarBox(),
             const SizedBox(height: 32),
 
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: "Name"),
-            ),
-            const SizedBox(height: 12),
+            Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(labelText: "Name"),
+                    onChanged: (value) => _nameError = null,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Gib einen Namen ein";
+                      }
+                      return _nameError;
+                    },
+                  ),
+                  const SizedBox(height: 12),
 
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: "E-Mail"),
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(labelText: "E-Mail"),
+                    validator: (value) {
+                      if (value == null ||
+                          !RegExp(
+                            r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}",
+                            caseSensitive: false,
+                          ).hasMatch(value)) {
+                        return "Ungültige E-Mail-Adresse";
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
             ),
 
             const SizedBox(height: 24),
 
             ElevatedButton(
-              onPressed: () {
-                ref
-                    .read(authProvider.notifier)
-                    .updateProfile(
-                      name: _nameController.text,
-                      email: _emailController.text,
-                    );
-              },
+              onPressed: _updateUserInfo,
               child: const Text("Änderungen speichern"),
             ),
 

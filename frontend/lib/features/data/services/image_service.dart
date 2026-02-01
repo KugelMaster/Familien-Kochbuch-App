@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/endpoints.dart';
-import 'package:frontend/core/utils/logger.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -12,36 +11,37 @@ class ImageService {
 
   ImageService(this._client);
 
+  /// Uploads an image to the backend server with a tag.
   Future<int> uploadImage(XFile image, String tag) async {
     final file = await MultipartFile.fromFile(image.path, filename: image.name);
     final formData = FormData.fromMap({"file": file, "tag": tag});
 
-    final response = await _client.dio.post<Map>(
+    final response = await _client.dio.post(
       Endpoints.images,
       data: formData,
-      options: Options(
-        responseType: ResponseType.json,
-        contentType: image.mimeType,
-      ),
+      options: Options(contentType: image.mimeType),
     );
 
     return response.data?["id"] ?? -1;
   }
 
+  /// Fetches an image from the backend server with the given [imageId].
+  /// Throws an [Exception] if the image could not be found / some other error occured.
   Future<XFile> getImage(int imageId) async {
-    final response = await _client.dio.get<List<int>>(
+    final response = await _client.dio.get(
       Endpoints.image(imageId),
       options: Options(responseType: ResponseType.bytes),
     );
 
-    final bytes = response.data;
-
-    if (bytes == null) {
-      logger.d(
-        "Failed to load image: ${response.statusCode} ${response.statusMessage}",
-      );
-      throw Exception("Failed to load image");
+    if (response.statusCode != 200) {
+      if (response.data["code"] == "NOT_FOUND") {
+        throw Exception("Image with ID $imageId not found");
+      } else {
+        throw Exception("Image could not be fetched");
+      }
     }
+
+    final bytes = response.data as List<int>;
 
     final dir = await getTemporaryDirectory();
     final file = File("${dir.path}/image_$imageId.jpg");

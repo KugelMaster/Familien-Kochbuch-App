@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/endpoints.dart';
-import 'package:frontend/core/utils/logger.dart';
 import 'package:frontend/features/data/models/rating.dart';
 
 class RatingService {
@@ -12,10 +11,7 @@ class RatingService {
   Future<Rating> getById(int ratingId) async {
     final response = await _client.dio.get(Endpoints.rating(ratingId));
 
-    if (response.data == null) {
-      logger.d(
-        "Fetching rating failed: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 200) {
       throw Exception("Failed to fetch rating");
     }
 
@@ -23,12 +19,9 @@ class RatingService {
   }
 
   Future<List<Rating>> getByRecipeId(int recipeId) async {
-    final response = await _client.dio.get(Endpoints.ratingsRecipe(recipeId));
+    final response = await _client.dio.get<List>(Endpoints.ratingsRecipe(recipeId));
 
-    if (response.data == null) {
-      logger.d(
-        "Fetching ratings failed: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 200) {
       throw Exception("Failed to fetch ratings");
     }
 
@@ -40,10 +33,7 @@ class RatingService {
   Future<(double, int)> getAverageStars(int recipeId) async {
     final response = await _client.dio.get(Endpoints.ratingAvgStars(recipeId));
 
-    if (response.data == null) {
-      logger.d(
-        "Fetching average stars failed: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 200) {
       throw Exception("Failed to fetch average stars");
     }
 
@@ -59,10 +49,7 @@ class RatingService {
       options: Options(contentType: Headers.jsonContentType),
     );
 
-    if (response.data == null) {
-      logger.d(
-        "Create rating failed: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 201) {
       throw Exception("Failed to create rating");
     }
 
@@ -76,10 +63,7 @@ class RatingService {
       options: Options(contentType: Headers.jsonContentType),
     );
 
-    if (response.data == null) {
-      logger.d(
-        "Updateing rating failed: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 200) {
       throw Exception("Failed to update rating");
     }
 
@@ -90,9 +74,6 @@ class RatingService {
     final response = await _client.dio.delete(Endpoints.rating(ratingId));
 
     if (response.statusCode != 200) {
-      logger.d(
-        "Deleting rating failed: ${response.statusCode} ${response.statusMessage}",
-      );
       throw Exception("Failed to delete rating");
     }
   }

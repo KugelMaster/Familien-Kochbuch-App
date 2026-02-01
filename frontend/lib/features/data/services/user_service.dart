@@ -26,33 +26,34 @@ class UserService {
   Future<User> getUserInfo() async {
     final response = await _client.dio.get(Endpoints.me);
 
+    if (response.statusCode != 200) {
+      throw Exception("Failed to get user info");
+    }
+
     return User.fromJson(response.data);
   }
 
   Future<UserSimple> getUserInfoFromUser(int userId) async {
     final response = await _client.dio.get(Endpoints.user(userId));
 
+    if (response.statusCode != 200) {
+      throw Exception("Failed to get user info from user (ID=$userId)");
+    }
+
     return UserSimple.fromJson(response.data);
   }
 
   Future<String> getToken(String username, String password) async {
-    if (username.isEmpty || password.isEmpty) {
-      throw DioException(
-        requestOptions: RequestOptions(path: Endpoints.getToken),
-        response: Response(
-          requestOptions: RequestOptions(path: Endpoints.getToken),
-          statusCode: 401,
-          statusMessage: "Unauthorized",
-        ),
-      );
-    }
-
     final response = await _client.dio.post(
       Endpoints.getToken,
       data:
           "grant_type=password&username=$username&password=$password&client_id=cooking_app&client_secret=",
       options: Options(contentType: "application/x-www-form-urlencoded"),
     );
+
+    if (response.statusCode != 200) {
+      throw Exception("Failed to get token for user");
+    }
 
     return response.data["access_token"];
   }
@@ -63,6 +64,10 @@ class UserService {
       data: patch.toJson(),
     );
 
+    if (response.statusCode != 200) {
+      throw Exception("Failed to update user info");
+    }
+
     return User.fromJson(response.data);
   }
 
@@ -70,13 +75,21 @@ class UserService {
     String currentPassword,
     String newPassword,
   ) async {
-    await _client.dio.patch(
+    final response = await _client.dio.patch(
       Endpoints.changePassword,
       data: {"current_password": currentPassword, "new_password": newPassword},
     );
+
+    if (response.statusCode != 204) {
+      throw Exception("Failed to update password");
+    }
   }
 
   Future<void> deleteUser() async {
-    await _client.dio.delete(Endpoints.me);
+    final response = await _client.dio.delete(Endpoints.me);
+
+    if (response.statusCode != 200) {
+      throw Exception("Failed to delete this user");
+    }
   }
 }

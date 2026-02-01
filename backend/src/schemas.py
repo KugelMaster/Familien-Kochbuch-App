@@ -276,5 +276,29 @@ class TokenData(BaseModel):
 
 
 ##############################################[Other]###############################################
+class Status(str, Enum):
+    SUCCESS = "SUCCESS"
+    ERROR = "ERROR"
+
+
+class ErrorCode(str, Enum):
+    # Generic errors
+    GENERIC_ERROR = "GENERIC_ERROR"
+    MISSING_PARAMETERS = "MISSING_PARAMETERS"
+    EXISTS = "EXISTS"
+    NOT_FOUND = "NOT_FOUND"  # When 404 is less appropriate
+    INVALID_FORMAT = "INVALID_FORMAT"
+
+    # Auth related errors
+    INVALID_CREDENTIALS = "INVALID_CREDENTIALS"
+    UNAUTHORIZED = "UNAUTHORIZED"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+
+    # User related errors
+    USERNAME_EXISTS = "USERNAME_EXISTS"
+
+
 class Message(BaseModel):
+    status: Status = Status.SUCCESS
+    code: Optional[ErrorCode] = None
     detail: str

@@ -14,7 +14,7 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-  final _userController = TextEditingController();
+  final _nameController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _isLoading = false;
@@ -22,7 +22,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   void dispose() {
-    _userController.dispose();
+    _nameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -31,9 +31,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
+      final username = _nameController.text.trim();
+      final password = _passwordController.text;
+
       await ref
           .read(authProvider.notifier)
-          .login(_userController.text, _passwordController.text);
+          .login(username, password);
 
       if (mounted && widget.closeOnLogin) Navigator.pop(context);
     } catch (e) {
@@ -98,7 +101,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
 
               TextField(
-                controller: _userController,
+                controller: _nameController,
                 decoration: const InputDecoration(
                   labelText: "Benutzername",
                   prefixIcon: Icon(Icons.perm_identity),

@@ -1,25 +1,15 @@
 # Offene Aufgaben:
-- Benutzerdefinierte Fehlermeldungen, z.B.:
-```json
-{
-  "status": "error",
-  "code": "WRONG_PASSWORD",
-  "message": "Das eingegebene aktuelle Passwort ist nicht korrekt."
-}
-```
-- Profil Bilder hinzufügen (mit IDs)
-- Bilder upload planen (URL-Erstellung / ID?)
+- Testen was passiert, wenn Datenbank-Verbindung während der App unterbrochen wird (-> Client fehlende DB-Verbindung mitteilen (z.B. ERR_DB_UNAVAILABLE))
+- Bilder Upload Dateiname besser generieren, sodass Datei leichter zuzuordnen ist
 - Backups für Bearbeitung / Löschung
 - Dokumentation übersichtlicher machen (OpenAPI)
  -> starlette.status Codes
 
 # Aufgaben abgeschlossen:
-- Optional user authentication
-- Using new pydantic syntax
-- Users can change their profile data
-- Users can change their password
-- Tagging images (currently useless)
-- Made the "routers" folder a python package
+- Adding status and error codes to 'Message' scheme
+- Updating ServiceException for more generic use (and registering it in 'main.py')
+- Log (and send) error when connection to database failed
+- Bugfix: Creating a tag now responds with status code 201
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11): \

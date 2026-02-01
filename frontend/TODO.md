@@ -13,6 +13,7 @@
 1. API-Calls reduzieren
 
 # Weitere Aufgaben (noch keine Priorität):
+- Gecachten Benutzerdaten bei Logout löschen
 - Registieren Seite schließt sich wenn man von Login Seite kommt
 - Fehler, wenn Benutzer Namen wählt den es schon gibt
 - Löschen-Knopf in Suchleiste erscheint auch verspätet (mit Debounce)
@@ -32,7 +33,8 @@
 - Für mehr Benutzer Sicherheit: Passwort und Benutzername (oder generell sensible Daten) in einem gesichertem Browser Fenster abfragen (z.B. flutter_appauth)
 
 # Aufgaben abgeschlossen:
-- Prototyp, um die "baseUrl" von "ApiClient" zu ändern
+- Removed debug logs from api services (one central logger in "ApiClient.dart")
+- Improved renaming experience for user (more versatile error messages)
 
 # Hilfreiche Befehle:
 - JSON Modell Konvertierer (automatisch Code generieren): `dart run build_runner watch --delete-conflicting-outputs`

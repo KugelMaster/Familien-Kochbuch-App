@@ -8,7 +8,7 @@ from starlette import status
 from config import config
 from dependencies import DBDependency, OptionalUserDep
 from models import Image
-from schemas import ImageTag, ImageUploadResponse, Message
+from schemas import ErrorCode, ImageTag, ImageUploadResponse, Message
 from utils.http_exceptions import BadRequest, InternalServerError, NotFound
 
 router = APIRouter(prefix="/images", tags=["Images"])
@@ -21,7 +21,7 @@ def upload_image(
     file: UploadFile, db: DBDependency, user: OptionalUserDep, tag: ImageTag = Form(...)
 ):
     if not file.content_type or not file.content_type.startswith("image/"):
-        raise BadRequest("Only image files allowed")
+        raise BadRequest("Only image files allowed", code=ErrorCode.INVALID_FORMAT)
 
     user_id = None if user is None else user.user_id
 

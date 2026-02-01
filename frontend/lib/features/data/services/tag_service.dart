@@ -1,6 +1,5 @@
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/endpoints.dart';
-import 'package:frontend/core/utils/logger.dart';
 import 'package:frontend/features/data/models/recipe.dart';
 import 'package:frontend/features/data/models/tag.dart';
 
@@ -12,10 +11,7 @@ class TagService {
   Future<List<Tag>> getTags() async {
     final response = await _client.dio.get(Endpoints.tags);
 
-    if (response.data == null) {
-      logger.d(
-        "Error when fetching tags: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 200) {
       throw Exception("Failed to get tags");
     }
 
@@ -27,10 +23,7 @@ class TagService {
   Future<Tag> getById(int id) async {
     final response = await _client.dio.get(Endpoints.tag(id));
 
-    if (response.data == null || response.statusCode != 200) {
-      logger.d(
-        "Error when fetching tag: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 200) {
       throw Exception("Failed to get tag");
     }
 
@@ -40,10 +33,7 @@ class TagService {
   Future<Tag> createTag(String tagName) async {
     final response = await _client.dio.post(Endpoints.createTag(tagName));
 
-    if (response.data == null || response.statusCode != 200) {
-      logger.d(
-        "Error when creating new tag: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 201) {
       throw Exception("Failed to create new tag");
     }
 
@@ -53,10 +43,7 @@ class TagService {
   Future<Tag> renameTag(int id, String tagName) async {
     final response = await _client.dio.patch(Endpoints.renameTag(id, tagName));
 
-    if (response.data == null || response.statusCode != 200) {
-      logger.d(
-        "Error when renaming tag: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 200) {
       throw Exception("Failed to rename tag");
     }
 
@@ -66,10 +53,7 @@ class TagService {
   Future<void> deleteTag(int id) async {
     final response = await _client.dio.patch(Endpoints.tag(id));
 
-    if (response.data == null || response.statusCode != 200) {
-      logger.d(
-        "Error when deleting tag: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 200) {
       throw Exception("Failed to delete tag");
     }
   }
@@ -78,9 +62,6 @@ class TagService {
     final response = await _client.dio.get(Endpoints.recipesByTag(tagId));
 
     if (response.statusCode != 200) {
-      logger.d(
-        "Error when fetching recipes by tag: ${response.statusCode} ${response.statusMessage}",
-      );
       throw Exception("Failed to fetch recipes by tag");
     }
 

@@ -35,6 +35,11 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<void> login(String username, String password) async {
+    if (username.isEmpty || password.isEmpty) {
+      state = AuthState.loggedOut(AuthFailure.invalidCredentials);
+      return;
+    }
+
     try {
       final token = await _userService.getToken(username, password);
       ref.read(apiClientProvider).setToken(token);
@@ -56,27 +61,49 @@ class AuthNotifier extends Notifier<AuthState> {
     state = AuthState.guest();
   }
 
+  Future<String?> createUser({
+    required String username,
+    required String password,
+    String? email,
+  }) async {
+    try {
+      await _userService.createUser(
+        username: username,
+        password: password,
+        email: email,
+      );
+      return null;
+    } on DioException catch (e) {
+      return e.response?.data["code"];
+    }
+  }
+
   Future<void> logout() async {
     state = AuthState.loggedOut();
     ref.read(apiClientProvider).clearToken();
     await _storage.delete(key: "access_token");
   }
 
-  Future<void> updateProfile({
+  Future<String?> updateProfile({
     String? name,
     String? email,
     int? avatarId,
   }) async {
     if (state.token == null) {
       logout();
-      return;
+      return null;
     }
 
-    final updated = await _userService.updateUserInfo(
-      UserPatch(username: name, email: email, avatarId: avatarId),
-    );
+    try {
+      final updated = await _userService.updateUserInfo(
+        UserPatch(username: name, email: email, avatarId: avatarId),
+      );
 
-    state = AuthState.fromTokenWithData(state.token!, updated);
+      state = AuthState.fromTokenWithData(state.token!, updated);
+      return null;
+    } on DioException catch (e) {
+      return e.response?.data["code"];
+    }
   }
 
   Future<bool> updatePassword(

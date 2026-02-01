@@ -6,9 +6,16 @@ from starlette import status
 
 from dependencies import DBDependency, UserDependency
 from models import User
-from schemas import Message, Token, UserDetailedOut, UserPasswordUpdate, UserUpdate
+from schemas import (
+    ErrorCode,
+    Message,
+    Token,
+    UserDetailedOut,
+    UserPasswordUpdate,
+    UserUpdate,
+)
 from utils.authentication import authenticate_user, create_access_token, hash_password
-from utils.http_exceptions import BadRequest
+from utils.http_exceptions import BadRequest, NotFound
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -29,14 +36,14 @@ def update_user_profile(
     db_user = db.query(User).filter(User.id == user.user_id).first()
 
     if not db_user:
-        raise BadRequest("User not found")
+        raise NotFound("User not found")
 
     patch = updated_user.model_dump(exclude_unset=True)
     username = patch.pop("username", None)
 
     if username and username != db_user.name:
         if db.query(User).where(User.name == username).first():
-            raise BadRequest("Username already exists")
+            raise BadRequest("Username already exists", code=ErrorCode.USERNAME_EXISTS)
         db_user.name = username
 
     for key, value in patch.items():
@@ -57,10 +64,12 @@ def change_user_password(
     db_user = db.query(User).filter(User.id == user.user_id).first()
 
     if not db_user:
-        raise BadRequest("User not found")
+        raise NotFound("User not found")
 
     if not passwords.new_password:
-        raise BadRequest("New password must be provided")
+        raise BadRequest(
+            "New password must be provided", code=ErrorCode.MISSING_PARAMETERS
+        )
 
     authenticate_user(db_user.name, passwords.current_password, db)
 
@@ -85,7 +94,7 @@ def delete_user_account(
     db_user = db.query(User).filter(User.id == user.user_id).first()
 
     if not db_user:
-        raise BadRequest("User not found")
+        raise NotFound("User not found")
 
     db.delete(db_user)
     db.commit()

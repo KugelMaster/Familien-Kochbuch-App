@@ -3,7 +3,7 @@ from starlette import status
 
 from dependencies import DBDependency
 from models import User
-from schemas import UserCreate, UserSimpleOut
+from schemas import ErrorCode, UserCreate, UserSimpleOut
 from utils.authentication import hash_password
 from utils.http_exceptions import BadRequest, NotFound
 
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
 def create_user(user: UserCreate, db: DBDependency):
     if db.query(User).where(User.name == user.username).first():
-        raise BadRequest("Username already exists")
+        raise BadRequest("Username already exists", code=ErrorCode.USERNAME_EXISTS)
 
     db_user = User(
         name=user.username,
