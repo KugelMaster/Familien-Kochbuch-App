@@ -3,7 +3,14 @@ from starlette import status
 
 from dependencies import DBDependency, UserDependency
 from models import Rating, Recipe
-from schemas import Message, RatingAverageOut, RatingCreate, RatingOut, RatingUpdate
+from schemas import (
+    ErrorCode,
+    Message,
+    RatingAverageOut,
+    RatingCreate,
+    RatingOut,
+    RatingUpdate,
+)
 from utils.http_exceptions import BadRequest, Forbidden, NotFound
 from utils.statements import ensure_exists
 
@@ -17,7 +24,7 @@ def create_rating(rating: RatingCreate, db: DBDependency, user: UserDependency):
         .filter(Rating.recipe_id == rating.recipe_id, Rating.user_id == user.user_id)
         .first()
     ):
-        raise BadRequest("User has already rated this recipe")
+        raise BadRequest("User has already rated this recipe", code=ErrorCode.EXISTS)
 
     ensure_exists(db, Recipe.id == rating.recipe_id, NotFound("Recipe not found"))
 

@@ -13,7 +13,7 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 def init_db():
     """
     This function initializes the database with every table declared in models.py.
-    It also binds the engine to there Base Model.
+    It also binds the engine to the Base Model.
     """
     Base.metadata.create_all(bind=engine)
 

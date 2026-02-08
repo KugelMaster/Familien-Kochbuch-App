@@ -1,8 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:frontend/core/utils/logger.dart';
-import 'package:frontend/features/data/models/recipe.dart';
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/endpoints.dart';
+import 'package:frontend/features/data/models/recipe.dart';
 
 class RecipeService {
   final ApiClient _client;
@@ -12,10 +11,7 @@ class RecipeService {
   Future<List<Recipe>> getAll() async {
     final response = await _client.dio.get<List<dynamic>>(Endpoints.recipes);
 
-    if (response.data == null) {
-      logger.e(
-        "Get all recipe failed: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 200) {
       throw Exception("Failed to load all recipes");
     }
 
@@ -27,10 +23,7 @@ class RecipeService {
       Endpoints.recipesSimple,
     );
 
-    if (response.data == null) {
-      logger.e(
-        "Get recipes simple failed: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 200) {
       throw Exception("Failed to load recipes simple");
     }
 
@@ -42,10 +35,7 @@ class RecipeService {
       Endpoints.recipe(recipeId),
     );
 
-    if (response.data == null) {
-      logger.e(
-        "Get recipe by ID failed: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 200) {
       throw Exception("Failed to load recipe");
     }
 
@@ -59,10 +49,7 @@ class RecipeService {
       options: Options(contentType: Headers.jsonContentType),
     );
 
-    if (response.data == null) {
-      logger.e(
-        "Creating recipe failed: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 201) {
       throw Exception("Failed to create recipe");
     }
 
@@ -76,10 +63,7 @@ class RecipeService {
       options: Options(contentType: Headers.jsonContentType),
     );
 
-    if (response.data == null) {
-      logger.e(
-        "Update recipe failed: ${response.statusCode} ${response.statusMessage}",
-      );
+    if (response.statusCode != 200) {
       throw Exception("Failed to update recipe");
     }
 
@@ -90,9 +74,6 @@ class RecipeService {
     final response = await _client.dio.delete(Endpoints.recipe(recipeId));
 
     if (response.statusCode != 200) {
-      logger.e(
-        "Deleting recipe failed: ${response.statusCode} ${response.statusMessage}",
-      );
       throw Exception("Failed to delete recipe");
     }
   }
@@ -107,9 +88,6 @@ class RecipeService {
     );
 
     if (response.statusCode != 200) {
-      logger.e(
-        "Searching recipes failed: ${response.statusCode} ${response.statusMessage}",
-      );
       throw Exception("Failed to search recipes");
     }
 

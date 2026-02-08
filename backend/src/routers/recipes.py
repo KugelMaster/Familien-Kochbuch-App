@@ -3,7 +3,14 @@ from starlette import status
 
 from dependencies import DBDependency
 from models import Image, Ingredient, Nutrition, Recipe, Tag
-from schemas import Message, RecipeCreate, RecipeOutSimple, RecipeResponse, RecipeUpdate
+from schemas import (
+    ErrorCode,
+    Message,
+    RecipeCreate,
+    RecipeOutSimple,
+    RecipeResponse,
+    RecipeUpdate,
+)
 from utils.http_exceptions import BadRequest, NotFound
 from utils.statements import ensure_exists, recipe_simple_statement
 
@@ -18,10 +25,14 @@ def create_recipe(recipe: RecipeCreate, db: DBDependency):
         db_tags = db.query(Tag).filter(Tag.id.in_(tags)).all()
 
         if len(db_tags) != len(tags):
-            raise BadRequest("One or more tags not found")
+            raise BadRequest("One or more tags not found", code=ErrorCode.NOT_FOUND)
 
     if recipe.image_id is not None:
-        ensure_exists(db, Image.id == recipe.image_id, BadRequest("Image not found"))
+        ensure_exists(
+            db,
+            Image.id == recipe.image_id,
+            BadRequest("Image not found", code=ErrorCode.NOT_FOUND),
+        )
 
     if recipe.recipe_uri is not None and recipe.recipe_uri.strip() == "":
         recipe.recipe_uri = None
@@ -100,7 +111,11 @@ def update_recipe(recipe_id: int, patch: RecipeUpdate, db: DBDependency):
         image_id = patch_data.pop("image_id")
 
         if image_id is not None:
-            ensure_exists(db, Image.id == image_id, BadRequest("Image doesn't exist"))
+            ensure_exists(
+                db,
+                Image.id == image_id,
+                BadRequest("Image not found", code=ErrorCode.NOT_FOUND),
+            )
 
         recipe.image_id = image_id
 
@@ -142,7 +157,7 @@ def update_recipe(recipe_id: int, patch: RecipeUpdate, db: DBDependency):
         new_tags = db.query(Tag).filter(Tag.id.in_(tag_ids)).all()
 
         if len(new_tags) != len(tag_ids):
-            raise BadRequest("One or more tags not found")
+            raise BadRequest("One or more tags not found", code=ErrorCode.NOT_FOUND)
 
         recipe.tags = new_tags
 

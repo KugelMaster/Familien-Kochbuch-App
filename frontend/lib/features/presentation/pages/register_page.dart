@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/auth/auth_providers.dart';
-import 'package:frontend/features/providers/user_providers.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -17,6 +16,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
+  String? _nameError;
 
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -39,13 +40,24 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       final username = _nameController.text.trim();
       final password = _passwordController.text;
       final email = _emailController.text.trim();
-      await ref
-          .read(userServiceProvider)
+
+      final errorCode = await ref
+          .read(authProvider.notifier)
           .createUser(
             username: username,
             password: password,
             email: email.isNotEmpty ? email : null,
           );
+
+      if (errorCode == "USERNAME_EXISTS") {
+        _nameError = "Dieser Name existiert bereits!";
+        _formKey.currentState!.validate();
+        return;
+      } else if (errorCode != null) {
+        _nameError = "Unbekannter Fehler: $errorCode";
+        _formKey.currentState!.validate();
+        return;
+      }
 
       if (mounted) Navigator.pop(context);
 
@@ -72,7 +84,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             constraints: const BoxConstraints(maxWidth: 420),
             child: Form(
               key: _formKey,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -84,26 +95,47 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                   TextFormField(
                     controller: _nameController,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     keyboardType: TextInputType.name,
                     decoration: const InputDecoration(
                       labelText: "Name",
                       prefixIcon: Icon(Icons.perm_identity),
                     ),
+                    onChanged: (_) => _nameError = null,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Gib einen Namen ein";
+                      }
+                      return _nameError;
+                    },
                   ),
                   const SizedBox(height: 16),
 
                   TextFormField(
                     controller: _emailController,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
                       labelText: "E-Mail",
                       prefixIcon: Icon(Icons.email_outlined),
                     ),
+                    validator: (value) {
+                      if (value != null && value.isEmpty) return null;
+                      if (value == null ||
+                          !RegExp(
+                            r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}",
+                            caseSensitive: false,
+                          ).hasMatch(value)) {
+                        return "Ungültige E-Mail-Adresse";
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 16),
 
                   TextFormField(
                     controller: _passwordController,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       labelText: "Passwort",
@@ -120,8 +152,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       ),
                     ),
                     validator: (value) {
-                      if (value == null || value.length < 6) {
-                        return "Mindestens 6 Zeichen";
+                      if (value == null || value.isEmpty) {
+                        return "Gib ein Passwort ein";
                       }
                       return null;
                     },
@@ -130,6 +162,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                   TextFormField(
                     controller: _confirmPasswordController,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     obscureText: _obscurePassword,
                     decoration: const InputDecoration(
                       labelText: "Passwort bestätigen",

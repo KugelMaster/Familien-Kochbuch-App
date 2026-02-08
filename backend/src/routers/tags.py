@@ -1,18 +1,19 @@
 from fastapi import APIRouter
+from starlette import status
 
 from dependencies import DBDependency
 from models import Recipe, Tag
-from schemas import Message, RecipeOutSimple, TagOut
+from schemas import ErrorCode, Message, RecipeOutSimple, TagOut
 from utils.http_exceptions import BadRequest, NotFound
 from utils.statements import ensure_exists, recipe_simple_statement
 
 router = APIRouter(prefix="/tags", tags=["Tags"])
 
 
-@router.post("", response_model=TagOut)
+@router.post("", response_model=TagOut, status_code=status.HTTP_201_CREATED)
 def create_tag(tag_name: str, db: DBDependency):
     if db.query(Tag).filter(Tag.name == tag_name).first():
-        raise BadRequest("Tag with this name already exists")
+        raise BadRequest("Tag with this name already exists", code=ErrorCode.EXISTS)
 
     db_tag = Tag(name=tag_name)
 

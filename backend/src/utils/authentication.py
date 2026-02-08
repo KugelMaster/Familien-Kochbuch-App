@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from config import config
 from models import User
-from schemas import Role, TokenData
+from schemas import ErrorCode, Role, TokenData
 from utils.http_exceptions import BadRequest, Unauthorized
 from utils.optional_oauth2_bearer import OptionalOAuth2PasswordBearer
 
@@ -27,18 +27,18 @@ def authenticate_user(username: str, password: str, db: Session) -> User:
     user = db.query(User).filter(User.name == username).first()
 
     if not user:
-        raise Unauthorized("Username or password is wrong")
+        raise Unauthorized("User does not exist", code=ErrorCode.INVALID_CREDENTIALS)
 
     try:
         password_hasher.verify(user.password_hash, password)
 
         return user
     except VerifyMismatchError:
-        raise Unauthorized("Username or password is wrong")
+        raise Unauthorized("Password is wrong", code=ErrorCode.INVALID_CREDENTIALS)
     except VerificationError:
-        raise Unauthorized("Verification failed")
+        raise Unauthorized("Verification failed", code=ErrorCode.INVALID_CREDENTIALS)
     except InvalidHashError:
-        raise BadRequest("Hash could not be parsed")
+        raise BadRequest("Hash could not be parsed", code=ErrorCode.INVALID_FORMAT)
 
 
 def create_access_token(user_id: int, role: Role) -> str:
@@ -59,11 +59,11 @@ def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]) -> TokenData
         user_id = payload.get("sub")
         role = payload.get("role")
         if user_id is None or role is None:
-            raise Unauthorized("User unauthorized")
+            raise Unauthorized("User unauthorized", code=ErrorCode.UNAUTHORIZED)
 
         return TokenData(user_id=int(user_id), role=role)
     except JWTError:
-        raise Unauthorized("Signature or claims invalid")
+        raise Unauthorized("Signature or claims invalid", code=ErrorCode.INVALID_FORMAT)
 
 
 def get_optional_user(
