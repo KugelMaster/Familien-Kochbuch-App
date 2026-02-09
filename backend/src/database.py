@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from config import config
 from models import Base
+from seed import seed_standard_values
 
 engine = create_engine(config.DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
@@ -13,9 +14,15 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 def init_db():
     """
     This function initializes the database with every table declared in models.py.
-    It also binds the engine to the Base Model.
+    It also binds the engine to the Base Model and seeds the database with standard values if necessary.
     """
     Base.metadata.create_all(bind=engine)
+
+    db = SessionLocal()
+    try:
+        seed_standard_values(db)
+    finally:
+        db.close()
 
 
 def get_db():

@@ -8,7 +8,6 @@ from sqlalchemy.exc import OperationalError
 
 from database import init_db
 from routers import *
-from tests.test_user import main as test_user_main
 from utils.http_exceptions import ServiceException
 
 _logger = logging.getLogger("uvicorn.error")
@@ -54,7 +53,6 @@ tags_metadata = [
 async def lifespan(app: FastAPI):
     try:
         init_db()
-        test_user_main()
     except OperationalError as e:
         _logger.critical("[red]Failed to connect to the database:\n%s[/red]", e)
         os._exit(1)

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy import CheckConstraint, ForeignKey, Numeric, String, Text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -7,7 +8,13 @@ from schemas import ImageTag, Role
 
 
 class Base(DeclarativeBase):
-    pass
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            field.name: getattr(self, field.name) for field in self.__table__.columns
+        }
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({', '.join(f'{key}={value!r}' for key, value in self.to_dict().items())})>"
 
 
 class Recipe(Base):
