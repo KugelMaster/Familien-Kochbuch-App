@@ -1,4 +1,5 @@
 # Offene Aufgaben:
+- /users und /me gleich implementieren; /me ist ein Alias für /users/{id}
 - Bilder Upload Dateiname besser generieren, sodass Datei leichter zuzuordnen ist
 - Backups für Bearbeitung / Löschung
 - Dokumentation übersichtlicher machen (OpenAPI)

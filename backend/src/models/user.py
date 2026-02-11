@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 from sqlalchemy import CheckConstraint, ForeignKey, Numeric, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -8,8 +7,11 @@ from schemas import Role
 
 from .base import Base
 
-if TYPE_CHECKING:
-    from .recipe import Recipe
+# from typing import TYPE_CHECKING
+
+
+# if TYPE_CHECKING:
+# from .recipe import Recipe
 
 
 class User(Base):
@@ -24,7 +26,8 @@ class User(Base):
     )
     role: Mapped[Role] = mapped_column(default=Role.user)
 
-    recipe_notes: Mapped[list["RecipeNote"]] = relationship(back_populates="user")
+    recipe_notes: Mapped[list["RecipeNote"]] = relationship()
+    ratings: Mapped[list["Rating"]] = relationship()
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now())
@@ -40,9 +43,6 @@ class RecipeNote(Base):
     )
     content: Mapped[str] = mapped_column(Text)
 
-    recipe: Mapped["Recipe"] = relationship(back_populates="recipe_notes")
-    user: Mapped["User"] = relationship(back_populates="recipe_notes")
-
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
@@ -52,7 +52,9 @@ class Rating(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"))
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
     stars: Mapped[float] = mapped_column(
         Numeric(precision=2, scale=1, asdecimal=False),
         CheckConstraint("stars >= 0 AND stars <= 5.0"),
