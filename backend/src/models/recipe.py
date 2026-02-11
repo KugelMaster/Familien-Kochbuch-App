@@ -27,7 +27,7 @@ class Recipe(Base):
     ingredients: Mapped[list["Ingredient"]] = relationship(cascade="all, delete-orphan")
     nutritions: Mapped[list["Nutrition"]] = relationship(cascade="all, delete-orphan")
     recipe_notes: Mapped[list["RecipeNote"]] = relationship(
-        back_populates="recipe", cascade="all, delete-orphan"
+        cascade="all, delete-orphan"
     )
     ratings: Mapped[list["Rating"]] = relationship(cascade="all, delete-orphan")
     tags: Mapped[list["Tag"]] = relationship(secondary="recipe_tags", backref="recipes")

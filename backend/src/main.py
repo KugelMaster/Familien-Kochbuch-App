@@ -45,6 +45,10 @@ tags_metadata = [
         "name": "Users",
         "description": "Operations with users.",
     },
+    {
+        "name": "Analytics",
+        "description": "Collect and fetch user data to improve user experience.",
+    },
     {"name": "Test", "description": "Routes for testing purposes."},
 ]
 
@@ -76,6 +80,7 @@ app.include_router(search.router)
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(test.router)
+app.include_router(analytics.router)
 
 
 @app.exception_handler(ServiceException)
