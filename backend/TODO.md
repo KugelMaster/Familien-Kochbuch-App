@@ -6,6 +6,7 @@
 
 # Aufgaben abgeschlossen:
 - Get or create default entries in database
+- Breaking down DB models in different files
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11): \
