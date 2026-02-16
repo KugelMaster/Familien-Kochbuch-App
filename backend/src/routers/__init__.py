@@ -2,6 +2,7 @@ from . import (
     analytics,
     auth,
     images,
+    planer,
     ratings,
     recipe_notes,
     recipes,
@@ -22,4 +23,5 @@ __all__ = [
     "tags",
     "test",
     "users",
+    "planer",
 ]

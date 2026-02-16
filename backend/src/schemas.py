@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Optional
 
@@ -273,6 +273,32 @@ class TokenData(BaseModel):
     @property
     def is_admin(self) -> bool:
         return self.role == Role.admin
+
+
+############################################[Analytics]#############################################
+class CookingHistoryCreate(BaseModel):
+    recipe_id: int
+    cooked_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class CookingHistoryOut(BaseModel):
+    id: int
+    recipe_id: int
+    cooked_by: Optional[int] = None
+    cooked_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CookingHistoryOutSingle(CookingHistoryOut):
+    times_cooked: int
+
+
+class CookingHistoryOutMultiple(BaseModel):
+    history: list[CookingHistoryOut]
+    times_cooked: list[tuple[int, int]]  # recipe_id -> times cooked
 
 
 ##############################################[Other]###############################################
