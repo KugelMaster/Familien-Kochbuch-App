@@ -1,0 +1,12 @@
+[
+    {
+        "recipe_id": 1,
+        "times_cooked": 20,
+        "last_cooked": "2026-03-05T17:32:02.951000Z"
+    },
+    {
+        "recipe_id": 3,
+        "times_cooked": 1,
+        "last_cooked": "2026-02-20T14:52:26.503566Z"
+    }
+]

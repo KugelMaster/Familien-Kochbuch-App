@@ -1,9 +1,7 @@
-from fastapi import HTTPException
 from sqlalchemy import ColumnElement, exists, func, select
 from sqlalchemy.orm import Session
 
 from models import Rating, Recipe
-from utils.http_exceptions import ServiceException
 
 recipe_simple_statement = (
     select(
@@ -23,7 +21,7 @@ recipe_simple_statement = (
 def ensure_exists(
     session: Session,
     condition: ColumnElement[bool],
-    http_exception: HTTPException | ServiceException,
+    http_exception: Exception,
 ) -> None:
     if not session.scalar(select(exists().where(condition))):
         raise http_exception

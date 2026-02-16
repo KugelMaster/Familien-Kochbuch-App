@@ -1,0 +1,483 @@
+[
+  {
+    "id": 1,
+    "title": "Haferflocken mit Beeren",
+    "tags": [
+      {
+        "id": 1,
+        "name": "Frühstück"
+      }
+    ],
+    "image_id": null,
+    "description": "Ein schnelles und gesundes Frühstück mit frischen Beeren.",
+    "time_prep": 5,
+    "time_total": 10,
+    "portions": 1,
+    "recipe_uri": null,
+    "ingredients": [
+      {
+        "name": "Haferflocken",
+        "amount": 80,
+        "unit": "g"
+      },
+      {
+        "name": "Milch",
+        "amount": 200,
+        "unit": "ml"
+      },
+      {
+        "name": "Blaubeeren",
+        "amount": 50,
+        "unit": "g"
+      },
+      {
+        "name": "Honig",
+        "amount": 1,
+        "unit": "EL"
+      }
+    ],
+    "nutritions": [
+      {
+        "name": "Kalorien",
+        "amount": 350,
+        "unit": "kcal"
+      },
+      {
+        "name": "Protein",
+        "amount": 15,
+        "unit": "g"
+      },
+      {
+        "name": "Kohlenhydrate",
+        "amount": 55,
+        "unit": "g"
+      },
+      {
+        "name": "Fett",
+        "amount": 8,
+        "unit": "g"
+      }
+    ],
+    "recipe_notes": [],
+    "ratings": [],
+    "created_at": "2026-02-20T14:38:22.352369Z",
+    "updated_at": "2026-02-20T14:38:22.354252Z"
+  },
+  {
+    "id": 2,
+    "title": "Spaghetti Bolognese",
+    "tags": [
+      {
+        "id": 2,
+        "name": "Mittagessen"
+      }
+    ],
+    "image_id": null,
+    "description": "Klassisches Nudelgericht mit würziger Hackfleischsoße.",
+    "time_prep": 15,
+    "time_total": 45,
+    "portions": 2,
+    "recipe_uri": null,
+    "ingredients": [
+      {
+        "name": "Spaghetti",
+        "amount": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Rinderhackfleisch",
+        "amount": 250,
+        "unit": "g"
+      },
+      {
+        "name": "Tomatensoße",
+        "amount": 400,
+        "unit": "ml"
+      },
+      {
+        "name": "Zwiebel",
+        "amount": 1,
+        "unit": "Stück"
+      },
+      {
+        "name": "Olivenöl",
+        "amount": 1,
+        "unit": "EL"
+      }
+    ],
+    "nutritions": [
+      {
+        "name": "Kalorien",
+        "amount": 720,
+        "unit": "kcal"
+      },
+      {
+        "name": "Protein",
+        "amount": 40,
+        "unit": "g"
+      },
+      {
+        "name": "Kohlenhydrate",
+        "amount": 85,
+        "unit": "g"
+      },
+      {
+        "name": "Fett",
+        "amount": 25,
+        "unit": "g"
+      }
+    ],
+    "recipe_notes": [],
+    "ratings": [],
+    "created_at": "2026-02-20T14:38:34.963828Z",
+    "updated_at": "2026-02-20T14:38:34.964975Z"
+  },
+  {
+    "id": 3,
+    "title": "Gemischter Salat mit Hähnchen",
+    "tags": [
+      {
+        "id": 2,
+        "name": "Mittagessen"
+      },
+      {
+        "id": 3,
+        "name": "Abendessen"
+      }
+    ],
+    "image_id": null,
+    "description": "Leichter Salat mit gebratenem Hähnchenbrustfilet.",
+    "time_prep": 20,
+    "time_total": 25,
+    "portions": 2,
+    "recipe_uri": null,
+    "ingredients": [
+      {
+        "name": "Hähnchenbrust",
+        "amount": 300,
+        "unit": "g"
+      },
+      {
+        "name": "Blattsalat",
+        "amount": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Tomaten",
+        "amount": 2,
+        "unit": "Stück"
+      },
+      {
+        "name": "Gurke",
+        "amount": 0.5,
+        "unit": "Stück"
+      },
+      {
+        "name": "Joghurtdressing",
+        "amount": 100,
+        "unit": "ml"
+      }
+    ],
+    "nutritions": [
+      {
+        "name": "Kalorien",
+        "amount": 480,
+        "unit": "kcal"
+      },
+      {
+        "name": "Protein",
+        "amount": 55,
+        "unit": "g"
+      },
+      {
+        "name": "Kohlenhydrate",
+        "amount": 20,
+        "unit": "g"
+      },
+      {
+        "name": "Fett",
+        "amount": 18,
+        "unit": "g"
+      }
+    ],
+    "recipe_notes": [],
+    "ratings": [
+      {
+        "id": 1,
+        "recipe_id": 3,
+        "user_id": 2,
+        "stars": 4,
+        "comment": null,
+        "created_at": "2026-03-05T17:06:00.743177Z",
+        "updated_at": "2026-03-05T17:06:00.748343Z"
+      },
+      {
+        "id": 3,
+        "recipe_id": 3,
+        "user_id": 3,
+        "stars": 5,
+        "comment": null,
+        "created_at": "2026-03-05T17:06:49.095538Z",
+        "updated_at": "2026-03-05T17:06:49.097685Z"
+      },
+      {
+        "id": 5,
+        "recipe_id": 3,
+        "user_id": 4,
+        "stars": 4.5,
+        "comment": null,
+        "created_at": "2026-03-05T17:07:25.776233Z",
+        "updated_at": "2026-03-05T17:07:25.777906Z"
+      },
+      {
+        "id": 7,
+        "recipe_id": 3,
+        "user_id": 5,
+        "stars": 3.5,
+        "comment": null,
+        "created_at": "2026-03-05T17:08:07.699732Z",
+        "updated_at": "2026-03-05T17:08:07.701544Z"
+      }
+    ],
+    "created_at": "2026-02-20T14:38:45.412072Z",
+    "updated_at": "2026-02-20T14:38:45.412755Z"
+  },
+  {
+    "id": 4,
+    "title": "Rührei mit Vollkornbrot",
+    "tags": [
+      {
+        "id": 1,
+        "name": "Frühstück"
+      },
+      {
+        "id": 3,
+        "name": "Abendessen"
+      }
+    ],
+    "image_id": null,
+    "description": "Herzhaftes Rührei mit frischen Kräutern und Vollkornbrot.",
+    "time_prep": 5,
+    "time_total": 10,
+    "portions": 1,
+    "recipe_uri": null,
+    "ingredients": [
+      {
+        "name": "Eier",
+        "amount": 3,
+        "unit": "Stück"
+      },
+      {
+        "name": "Butter",
+        "amount": 10,
+        "unit": "g"
+      },
+      {
+        "name": "Vollkornbrot",
+        "amount": 2,
+        "unit": "Scheiben"
+      },
+      {
+        "name": "Schnittlauch",
+        "amount": 5,
+        "unit": "g"
+      }
+    ],
+    "nutritions": [
+      {
+        "name": "Kalorien",
+        "amount": 420,
+        "unit": "kcal"
+      },
+      {
+        "name": "Protein",
+        "amount": 25,
+        "unit": "g"
+      },
+      {
+        "name": "Kohlenhydrate",
+        "amount": 30,
+        "unit": "g"
+      },
+      {
+        "name": "Fett",
+        "amount": 22,
+        "unit": "g"
+      }
+    ],
+    "recipe_notes": [],
+    "ratings": [
+      {
+        "id": 2,
+        "recipe_id": 4,
+        "user_id": 2,
+        "stars": 3,
+        "comment": null,
+        "created_at": "2026-03-05T17:06:19.565090Z",
+        "updated_at": "2026-03-05T17:06:19.567284Z"
+      },
+      {
+        "id": 4,
+        "recipe_id": 4,
+        "user_id": 3,
+        "stars": 3.5,
+        "comment": null,
+        "created_at": "2026-03-05T17:07:02.620775Z",
+        "updated_at": "2026-03-05T17:07:02.624262Z"
+      },
+      {
+        "id": 6,
+        "recipe_id": 4,
+        "user_id": 4,
+        "stars": 2.5,
+        "comment": null,
+        "created_at": "2026-03-05T17:07:42.963996Z",
+        "updated_at": "2026-03-05T17:07:42.966622Z"
+      },
+      {
+        "id": 8,
+        "recipe_id": 4,
+        "user_id": 5,
+        "stars": 5,
+        "comment": null,
+        "created_at": "2026-03-05T17:08:18.104189Z",
+        "updated_at": "2026-03-05T17:08:18.105493Z"
+      }
+    ],
+    "created_at": "2026-02-20T14:38:55.023834Z",
+    "updated_at": "2026-02-20T14:38:55.025325Z"
+  },
+  {
+    "id": 5,
+    "title": "Gemüsepfanne mit Reis",
+    "tags": [
+      {
+        "id": 2,
+        "name": "Mittagessen"
+      }
+    ],
+    "image_id": null,
+    "description": "Bunte Gemüsepfanne mit Basmatireis und Sojasoße.",
+    "time_prep": 15,
+    "time_total": 30,
+    "portions": 3,
+    "recipe_uri": null,
+    "ingredients": [
+      {
+        "name": "Basmatireis",
+        "amount": 250,
+        "unit": "g"
+      },
+      {
+        "name": "Paprika",
+        "amount": 2,
+        "unit": "Stück"
+      },
+      {
+        "name": "Brokkoli",
+        "amount": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Karotten",
+        "amount": 2,
+        "unit": "Stück"
+      },
+      {
+        "name": "Sojasoße",
+        "amount": 3,
+        "unit": "EL"
+      }
+    ],
+    "nutritions": [
+      {
+        "name": "Kalorien",
+        "amount": 600,
+        "unit": "kcal"
+      },
+      {
+        "name": "Protein",
+        "amount": 18,
+        "unit": "g"
+      },
+      {
+        "name": "Kohlenhydrate",
+        "amount": 110,
+        "unit": "g"
+      },
+      {
+        "name": "Fett",
+        "amount": 10,
+        "unit": "g"
+      }
+    ],
+    "recipe_notes": [],
+    "ratings": [],
+    "created_at": "2026-02-20T14:39:03.742455Z",
+    "updated_at": "2026-02-20T14:39:03.743709Z"
+  },
+  {
+    "id": 6,
+    "title": "Pfannkuchen",
+    "tags": [
+      {
+        "id": 2,
+        "name": "Mittagessen"
+      }
+    ],
+    "image_id": null,
+    "description": "Eier und Mehl Kuchen",
+    "time_prep": 15,
+    "time_total": 20,
+    "portions": 12,
+    "recipe_uri": "https://www.einfachbacken.de/rezepte/pfannkuchen-das-schnelle-grundrezept",
+    "ingredients": [
+      {
+        "name": "Eier",
+        "amount": 2,
+        "unit": null
+      },
+      {
+        "name": "Milch",
+        "amount": 200,
+        "unit": "ml"
+      },
+      {
+        "name": "Zucker",
+        "amount": 1,
+        "unit": "Prise"
+      },
+      {
+        "name": "Salz",
+        "amount": 1,
+        "unit": "Prise"
+      },
+      {
+        "name": "Mehl",
+        "amount": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Mineralwasser",
+        "amount": 60,
+        "unit": "ml"
+      }
+    ],
+    "nutritions": [
+      {
+        "name": "Zucker",
+        "amount": 1.5,
+        "unit": "g"
+      },
+      {
+        "name": "Salz",
+        "amount": 1.5,
+        "unit": "g"
+      }
+    ],
+    "recipe_notes": [],
+    "ratings": [],
+    "created_at": "2026-02-20T14:41:38.389947Z",
+    "updated_at": "2026-02-20T14:41:38.393919Z"
+  }
+]

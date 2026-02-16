@@ -6,8 +6,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.exc import OperationalError
 
+import routers
 from database import init_db
-from routers import *
 from utils.http_exceptions import ServiceException
 
 _logger = logging.getLogger("uvicorn.error")
@@ -49,6 +49,10 @@ tags_metadata = [
         "name": "Analytics",
         "description": "Collect and fetch user data to improve user experience.",
     },
+    {
+        "name": "Planer",
+        "description": "Operations related to meal planning and shopping lists.",
+    },
     {"name": "Test", "description": "Routes for testing purposes."},
 ]
 
@@ -71,16 +75,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(recipes.router)
-app.include_router(recipe_notes.router)
-app.include_router(ratings.router)
-app.include_router(images.router)
-app.include_router(tags.router)
-app.include_router(search.router)
-app.include_router(auth.router)
-app.include_router(users.router)
-app.include_router(test.router)
-app.include_router(analytics.router)
+for router in [getattr(routers, name).router for name in routers.__all__]:
+    app.include_router(router)
 
 
 @app.exception_handler(ServiceException)

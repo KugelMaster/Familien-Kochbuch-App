@@ -1,3 +1,4 @@
+from .analytics import CookingHistory, RecipeCooked
 from .associations import RecipeTag
 from .base import Base
 from .general import Image
@@ -15,4 +16,6 @@ __all__ = [
     "RecipeTag",
     "User",
     "Image",
+    "CookingHistory",
+    "RecipeCooked",
 ]

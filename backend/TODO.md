@@ -8,6 +8,10 @@
 # Aufgaben abgeschlossen:
 - Get or create default entries in database
 - Breaking down DB models in different files
+- Implemented recipe chooser function (WIP!)
+- Added better testing utilities
+
+- Added new example recipes
 
 # Andere Hinweise
 Windows Subsystem for Linux (WSL, Windows 11): \
